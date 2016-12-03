@@ -89,3 +89,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+#project_specific 
+browserperfdash/wsgi.py
+.idea/
