@@ -93,4 +93,5 @@ ENV/
 #project_specific 
 browserperfdash/wsgi.py
 .idea/
-static/
+/static/
+/.idea/*
