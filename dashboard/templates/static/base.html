@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Browser Performance Dashboard</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" type="text/css"  href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.min.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- fontawesome -->
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+</head>
+<body>
+<div class="page-wrap">
+    {% block navbar %}
+    {% include 'static/navbar_top.html' %}
+    {% endblock navbar %}
+    {% block body %}
+
+    {% endblock body %}
+</div>
+{% include 'static/footer.html' %}
+</body>
+</html>
