@@ -46,3 +46,12 @@ class Bot(models.Model):
 
     def __unicode__(self):
         return self.name
+
+
+class Browser(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(_('Browser Name'), max_length=50, blank=False, unique=True)
+    enabled = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return self.name
