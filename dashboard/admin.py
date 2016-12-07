@@ -1,5 +1,5 @@
 from django.contrib import admin
-from dashboard.models import CPUArchitecture, GPUType, Platform
+from dashboard.models import CPUArchitecture, GPUType, Platform, Bot
 
 # Register your models here.
 
@@ -18,3 +18,7 @@ class PlatformAdmin(admin.ModelAdmin):
     list_display = ('name', 'enabled')
 admin.site.register(Platform, PlatformAdmin)
 
+
+class BotAdmin(admin.ModelAdmin):
+    list_display = ('name', 'cpuArchitecture', 'gpuType', 'platform', 'enabled')
+admin.site.register(Bot, BotAdmin)
