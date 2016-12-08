@@ -49,9 +49,37 @@ class Bot(models.Model):
 
 
 class Browser(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(_('Browser Name'), max_length=50, blank=False, unique=True)
+    id = models.CharField(_('Browser Id'), max_length=50, primary_key = True)
+    name = models.CharField(_('Browser Name'), max_length=50, blank=False, unique=False)
     enabled = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name
+
+
+class Test(models.Model):
+    id = models.CharField(_('Test Id'), max_length=50, primary_key = True)
+    description = models.CharField(_('Test Description'), max_length=150, blank=True, unique=False)
+    url = models.CharField(_('Test URL'), max_length=150, blank=True, unique=False)
+    enabled = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return self.id + " " + self.name
+
+
+IS_BETTER_CHOICES = (
+    ('dw', 'Down'),
+    ('up', 'Up'),
+)
+
+
+class MetricUnit(models.Model):
+    name = models.CharField(_('Metric Name'), max_length=50, primary_key=True)
+    unit = models.CharField(_('Metric Unit'), max_length=10, blank=True, unique=False)
+    description = models.CharField(_('Metric Description'), max_length=150, blank=True, unique=False)
+    prefix = models.CharField(_('Metric Prefix'), max_length=50, blank=True, unique=False)
+    is_better = models.CharField(_('Is Better'), max_length=2, choices=IS_BETTER_CHOICES, default='dw')
+
+    def __unicode__(self):
+        return self.name + " " + self.unit
+

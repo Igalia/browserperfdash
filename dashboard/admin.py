@@ -1,5 +1,5 @@
 from django.contrib import admin
-from dashboard.models import CPUArchitecture, GPUType, Platform, Bot, Browser
+from dashboard.models import CPUArchitecture, GPUType, Platform, Bot, Browser, Test, MetricUnit
 
 # Register your models here.
 
@@ -27,3 +27,16 @@ admin.site.register(Bot, BotAdmin)
 class BrowserAdmin(admin.ModelAdmin):
     list_display = ('name', 'enabled')
 admin.site.register(Browser, BrowserAdmin)
+
+
+class TestAdmin(admin.ModelAdmin):
+    list_display = ('id', 'enabled')
+admin.site.register(Test, TestAdmin)
+
+
+class MetricUnitAdmin(admin.ModelAdmin):
+    list_display = ('name', 'is_better')
+admin.site.register(MetricUnit, MetricUnitAdmin)
+
+
+
