@@ -95,3 +95,4 @@ browserperfdash/wsgi.py
 .idea/
 /static/
 /.idea/*
+migrations/
