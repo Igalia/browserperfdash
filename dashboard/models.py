@@ -44,6 +44,9 @@ class Bot(models.Model):
     platformDetail = models.CharField(_('CPU Details'), max_length=100, blank=True, unique=False)
     enabled = models.BooleanField(default=False)
 
+    def is_authenticated(self):
+        return True
+
     def __unicode__(self):
         return self.name
 
@@ -83,3 +86,15 @@ class MetricUnit(models.Model):
     def __unicode__(self):
         return self.name + " " + self.unit
 
+
+AGGREGATION_CHOICES = (
+    ('na', 'None'),
+    ('tt', 'Total'),
+    ('am', 'Arithmetic'),
+    ('gm', 'Geometric'),
+)
+
+
+class BotReportData(models.Model):
+    aggregation = models.CharField(_('Aggregation'), max_length=2, choices=AGGREGATION_CHOICES
+                                   , default='na')
