@@ -97,3 +97,4 @@ browserperfdash/wsgi.py
 /.idea/*
 migrations/
 logfile.txt
+db.sqlite3

@@ -42,4 +42,10 @@ class BotReportView(APIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def post(self, request, format=None):
+        browser_id = self.request.POST.get('browser_id')
+        browser_version = self.request.POST.get('browser_version')
+        test_id = self.request.POST.get('test_id')
+        test_data = self.request.POST.get('test_data')
+        print(self.request.POST.values())
+
         return HttpResponse("<p> The POST went through </p>")
