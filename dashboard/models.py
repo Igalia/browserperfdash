@@ -96,5 +96,12 @@ AGGREGATION_CHOICES = (
 
 
 class BotReportData(models.Model):
-    aggregation = models.CharField(_('Aggregation'), max_length=2, choices=AGGREGATION_CHOICES
-                                   , default='na')
+    bot = models.ForeignKey(Bot, blank=False, null=False)
+    browser = models.ForeignKey(Browser, blank=False, null=False)
+    browser_version = models.CharField(_('Browser Version'), max_length=50, blank=True, unique=False)
+    test = models.ForeignKey(Test, blank=False, null=False)
+    test_version = models.CharField(_('Test Version'), max_length=50, blank=True, unique=False)
+    aggregation = models.CharField(_('Aggregation'), max_length=2, choices=AGGREGATION_CHOICES, default='na')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    metric_tested = models.ForeignKey(MetricUnit, blank=False, null=False)
+    value = models.FloatField(_('Value'),null=True, blank=True)

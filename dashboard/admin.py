@@ -1,5 +1,5 @@
 from django.contrib import admin
-from dashboard.models import CPUArchitecture, GPUType, Platform, Bot, Browser, Test, MetricUnit
+from dashboard.models import CPUArchitecture, GPUType, Platform, Bot, Browser, Test, MetricUnit, BotReportData
 
 # Register your models here.
 
@@ -37,6 +37,11 @@ admin.site.register(Test, TestAdmin)
 class MetricUnitAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_better')
 admin.site.register(MetricUnit, MetricUnitAdmin)
+
+
+class BotReportDataAdmin(admin.ModelAdmin):
+    list_display = ('bot', 'browser', 'browser_version', 'test', 'timestamp', 'metric_tested','value')
+admin.site.register(BotReportData, BotReportDataAdmin)
 
 
 
