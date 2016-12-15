@@ -39,9 +39,9 @@ class Bot(models.Model):
     cpuArchitecture = models.ForeignKey(CPUArchitecture, blank=False, null=False)
     cpuDetail = models.CharField(_('CPU Details'), max_length=100, blank=True, unique=False)
     gpuType = models.ForeignKey(GPUType, blank=False, null=False)
-    gpuDetail = models.CharField(_('CPU Details'), max_length=100, blank=True, unique=False)
+    gpuDetail = models.CharField(_('GPU Details'), max_length=100, blank=True, unique=False)
     platform = models.ForeignKey(Platform, blank=False, null=False)
-    platformDetail = models.CharField(_('CPU Details'), max_length=100, blank=True, unique=False)
+    platformDetail = models.CharField(_('Platform Details'), max_length=100, blank=True, unique=False)
     enabled = models.BooleanField(default=False)
 
     def is_authenticated(self):
@@ -67,7 +67,7 @@ class Test(models.Model):
     enabled = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return self.id + " " + self.name
+        return self.id + " " + self.description
 
 
 IS_BETTER_CHOICES = (
