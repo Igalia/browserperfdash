@@ -9,6 +9,8 @@ from rest_framework import authentication, permissions
 from rest_framework import generics
 from dashboard.models import *
 from rest_framework import exceptions
+import json
+from pprint import pprint
 
 import logging
 
@@ -45,7 +47,6 @@ class BotReportView(APIView):
         browser_id = self.request.POST.get('browser_id')
         browser_version = self.request.POST.get('browser_version')
         test_id = self.request.POST.get('test_id')
-        test_data = self.request.POST.get('test_data')
-        print(self.request.POST.values())
+        test_data = json.load(self.request.FILES.get('test_data'))
 
         return HttpResponse("<p> The POST went through </p>")
