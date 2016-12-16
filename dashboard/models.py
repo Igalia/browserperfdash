@@ -33,9 +33,8 @@ class Platform(models.Model):
 
 
 class Bot(models.Model):
-    id = models.AutoField(primary_key=True)
     password = models.CharField(_('Bot Password'), max_length=100, blank=False, unique=True)
-    name = models.CharField(_('Bot Name'), max_length=50, blank=False, unique=True)
+    name = models.CharField(_('Bot Name'), max_length=50, blank=False, unique=True, primary_key=True)
     cpuArchitecture = models.ForeignKey(CPUArchitecture, blank=False, null=False)
     cpuDetail = models.CharField(_('CPU Details'), max_length=100, blank=True, unique=False)
     gpuType = models.ForeignKey(GPUType, blank=False, null=False)
@@ -67,7 +66,7 @@ class Test(models.Model):
     enabled = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return self.id + " " + self.description
+        return self.id
 
 
 IS_BETTER_CHOICES = (
@@ -84,7 +83,7 @@ class MetricUnit(models.Model):
     is_better = models.CharField(_('Is Better'), max_length=2, choices=IS_BETTER_CHOICES, default='dw')
 
     def __unicode__(self):
-        return self.name + " " + self.unit
+        return self.name
 
 
 AGGREGATION_CHOICES = (
@@ -95,6 +94,14 @@ AGGREGATION_CHOICES = (
 )
 
 
+class BotReportDataManger(models.Manager):
+    def create_report(self, bot, browser, browser_version, test, test_version, aggregation, metric_tested, mean_value, stddev, raw_values):
+        bot_report_data = self.create(bot=bot, browser=browser, browser_version=browser_version, test=test,
+                    test_version=test_version, aggregation=aggregation, metric_tested=metric_tested,
+                                      mean_value=mean_value, stddev=stddev, raw_values=raw_values)
+        return bot_report_data
+
+
 class BotReportData(models.Model):
     bot = models.ForeignKey(Bot, blank=False, null=False)
     browser = models.ForeignKey(Browser, blank=False, null=False)
@@ -102,6 +109,10 @@ class BotReportData(models.Model):
     test = models.ForeignKey(Test, blank=False, null=False)
     test_version = models.CharField(_('Test Version'), max_length=50, blank=True, unique=False)
     aggregation = models.CharField(_('Aggregation'), max_length=2, choices=AGGREGATION_CHOICES, default='na')
-    timestamp = models.DateTimeField(auto_now_add=True)
     metric_tested = models.ForeignKey(MetricUnit, blank=False, null=False)
-    value = models.FloatField(_('Value'),null=True, blank=True)
+    mean_value = models.FloatField(_('Mean Value'),null=True, blank=True)
+    stddev = models.FloatField(_('Standard Deviation'),null=True, blank=True)
+    raw_values = models.CharField(_('Raw JSON Data'),  max_length=150, blank=True, unique=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    objects = BotReportDataManger()
