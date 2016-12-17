@@ -87,10 +87,10 @@ class MetricUnit(models.Model):
 
 
 AGGREGATION_CHOICES = (
-    ('na', 'None'),
-    ('tt', 'Total'),
-    ('am', 'Arithmetic'),
-    ('gm', 'Geometric'),
+    ('None', 'None'),
+    ('Total', 'Total'),
+    ('Arithmetic', 'Arithmetic'),
+    ('Geometric', 'Geometric'),
 )
 
 
@@ -108,7 +108,7 @@ class BotReportData(models.Model):
     browser_version = models.CharField(_('Browser Version'), max_length=50, blank=True, unique=False)
     test = models.ForeignKey(Test, blank=False, null=False)
     test_version = models.CharField(_('Test Version'), max_length=50, blank=True, unique=False)
-    aggregation = models.CharField(_('Aggregation'), max_length=2, choices=AGGREGATION_CHOICES, default='na')
+    aggregation = models.CharField(_('Aggregation'), max_length=20, choices=AGGREGATION_CHOICES, default='na')
     metric_tested = models.ForeignKey(MetricUnit, blank=False, null=False)
     mean_value = models.FloatField(_('Mean Value'),null=True, blank=True)
     stddev = models.FloatField(_('Standard Deviation'),null=True, blank=True)

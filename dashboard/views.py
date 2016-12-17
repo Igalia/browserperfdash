@@ -71,25 +71,24 @@ class BotReportView(APIView):
             metrics.append(metric)
 
         for metric in metrics:
-            if metrics_data[metric].keys()[0] is None:
-                unit = metrics_data[metric].get(None)['unit']
-                try:
-                    current_metric = MetricUnit.objects.get(pk=metric)
-                except MetricUnit.DoesNotExist:
-                    return HttpResponseBadRequest("The Metric Unit does not exist")
-
+            aggregator = metrics_data[metric].keys()[0]
+            try:
+                current_metric = MetricUnit.objects.get(pk=metric)
+            except MetricUnit.DoesNotExist:
+                return HttpResponseBadRequest("The Metric Unit does not exist")
+            if aggregator is None or aggregator in ['Total', 'Arithmetic', 'Geometric']:
+                unit = metrics_data[metric].get(aggregator)['unit']
                 if unit != current_metric.unit:
                     return HttpResponseBadRequest("The unit provided is inconsistent with the metric tested")
 
-                aggregation = 'None'
-                raw_values = json.dumps(metrics_data[metric].get(None)['raw_values'])
-                stddev = float(metrics_data[metric].get(None)['stdev'])
-                mean_value = float(metrics_data[metric].get(None)['mean_value'])
+                raw_values = json.dumps(metrics_data[metric].get(aggregator)['raw_values'])
+                stddev = float(metrics_data[metric].get(aggregator)['stdev'])
+                mean_value = float(metrics_data[metric].get(aggregator)['mean_value'])
 
                 BotReportData.objects.create_report(bot=bot, browser=browser, browser_version=browser_version,
-                                                    test=test, test_version=test_version, aggregation=aggregation,
+                                                    test=test, test_version=test_version, aggregation='Total',
                                                     metric_tested=current_metric, mean_value=mean_value, stddev=stddev,
                                                     raw_values=raw_values)
-                return HttpResponse("<p> Data saved for a direct test result </p>")
+                print("Data inserted for %s"% metric)
 
-        return HttpResponse("<p> The POST went through </p>")
+        return HttpResponse("<p> The POST went through, and inserted data correctly </p>")
