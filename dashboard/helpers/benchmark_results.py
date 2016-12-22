@@ -59,6 +59,62 @@ class BenchmarkResults(object):
     def format_json(self):
         return json.dumps(self.format_dict(), indent=True)
 
+    def print_db_entries(self, skip_aggregated=False):
+        db_entries = self._generate_db_entries(self._results, skip_aggregated)
+        for db_entry in db_entries:
+            print('Name=%s \t Metric=%s \t Unit=%s \t Value=%s \t Stdev=%s' %(db_entry['name'], db_entry['metric'],
+                                                                              db_entry['unit'], db_entry['value'], db_entry['stdev']))
+
+
+    """
+    The method below returns a list of dictionaries, with the following format:
+
+    [{'name': SpeedometerExample, 'metric': Score:None, 'value': 142.0, 'stdev': 0.00704225352113}
+    {'name': SpeedometerExample, 'metric': Time:Total, 'value': 674.22, 'stdev': 0.098284410446}
+    {'name': SpeedometerExample:AngularJS-TodoMVC, 'metric': Time:Total, 'value': 674.22, 'stdev': 0.098284410446}
+    {'name': SpeedometerExample:AngularJS-TodoMVC:Adding100Items, 'metric': Time:Total, 'value': 217.81, 'stdev': 0.0290934151339}
+    {'name': SpeedometerExample:AngularJS-TodoMVC:Adding100Items:Async, 'metric': Time:None, 'value': 11.25, 'stdev': 0.173561103909}
+    {'name': SpeedometerExample:AngularJS-TodoMVC:Adding100Items:Sync, 'metric': Time:None, 'value': 206.56, 'stdev': 0.0294749686776}
+    {'name': SpeedometerExample:AngularJS-TodoMVC:Adding200Items, 'metric': Time:Total, 'value': 456.41, 'stdev': 0.136262489719}
+    {'name': SpeedometerExample:AngularJS-TodoMVC:Adding200Items:Async, 'metric': Time:None, 'value': 27.25, 'stdev': 0.395773479085}
+    {'name': SpeedometerExample:AngularJS-TodoMVC:Adding200Items:Sync, 'metric': Time:None, 'value': 429.16, 'stdev': 0.122973388375}]
+
+    The Value of the metric field indicates the metric and the aggregator.
+    It uses the character ":" as separator, so it contains metric:aggregator
+    If aggregator is "None" then it means its a real value (not aggregated).
+
+    """
+
+    @classmethod
+    def _generate_db_entries(cls, tests, skip_aggregated=False, parent=None, test_table = []):
+        for test_name in sorted(tests.keys()):
+            if ':' in test_name:
+                raise ValueError('Test %s contains a ":" in the name. This is Forbidden' %(test_name))
+            if parent is None:
+                test_path = test_name
+            else:
+                test_path = '%s:%s' %(parent,test_name)
+
+            for unit in sorted(tests[test_name]['metrics'].keys()):
+                for aggregator in tests[test_name]['metrics'][unit].keys():
+                    if skip_aggregated:
+                        if aggregator is not None:
+                            continue
+                    values = cls._format_values(unit, tests[test_name]['metrics'][unit][aggregator]['current'], db_format=True)
+                    test_table.append({'name': test_path,
+                                       'metric': '%s:%s' %(unit,aggregator),
+                                       'value': values['value'],
+                                       'stdev': values['stdev'],
+                                       'unit': values['unit'],
+                                       })
+
+            if 'tests' in tests[test_name]:
+                BenchmarkResults._generate_db_entries(tests[test_name]['tests'], skip_aggregated, test_path, test_table)
+
+        return test_table
+
+
+
     @classmethod
     def _format_dict_results(cls, tests):
         format_dict = {}
@@ -105,7 +161,7 @@ class BenchmarkResults(object):
         return output
 
     @classmethod
-    def _format_values(cls, metric_name, values, scale_unit=True, json_format=False):
+    def _format_values(cls, metric_name, values, scale_unit=True, json_format=False, db_format=False):
         values = map(float, values)
         total = sum(values)
         mean = total / len(values)
@@ -121,6 +177,10 @@ class BenchmarkResults(object):
             sample_stdev = math.sqrt(max(0, square_sum / (sample_count - 1) - total * total / (sample_count - 1) / sample_count))
 
         unit = cls._unit_from_metric(metric_name)
+
+        # scale unit is ignored for db_format, we get the raw values always
+        if db_format:
+            return {'value': mean, 'stdev':  sample_stdev / mean, 'unit': unit}
 
         if json_format:
             return {'mean_value': mean, 'stdev':  sample_stdev / mean, 'unit': unit, 'raw_values': values}

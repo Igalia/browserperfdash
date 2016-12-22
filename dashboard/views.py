@@ -44,6 +44,22 @@ class BotReportView(APIView):
     authentication_classes = (BotAuthentication,)
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
+    @classmethod
+    def is_aggregated(cls, metric):
+        return not metric.endswith(":None")
+
+    @classmethod
+    def extract_metric(cls, metric):
+        return metric.split(':')[0]
+
+    @classmethod
+    def extract_aggregation(cls, metric):
+        return metric.split(':')[1]
+
+    @classmethod
+    def extract_current_test(cls, test_path):
+        return test_path.split(':')[-1]
+
     def post(self, request, format=None):
         browser_id = self.request.POST.get('browser_id')
         browser_version = self.request.POST.get('browser_version')
@@ -51,44 +67,60 @@ class BotReportView(APIView):
         test_data = json.load(self.request.FILES.get('test_data'))
         test_version = self.request.POST.get('test_version')
         bot = Bot.objects.get(pk=self.request.POST.get('bot_id'))
+
         try:
             browser = Browser.objects.get(pk=browser_id)
         except Browser.DoesNotExist:
             return HttpResponseBadRequest("The browser does not exist")
         try:
-            test = Test.objects.get(pk=test_id)
+            root_test = Test.objects.get(pk=test_id)
         except Test.DoesNotExist:
-            return HttpResponseBadRequest("The test does not exist")
+            return HttpResponseBadRequest("The test %s does not exist"% test_id )
 
         test_data_id = test_data.keys()[0]
         if test_data_id != test_id:
             return HttpResponseBadRequest("The data do not correspond to the test param")
 
-        test_data_results = BenchmarkResults(test_data).format_dict()
-        metrics_data = test_data_results[test_data_id]['metrics']
-        metrics = []
-        for metric in metrics_data:
-            metrics.append(metric)
+        test_data_results = BenchmarkResults(test_data)
+        results_table = BenchmarkResults._generate_db_entries(test_data_results._results)
 
-        for metric in metrics:
-            aggregator = metrics_data[metric].keys()[0]
+        post_logs = ''
+
+        for result in results_table:
+            raw_path = result['name']
+            raw_test = self.extract_current_test(raw_path)
             try:
-                current_metric = MetricUnit.objects.get(pk=metric)
+                test = Test.objects.get(pk=raw_test)
+            except Test.DoesNotExist:
+                return HttpResponseBadRequest("The test %s does not exist" % raw_test)
+
+            metric_name = self.extract_metric(result['metric'])
+            stddev = float(result['stdev'])
+            mean_value = float(result['value'])
+            unit = result['unit']
+
+            try:
+                current_metric = MetricUnit.objects.get(pk=metric_name)
             except MetricUnit.DoesNotExist:
-                return HttpResponseBadRequest("The Metric Unit does not exist")
-            if aggregator is None or aggregator in ['Total', 'Arithmetic', 'Geometric']:
-                unit = metrics_data[metric].get(aggregator)['unit']
-                if unit != current_metric.unit:
-                    return HttpResponseBadRequest("The unit provided is inconsistent with the metric tested")
+                return HttpResponseBadRequest("The Metric Unit %s does not exist"% metric_name)
 
-                raw_values = json.dumps(metrics_data[metric].get(aggregator)['raw_values'])
-                stddev = float(metrics_data[metric].get(aggregator)['stdev'])
-                mean_value = float(metrics_data[metric].get(aggregator)['mean_value'])
+            if current_metric.unit != unit:
+                return HttpResponseBadRequest("The received unit: %s field of Metric Unit %s does not match"% unit,metric_name)
 
-                BotReportData.objects.create_report(bot=bot, browser=browser, browser_version=browser_version,
-                                                    test=test, test_version=test_version, aggregation='Total',
-                                                    metric_tested=current_metric, mean_value=mean_value, stddev=stddev,
-                                                    raw_values=raw_values)
-                print("Data inserted for %s"% metric)
+            if self.is_aggregated(metric=result['metric']):
+                aggregation = self.extract_aggregation(metric=result['metric'])
+            else:
+                aggregation = 'None'
 
-        return HttpResponse("<p> The POST went through, and inserted data correctly </p>")
+            report = BotReportData.objects.create_report(bot=bot, browser=browser, browser_version=browser_version,
+                                                         root_test=root_test, test=test, test_path=raw_path,
+                                                         test_version=test_version, aggregation=aggregation,
+                                                         metric_tested= current_metric, mean_value=mean_value,
+                                                         stddev=stddev
+                                                         )
+            if report:
+                post_logs += "The POST inserted data correctly for %s: \n" % raw_path
+            else:
+                post_logs += "The POST failed to inserted data correctly for %s:\n" % raw_path
+
+        return HttpResponse("<p> The POST went through, and the log is %s</p>"%log)
