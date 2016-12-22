@@ -49,6 +49,18 @@ class Bot(models.Model):
     def __unicode__(self):
         return self.name
 
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        if not self.cpuArchitecture.enabled:
+            raise ValueError("The CPU Type is not enabled")
+        if not self.gpuType.enabled:
+            raise ValueError("The GPU type is not enabled")
+        if not self.platform.enabled:
+            raise ValueError("The Platform is not enabled")
+
+        super(Bot,self).save()
+
+
 
 class Browser(models.Model):
     id = models.CharField(_('Browser Id'), max_length=50, primary_key = True)
