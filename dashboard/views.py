@@ -66,7 +66,11 @@ class BotReportView(APIView):
         test_id = self.request.POST.get('test_id')
         test_data = json.load(self.request.FILES.get('test_data'))
         test_version = self.request.POST.get('test_version')
-        bot = Bot.objects.get(pk=self.request.POST.get('bot_id'))
+        bot_id = self.request.POST.get('bot_id')
+        bot = Bot.objects.get(pk=bot_id)
+
+        if not bot.enabled:
+            return HttpResponseBadRequest("The bot %s is not enabled"% bot_id)
 
         try:
             browser = Browser.objects.get(pk=browser_id)
@@ -123,4 +127,4 @@ class BotReportView(APIView):
             else:
                 post_logs += "The POST failed to inserted data correctly for %s:\n" % raw_path
 
-        return HttpResponse("<p> The POST went through, and the log is %s</p>"%log)
+        return HttpResponse("<p> The POST went through, and the log is \n %s</p>"%post_logs)
