@@ -57,10 +57,6 @@ class BotReportView(APIView):
     def extract_aggregation(cls, metric):
         return metric.split(':')[1]
 
-    @classmethod
-    def extract_current_test(cls, test_path):
-        return test_path.split(':')[-1]
-
     def post(self, request, format=None):
         browser_id = self.request.POST.get('browser_id')
         browser_version = self.request.POST.get('browser_version')
@@ -93,18 +89,8 @@ class BotReportView(APIView):
         test_data_results = BenchmarkResults(test_data)
         results_table = BenchmarkResults._generate_db_entries(test_data_results._results)
 
-        post_logs = ''
-
         for result in results_table:
             raw_path = result['name']
-            raw_test = self.extract_current_test(raw_path)
-            try:
-                test = Test.objects.get(pk=raw_test)
-            except Test.DoesNotExist:
-                log.error("Got wrong test: %s for bot: %s browser: %s, browser_version: %s, root_test: %s," %
-                          (raw_test, bot_id, browser_id, browser_version, raw_path)
-                          )
-                return HttpResponseBadRequest("The test %s does not exist" % raw_test)
 
             metric_name = self.extract_metric(result['metric'])
             stddev = float(result['stdev'])
@@ -124,7 +110,7 @@ class BotReportView(APIView):
                           "root_test: %s, test_description: %s" % (unit, metric_name, bot_id, browser_id, browser_version,
                                                                    test_id, raw_path)
                           )
-                return HttpResponseBadRequest("The received unit: %s field of Metric Unit %s does not match"% unit,metric_name)
+                return HttpResponseBadRequest("The received unit: %s field of Metric Unit %s does not match" % (unit,metric_name))
 
             if self.is_aggregated(metric=result['metric']):
                 aggregation = self.extract_aggregation(metric=result['metric'])
@@ -132,7 +118,7 @@ class BotReportView(APIView):
                 aggregation = 'None'
 
             report = BotReportData.objects.create_report(bot=bot, browser=browser, browser_version=browser_version,
-                                                         root_test=root_test, test=test, test_path=raw_path,
+                                                         root_test=root_test, test_path=raw_path,
                                                          test_version=test_version, aggregation=aggregation,
                                                          metric_tested= current_metric, mean_value=mean_value,
                                                          stddev=stddev
@@ -146,4 +132,4 @@ class BotReportView(APIView):
                           "test_description: %s" % (bot_id, browser_id, browser_version, test_id,raw_path)
                           )
 
-        return HttpResponse("<p> The POST went through, and the log is \n %s</p>"%post_logs)
+        return HttpResponse("<p> The POST went through \n %s</p>")

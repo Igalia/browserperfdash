@@ -107,10 +107,10 @@ AGGREGATION_CHOICES = (
 
 
 class BotReportDataManger(models.Manager):
-    def create_report(self, bot, browser, browser_version, root_test, test, test_path, test_version, aggregation,
+    def create_report(self, bot, browser, browser_version, root_test, test_path, test_version, aggregation,
                       metric_tested, mean_value, stddev):
         bot_report_data = self.create(bot=bot, browser=browser, browser_version=browser_version, root_test=root_test,
-                                      test=test, test_path=test_path, test_version=test_version, aggregation=aggregation,
+                                      test_path=test_path, test_version=test_version, aggregation=aggregation,
                                       metric_tested=metric_tested, mean_value=mean_value, stddev=stddev)
         return bot_report_data
 
@@ -120,7 +120,6 @@ class BotReportData(models.Model):
     browser = models.ForeignKey(Browser, blank=False, null=False)
     browser_version = models.CharField(_('Browser Version'), max_length=50, blank=True, unique=False)
     root_test = models.ForeignKey(Test, blank=False, null=False, related_name='root_test')
-    test = models.ForeignKey(Test, blank=False, null=False, related_name='current_test')
     test_path = models.CharField(_('Test Path'), max_length=500, blank=True, unique=False)
     test_version = models.CharField(_('Test Version'), max_length=50, blank=True, unique=False)
     aggregation = models.CharField(_('Aggregation'), max_length=20, choices=AGGREGATION_CHOICES, default='na')
