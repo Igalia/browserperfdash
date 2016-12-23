@@ -12,6 +12,7 @@ from rest_framework import exceptions
 import json
 from pprint import pprint
 from helpers.benchmark_results import BenchmarkResults
+import datetime
 
 import logging
 
@@ -70,15 +71,19 @@ class BotReportView(APIView):
         bot = Bot.objects.get(pk=bot_id)
 
         if not bot.enabled:
+            log.error("Got data from disabled bot: %s" % (bot_id))
             return HttpResponseBadRequest("The bot %s is not enabled"% bot_id)
 
         try:
             browser = Browser.objects.get(pk=browser_id)
         except Browser.DoesNotExist:
+            log.error("Got invalid browser %s from bot: %s" % (browser_id, bot_id))
             return HttpResponseBadRequest("The browser does not exist")
         try:
             root_test = Test.objects.get(pk=test_id)
         except Test.DoesNotExist:
+            log.error("Got invalid root test: %s from bot: %s for browser: %s, browser_version: %s" %
+                      (test_id, bot_id, browser_id, browser_version))
             return HttpResponseBadRequest("The test %s does not exist"% test_id )
 
         test_data_id = test_data.keys()[0]
@@ -96,6 +101,9 @@ class BotReportView(APIView):
             try:
                 test = Test.objects.get(pk=raw_test)
             except Test.DoesNotExist:
+                log.error("Got wrong test: %s for bot: %s browser: %s, browser_version: %s, root_test: %s," %
+                          (raw_test, bot_id, browser_id, browser_version, raw_path)
+                          )
                 return HttpResponseBadRequest("The test %s does not exist" % raw_test)
 
             metric_name = self.extract_metric(result['metric'])
@@ -106,9 +114,16 @@ class BotReportView(APIView):
             try:
                 current_metric = MetricUnit.objects.get(pk=metric_name)
             except MetricUnit.DoesNotExist:
+                log.error("Got wrong Metric %s for bot: %s, browser: %s, browser_version: %s, root_test: %s,"
+                          " test_description: %s" % (metric_name, bot_id, browser_id, browser_version, test_id, raw_path)
+                          )
                 return HttpResponseBadRequest("The Metric Unit %s does not exist"% metric_name)
 
             if current_metric.unit != unit:
+                log.error("Got wrong unit %s for metric unit %s data for bot: %s, browser: %s, browser_version: %s, "
+                          "root_test: %s, test_description: %s" % (unit, metric_name, bot_id, browser_id, browser_version,
+                                                                   test_id, raw_path)
+                          )
                 return HttpResponseBadRequest("The received unit: %s field of Metric Unit %s does not match"% unit,metric_name)
 
             if self.is_aggregated(metric=result['metric']):
@@ -123,8 +138,12 @@ class BotReportView(APIView):
                                                          stddev=stddev
                                                          )
             if report:
-                post_logs += "The POST inserted data correctly for %s: \n" % raw_path
+                log.info("Correctly received data for bot: %s, browser: %s, browser_version: %s, root_test: %s,"
+                         " test_description: %s" % (bot_id, browser_id, browser_version, test_id,raw_path)
+                         )
             else:
-                post_logs += "The POST failed to inserted data correctly for %s:\n" % raw_path
+                log.error("Failed inserting data for bot: %s, browser: %s, browser_version: %s, root_test: %s, "
+                          "test_description: %s" % (bot_id, browser_id, browser_version, test_id,raw_path)
+                          )
 
         return HttpResponse("<p> The POST went through, and the log is \n %s</p>"%post_logs)
