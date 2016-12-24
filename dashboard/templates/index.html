@@ -1,37 +1,43 @@
 {% extends "static/base.html" %}
 {% load static %}
 {% block body %}
+    <div class="container-fluid" ng-controller="{% block ng_controller %}AppController{% endblock %}">
+        {% block content %}
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-hover">
+                        <thead>
+                        <td>Timestamp</td>
+                        <td>Bot</td>
+                        <td>Browser</td>
+                        <td>Browser Version</td>
+                        <td>Test</td>
+                        <td>Description</td>
+                        <td>Test Version</td>
+                        <td>Metric</td>
+                        <td>Mean</td>
+                        <td>Std.Dev</td>
+                        </thead>
+                        <tbody>
+                    {% verbatim %}
 
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="panel panel-primary">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Hello test</h3>
-                    </div>
-                    <div class="panel-body">
-                        Test content
-                    </div>
-                    <div class="panel-footer">
-                        <button class="btn btn-default">More Info <i class="fa fa-arrow-circle-o-right"></i></button>
-                    </div>
+
+                    <tr ng-repeat="data in reports">
+                        <td>{{ data.timestamp }}</td>
+                        <td>{{ data.bot }}</td>
+                        <td>{{ data.browser }}</td>
+                        <td>{{ data.browser_version }}</td>
+                        <td>{{ data.root_test }}</td>
+                        <td>{{ data.test_path }}</td>
+                        <td>{{ data.test_version }}</td>
+                        <td>{{ data.metric_tested }}</td>
+                        <td>{{ data.mean_value }}</td>
+                        <td>{{ data.stddev }}</td>
+                    </tr>
+                    {% endverbatim %}
+                    </tbody>
+                    </table>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="panel panel-primary">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Hello test 2</h3>
-                    </div>
-                    <div class="panel-body">
-                        Test content
-                    </div>
-                    <div class="panel-footer">
-                        <button class="btn btn-default">More Info <i class="fa fa-arrow-circle-o-right"></i></button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
+        {% endblock %}
 {% endblock body %}

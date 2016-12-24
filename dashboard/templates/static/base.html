@@ -11,12 +11,9 @@
 
     <!-- fontawesome -->
     <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
-
-    <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
 </head>
-<body>
-<div class="page-wrap">
+<body ng-app="{% block ng_app %}browserperfdash.dashboard.static{% endblock %}">
+<div class="page-wrap" style="height: 100%;">
     {% block navbar %}
     {% include 'static/navbar_top.html' %}
     {% endblock navbar %}
@@ -25,5 +22,11 @@
     {% endblock body %}
 </div>
 {% include 'static/footer.html' %}
+<script type="text/javascript" src="{% static 'js/underscore-min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/angular.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/angular-resource.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/dashboard.module.js' %}"></script>
 </body>
 </html>
