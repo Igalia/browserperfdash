@@ -9,5 +9,5 @@ app.controller('AppController', function($scope, $http, botReportsFactory, $inte
         $scope.reports = botReportsFactory.query();
     };
     $scope.reload();
-    $interval($scope.reload, 50000);
+    $interval($scope.reload, 10000);
 });
