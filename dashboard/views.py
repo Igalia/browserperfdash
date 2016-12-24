@@ -10,9 +10,9 @@ from rest_framework import generics
 from dashboard.models import *
 from rest_framework import exceptions
 import json
-from pprint import pprint
 from helpers.benchmark_results import BenchmarkResults
-import datetime
+from django.views.generic import ListView
+from .serializers import *
 
 import logging
 
@@ -37,7 +37,13 @@ class BotAuthentication(authentication.BaseAuthentication):
         return (bot, None)
 
 
-class HomePageView(TemplateView):
+class BotDataReportList(generics.ListAPIView):
+    model = BotReportData
+    queryset = BotReportData.objects.filter(aggregation='None')
+    serializer_class = BotReportDataSerializer
+
+
+class DefaultHomeView(TemplateView):
     template_name="index.html"
 
 
