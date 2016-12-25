@@ -43,6 +43,36 @@ class BotDataReportList(generics.ListAPIView):
     serializer_class = BotReportDataSerializer
 
 
+class BrowsersList(generics.ListAPIView):
+    model = Browser
+    queryset = Browser.objects.filter(enabled=True)
+    serializer_class = BrowserListSerializer
+
+
+class BotsList(generics.ListAPIView):
+    model = Bot
+    queryset = Bot.objects.filter(enabled=True)
+    serializer_class = BotListSerializer
+
+
+class PlatformList(generics.ListAPIView):
+    model = Platform
+    queryset = Platform.objects.filter(enabled=True)
+    serializer_class = PlatformListSerializer
+
+
+class GPUTypeList(generics.ListAPIView):
+    model = GPUType
+    queryset = GPUType.objects.filter(enabled=True)
+    serializer_class = GPUTypeListSerializer
+
+
+class CPUArchitectureList(generics.ListAPIView):
+    model = CPUArchitecture
+    queryset = CPUArchitecture.objects.filter(enabled=True)
+    serializer_class = CPUArchitectureListSerializer
+
+
 class DefaultHomeView(TemplateView):
     template_name="index.html"
 
