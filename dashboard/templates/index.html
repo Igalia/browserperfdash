@@ -9,24 +9,24 @@
                         <div class="form-group">
                             {% verbatim %}
                             <label for="browsers">Browser</label>
-                            <select name="browser" class="form-control" ng-repeat="browser in browsers">
-                                <option id="{{ browser.id }}">{{ browser.name }}</option>
+                            <select name="browser" class="form-control" ng-model="selectedBrowser"
+                                    ng-options="x.name for x in browsers">
                             </select>
                             <label for="bot">Bot</label>
-                            <select name="bot" class="form-control" ng-repeat="bot in bots">
-                                <option id="{{ bot.name }}">{{ bot.name }}</option>
+                            <select name="bot" class="form-control" ng-model="selectedBot"
+                                    ng-options="bot.name for bot in bots">
                             </select>
                             <label for="platform">Platform</label>
-                            <select name="platform" class="form-control" ng-repeat="platform in platforms">
-                                <option id="{{ platform.id }}">{{ platform.name }}</option>
+                            <select name="platform" class="form-control" ng-model="selectedPlatform"
+                                    ng-options="platform.name for platform in platforms">
                             </select>
                             <label for="platform">GPU</label>
-                            <select name="gpu" class="form-control" ng-repeat="gpu in gpus">
-                                <option id="{{ gpu.id }}">{{ gpu.name }}</option>
+                            <select name="gpu" class="form-control" ng-model="selectedGPU"
+                                    ng-options="gpu.name for gpu in gpus">
                             </select>
                             <label for="platform">CPU</label>
-                            <select name="cpu" class="form-control" ng-repeat="cpu in cpus">
-                                <option id="{{ cpu.id }}">{{ cpu.name }}</option>
+                            <select name="cpu" class="form-control" ng-model="selectedCPU"
+                                    ng-options="cpu.name for cpu in cpus">
                             </select>
                             {% endverbatim %}
                         </div>

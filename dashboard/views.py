@@ -34,7 +34,7 @@ class BotAuthentication(authentication.BaseAuthentication):
         except Bot.DoesNotExist:
             raise exceptions.AuthenticationFailed('This bot cannot be authenticated')
 
-        return (bot, None)
+        return (bot, bot_name)
 
 
 class BotDataReportList(generics.ListAPIView):
@@ -94,12 +94,21 @@ class BotReportView(APIView):
         return metric.split(':')[1]
 
     def post(self, request, format=None):
-        browser_id = self.request.POST.get('browser_id')
-        browser_version = self.request.POST.get('browser_version')
-        test_id = self.request.POST.get('test_id')
-        test_data = json.load(self.request.FILES.get('test_data'))
-        test_version = self.request.POST.get('test_version')
-        bot_id = self.request.POST.get('bot_id')
+        try:
+            browser_id = self.request.POST.get('browser_id')
+            browser_version = self.request.POST.get('browser_version')
+            test_id = self.request.POST.get('test_id')
+            test_version = self.request.POST.get('test_version')
+            bot_id = self.request.POST.get('bot_id')
+            json_data = self.request.FILES.get('test_data')
+        except AttributeError:
+            log.error("Got invalid params from the bot: %s"% request.auth)
+            return HttpResponseBadRequest("Some params are missing in the request")
+        try:
+            test_data = json.load(json_data)
+        except AttributeError:
+            return HttpResponseBadRequest("Error parsing JSON file from bot: %s "% request.auth)
+
         bot = Bot.objects.get(pk=bot_id)
 
         if not bot.enabled:
@@ -168,4 +177,4 @@ class BotReportView(APIView):
                           "test_description: %s" % (bot_id, browser_id, browser_version, test_id,raw_path)
                           )
 
-        return HttpResponse("<p> The POST went through \n %s</p>")
+        return HttpResponse("The POST went through")
