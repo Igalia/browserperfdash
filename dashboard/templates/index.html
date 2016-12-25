@@ -48,7 +48,8 @@
                         </thead>
                         <tbody>
                         {% verbatim %}
-                        <tr ng-repeat="data in reports">
+                        <tr ng-repeat="data in reports | filter: { browser: selectedBrowser.id }
+                        | filter: {bot: selectedBot.name}">
                             <td>{{ data.timestamp }}</td>
                             <td>{{ data.bot }}</td>
                             <td>{{ data.browser }}</td>
