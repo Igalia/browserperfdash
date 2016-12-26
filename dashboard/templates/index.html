@@ -39,6 +39,9 @@
                         <td>Bot</td>
                         <td>Browser</td>
                         <td>Version</td>
+                        <td>CPU</td>
+                        <td>GPU</td>
+                        <td>Platform</td>
                         <td>Test</td>
                         <td>Description</td>
                         <td>Test Version</td>
@@ -49,11 +52,15 @@
                         <tbody>
                         {% verbatim %}
                         <tr ng-repeat="data in reports | filter: { browser: selectedBrowser.id }
-                        | filter: {bot: selectedBot.name}">
+                        | filter: {bot: selectedBot.name} | filter: {cpu_arch:selectedCPU.name}
+                        | filter: {platform: selectedPlatform.name } | filter: {gpu_type: selectedGPU.name}">
                             <td>{{ data.timestamp }}</td>
                             <td>{{ data.bot }}</td>
                             <td>{{ data.browser }}</td>
                             <td>{{ data.browser_version }}</td>
+                            <td>{{ data.cpu_arch}}</td>
+                            <td>{{ data.gpu_type }}</td>
+                            <td>{{ data.platform }}</td>
                             <td>{{ data.root_test }}</td>
                             <td>{{ data.test_path }}</td>
                             <td>{{ data.test_version }}</td>

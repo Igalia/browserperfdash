@@ -35,11 +35,11 @@ class Platform(models.Model):
 class Bot(models.Model):
     password = models.CharField(_('Bot Password'), max_length=100, blank=False, unique=True)
     name = models.CharField(_('Bot Name'), max_length=50, blank=False, unique=True, primary_key=True)
-    cpuArchitecture = models.ForeignKey(CPUArchitecture, blank=False, null=False)
+    cpuArchitecture = models.ForeignKey(CPUArchitecture, blank=False, null=False, related_name='cpu_relation')
     cpuDetail = models.CharField(_('CPU Details'), max_length=100, blank=True, unique=False)
-    gpuType = models.ForeignKey(GPUType, blank=False, null=False)
+    gpuType = models.ForeignKey(GPUType, blank=False, null=False, related_name='gpu_relation')
     gpuDetail = models.CharField(_('GPU Details'), max_length=100, blank=True, unique=False)
-    platform = models.ForeignKey(Platform, blank=False, null=False)
+    platform = models.ForeignKey(Platform, blank=False, null=False, related_name='platform_relation')
     platformDetail = models.CharField(_('Platform Details'), max_length=100, blank=True, unique=False)
     enabled = models.BooleanField(default=False)
 
@@ -115,7 +115,7 @@ class BotReportDataManger(models.Manager):
 
 
 class BotReportData(models.Model):
-    bot = models.ForeignKey(Bot, blank=False, null=False)
+    bot = models.ForeignKey(Bot, blank=False, null=False, related_name='bot_relation', related_query_name='bot_relation')
     browser = models.ForeignKey(Browser, blank=False, null=False)
     browser_version = models.CharField(_('Browser Version'), max_length=50, blank=True, unique=False)
     root_test = models.ForeignKey(Test, blank=False, null=False, related_name='root_test')
@@ -128,3 +128,6 @@ class BotReportData(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     objects = BotReportDataManger()
+
+    def __unicode__(self):
+        return self.bot
