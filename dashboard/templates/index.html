@@ -11,22 +11,27 @@
                             <label for="browsers">Browser</label>
                             <select name="browser" class="form-control" ng-model="selectedBrowser"
                                     ng-options="x.name for x in browsers">
+                                <option value="">--All browsers--</option>
                             </select>
                             <label for="bot">Bot</label>
                             <select name="bot" class="form-control" ng-model="selectedBot"
                                     ng-options="bot.name for bot in bots">
+                                <option value="">--All bots--</option>
                             </select>
                             <label for="platform">Platform</label>
                             <select name="platform" class="form-control" ng-model="selectedPlatform"
                                     ng-options="platform.name for platform in platforms">
+                                <option value="">--All platforms--</option>
                             </select>
                             <label for="platform">GPU</label>
                             <select name="gpu" class="form-control" ng-model="selectedGPU"
                                     ng-options="gpu.name for gpu in gpus">
+                                <option value="">--All GPU--</option>
                             </select>
                             <label for="platform">CPU</label>
                             <select name="cpu" class="form-control" ng-model="selectedCPU"
                                     ng-options="cpu.name for cpu in cpus">
+                                <option value="">--All CPU--</option>
                             </select>
                             {% endverbatim %}
                         </div>
