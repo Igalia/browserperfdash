@@ -48,7 +48,8 @@
                                   <input type="number" ng-init="selectedDays=5" max="20"  name="selectedDays"
                                          data-ng-model="selectedDays" class="form-control" style="width: 65px;" id="selectedDays">
                             </div>
-                            <button type="button" class="btn btn-default" ng-click="reload()">Refresh</button>
+                            <button type="button" class="btn btn-default" ng-click="reload()" id="reload">
+                                <i class="glyphicon glyphicon-refresh"></i></button>
                         </div>
                         {% endverbatim %}
                     </form>
