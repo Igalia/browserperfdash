@@ -4,43 +4,58 @@
     <div class="container-fluid" ng-controller="{% block ng_controller %}AppController{% endblock %}">
         {% block content %}
             <div class="row">
-                <div class="container" style="text-align: center">
+                <div class="container-fluid">
                     <form class="form-inline">
-                        <div class="form-group">
+                        <div class="row" style="text-align: center">
                             {% verbatim %}
-                            <label for="browsers">Browser</label>
-                            <select name="browser" class="form-control" ng-model="selectedBrowser"
-                                    ng-options="x.name for x in browsers">
-                                <option value="">--All browsers--</option>
-                            </select>
-                            <label for="bot">Bot</label>
-                            <select name="bot" class="form-control" ng-model="selectedBot"
-                                    ng-options="bot.name for bot in bots">
-                                <option value="">--All bots--</option>
-                            </select>
-                            <label for="platform">Platform</label>
-                            <select name="platform" class="form-control" ng-model="selectedPlatform"
-                                    ng-options="platform.name for platform in platforms">
-                                <option value="">--All platforms--</option>
-                            </select>
-                            <label for="platform">GPU</label>
-                            <select name="gpu" class="form-control" ng-model="selectedGPU"
-                                    ng-options="gpu.name for gpu in gpus">
-                                <option value="">--All GPU--</option>
-                            </select>
-                            <label for="platform">CPU</label>
-                            <select name="cpu" class="form-control" ng-model="selectedCPU"
-                                    ng-options="cpu.name for cpu in cpus">
-                                <option value="">--All CPU--</option>
-                            </select>
-                            {% endverbatim %}
+                            <div class="form-group">
+                                <label for="browsers">Browser</label>
+                                <select name="browser" class="form-control" ng-model="selectedBrowser"
+                                        ng-options="x.name for x in browsers">
+                                    <option value="">--All browsers--</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="bot">Bot</label>
+                                <select name="bot" class="form-control" ng-model="selectedBot"
+                                        ng-options="bot.name for bot in bots">
+                                    <option value="">--All bots--</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="platform">Platform</label>
+                                <select name="platform" class="form-control" ng-model="selectedPlatform"
+                                        ng-options="platform.name for platform in platforms">
+                                    <option value="">--All platforms--</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="platform">GPU</label>
+                                <select name="gpu" class="form-control" ng-model="selectedGPU"
+                                        ng-options="gpu.name for gpu in gpus">
+                                    <option value="">--All GPU--</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="platform">CPU</label>
+                                <select name="cpu" class="form-control" ng-model="selectedCPU"
+                                        ng-options="cpu.name for cpu in cpus">
+                                    <option value="">--All CPU--</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="days">Days</label>
+                                  <input type="number" ng-init="selectedDays=5" max="20"  name="selectedDays"
+                                         data-ng-model="selectedDays" class="form-control" style="width: 65px;" id="selectedDays">
+                            </div>
+                            <button type="button" class="btn btn-default">Reload</button>
                         </div>
+                        {% endverbatim %}
                     </form>
                 </div>
                 <div class="col-md-12" style="padding-top: 10px;">
                     <table class="table table-hover table-condensed table-bordered">
                         <thead>
-                        <td>Timestamp</td>
                         <td>Bot</td>
                         <td>Browser</td>
                         <td>Version</td>
@@ -58,8 +73,8 @@
                         {% verbatim %}
                         <tr ng-repeat="data in reports | filter: { browser: selectedBrowser.id }
                         | filter: {bot: selectedBot.name} | filter: {cpu_arch:selectedCPU.name}
-                        | filter: {platform: selectedPlatform.name } | filter: {gpu_type: selectedGPU.name}">
-                            <td>{{ data.timestamp }}</td>
+                        | filter: {platform: selectedPlatform.name } | filter: {gpu_type: selectedGPU.name}"
+                            ng-if="data.days_since < selectedDays">
                             <td>{{ data.bot }}</td>
                             <td>{{ data.browser }}</td>
                             <td>{{ data.browser_version }}</td>
