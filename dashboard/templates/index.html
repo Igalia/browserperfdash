@@ -26,6 +26,7 @@
                                 <label for="platform">Platform</label>
                                 <select name="platform" class="form-control" ng-model="selectedPlatform" ng-disabled="selectedBot">
                                     <option value="">--All platforms--</option>
+                                    <option ng-repeat="x in platforms" value="{{ x.name }}">{{ x.name }}</option>
                                     <option value="{{ selectedBot.platform }}" ng-selected="selectedBot" ng-show="selectedBot">
                                         {{ selectedBot.platform}}</option>
                                 </select>
