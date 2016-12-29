@@ -33,10 +33,14 @@ app.controller('AppController', function($scope, botReportsFactory, browserFacto
     $scope.gpus = gpuFactory.query();
     $scope.cpus = cpuArchFactory.query();
     $scope.updateOtherCombos = function () {
-        if ( $scope.selectedBot ) {
+        if ( !$scope.selectedBot ) {
+            $scope.selectedPlatform = '';
+            $scope.selectedCPU = '';
+            $scope.selectedGPU = '';
+        } else {
             $scope.selectedPlatform = $scope.selectedBot.platform;
-            $scope.selectedCPU = $scope.selectedBot.cpu;
-            $scope.selectedGPU = $scope.selectedBot.gpu;
+            $scope.selectedCPU = $scope.selectedBot.cpuArchitecture;
+            $scope.selectedGPU = $scope.selectedBot.gpuType;
         }
     };
     $scope.reload = function () {
