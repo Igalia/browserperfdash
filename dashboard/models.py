@@ -130,4 +130,4 @@ class BotReportData(models.Model):
     objects = BotReportDataManger()
 
     def __unicode__(self):
-        return self.bot
+        return self.bot.name
