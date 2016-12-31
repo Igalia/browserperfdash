@@ -168,11 +168,7 @@ class BotReportView(APIView):
                                                          metric_tested= current_metric, mean_value=mean_value,
                                                          stddev=stddev
                                                          )
-            if report:
-                log.info("Correctly received data for bot: %s, browser: %s, browser_version: %s, root_test: %s,"
-                         " test_description: %s" % (bot_id, browser_id, browser_version, test_id,raw_path)
-                         )
-            else:
+            if not report:
                 log.error("Failed inserting data for bot: %s, browser: %s, browser_version: %s, root_test: %s, "
                           "test_description: %s" % (bot_id, browser_id, browser_version, test_id,raw_path)
                           )
