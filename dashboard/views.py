@@ -132,7 +132,7 @@ class BotReportView(APIView):
             return HttpResponseBadRequest("The data do not correspond to the test param")
 
         test_data_results = BenchmarkResults(test_data)
-        results_table = BenchmarkResults._generate_db_entries(test_data_results._results)
+        results_table = test_data_results.fetch_db_entries(test_data_results)
 
         for result in results_table:
             raw_path = result['name']

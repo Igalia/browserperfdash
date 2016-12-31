@@ -46,6 +46,8 @@ class BenchmarkResults(object):
     }
     SI_prefixes = ['n', 'u', 'm', '', 'K', 'M', 'G', 'T', 'P', 'E']
 
+    _results = None
+
     def __init__(self, results):
         self._lint_results(results)
         self._results = self._aggregate_results(results)
@@ -59,12 +61,24 @@ class BenchmarkResults(object):
     def format_json(self):
         return json.dumps(self.format_dict(), indent=True)
 
+    def set_values(self, result):
+        self._results = None
+        self._lint_results(result)
+        self._results = self._aggregate_results(result)
+
+    def fetch_db_entries(self, skip_aggregated=False):
+        test_table = []
+        return self._generate_db_entries(self._results,test_table, skip_aggregated)
+
     def print_db_entries(self, skip_aggregated=False):
-        db_entries = self._generate_db_entries(self._results, skip_aggregated)
+        test_table = []
+        db_entries = self._generate_db_entries(self._results, test_table, skip_aggregated)
         for db_entry in db_entries:
             print('Name=%s \t Metric=%s \t Unit=%s \t Value=%s \t Stdev=%s' %(db_entry['name'], db_entry['metric'],
                                                                               db_entry['unit'], db_entry['value'], db_entry['stdev']))
 
+    def __del__(self):
+        self._results = None
 
     """
     The method below returns a list of dictionaries, with the following format:
@@ -86,7 +100,7 @@ class BenchmarkResults(object):
     """
 
     @classmethod
-    def _generate_db_entries(cls, tests, skip_aggregated=False, parent=None, test_table = []):
+    def _generate_db_entries(cls, tests, test_table, skip_aggregated=False, parent=None):
         for test_name in sorted(tests.keys()):
             if ':' in test_name:
                 raise ValueError('Test %s contains a ":" in the name. This is Forbidden' %(test_name))
@@ -109,7 +123,7 @@ class BenchmarkResults(object):
                                        })
 
             if 'tests' in tests[test_name]:
-                BenchmarkResults._generate_db_entries(tests[test_name]['tests'], skip_aggregated, test_path, test_table)
+                BenchmarkResults._generate_db_entries(tests[test_name]['tests'], test_table, skip_aggregated, test_path)
 
         return test_table
 
