@@ -3,6 +3,7 @@ from dashboard.views import *
 from . import views
 
 urlpatterns = [
+    url(r'^all/$', AllResultsView.as_view(), name='all_results'),
     url(r'^bot-report', BotReportView.as_view()),
     url(r'^result/$', BotDataReportList.as_view(), name='result-list'),
     url(r'^browser/$', BrowsersList.as_view(), name='browser-list'),

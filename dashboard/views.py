@@ -13,6 +13,9 @@ import json
 from helpers.benchmark_results import BenchmarkResults
 from django.views.generic import ListView
 from .serializers import *
+from django.db.models import Sum
+from django.db.models import F, Count
+from django.db.models import Max, Min
 
 import logging
 
@@ -73,8 +76,16 @@ class CPUArchitectureList(generics.ListAPIView):
     serializer_class = CPUArchitectureListSerializer
 
 
-class DefaultHomeView(TemplateView):
+class DefaultHomeView(ListView):
     template_name="index.html"
+
+    def get_queryset(self):
+        return BotReportData.objects.all()
+
+
+
+class AllResultsView(TemplateView):
+    template_name="allresults.html"
 
 
 class BotReportView(APIView):
@@ -92,6 +103,19 @@ class BotReportView(APIView):
     @classmethod
     def extract_aggregation(cls, metric):
         return metric.split(':')[1]
+
+    @classmethod
+    def process_delta(cls, test_version, browser, root_test, browser_version, test_path, mean_value):
+        delta = 0.0
+        # We take in the previous result (if exists)
+        previous_result = BotReportData.objects.filter(test_version__lt=test_version, browser=browser,
+                                                       root_test=root_test, browser_version=browser_version,
+                                                       test_path=test_path).order_by('-timestamp')[:1]
+        if previous_result:
+            for res in previous_result:
+                delta = float(mean_value)-float(res.mean_value)
+
+        return delta
 
     def post(self, request, format=None):
         try:
@@ -162,11 +186,13 @@ class BotReportView(APIView):
             else:
                 aggregation = 'None'
 
+            # Calculate the change and store it during processing the POST
+            delta = self.process_delta(test_version, browser, root_test, browser_version, raw_path, mean_value)
             report = BotReportData.objects.create_report(bot=bot, browser=browser, browser_version=browser_version,
                                                          root_test=root_test, test_path=raw_path,
                                                          test_version=test_version, aggregation=aggregation,
                                                          metric_tested= current_metric, mean_value=mean_value,
-                                                         stddev=stddev
+                                                         stddev=stddev,delta=delta
                                                          )
             if not report:
                 log.error("Failed inserting data for bot: %s, browser: %s, browser_version: %s, root_test: %s, "

@@ -107,10 +107,10 @@ AGGREGATION_CHOICES = (
 
 class BotReportDataManger(models.Manager):
     def create_report(self, bot, browser, browser_version, root_test, test_path, test_version, aggregation,
-                      metric_tested, mean_value, stddev):
+                      metric_tested, mean_value, stddev, delta):
         bot_report_data = self.create(bot=bot, browser=browser, browser_version=browser_version, root_test=root_test,
                                       test_path=test_path, test_version=test_version, aggregation=aggregation,
-                                      metric_tested=metric_tested, mean_value=mean_value, stddev=stddev)
+                                      metric_tested=metric_tested, mean_value=mean_value, stddev=stddev, delta=delta)
         return bot_report_data
 
 
@@ -125,9 +125,11 @@ class BotReportData(models.Model):
     metric_tested = models.ForeignKey(MetricUnit, blank=False, null=False)
     mean_value = models.FloatField(_('Mean Value'),null=True, blank=True)
     stddev = models.FloatField(_('Standard Deviation'),null=True, blank=True)
+    delta = models.FloatField(_('Delta Field'), null=True, blank=True, default=0.00)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     objects = BotReportDataManger()
 
     def __unicode__(self):
-        return self.bot.name
+        return self.bot.name + ":" + str(self.browser) + ":" + self.test_version + ":" +\
+               self.test_path + ":" + str(self.mean_value)
