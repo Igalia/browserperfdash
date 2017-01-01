@@ -1,26 +1,165 @@
 {% extends "static/base.html" %}
 {% load static %}
 {% block body %}
-    <div class="container-fluid">
+    <div class="container-fluid" ng-controller="{% block ng_controller %}DeltaController{% endblock %}">
         {% block content %}
             <div class="row">
                 <div class="container-fluid">
+                    <form class="form-inline">
 
-                    <h3> Top 10 improvements in the last 10 days</h3>
-                    <table>
-                    <tbody>
-                    {%  for obj in object_list %}
-                        <tr>
-                            <td>
-                                {{ obj.test_path }}
-                            </td>
-                        <td>
-                            {{ obj.delta }}
-                        </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                    </table>
+                        <div class="row" style="text-align: center; padding-bottom: 10px;">
+                            {% verbatim %}
+                            <div class="form-group">
+                                <label for="days">Show</label>
+                                <input type="number" ng-init="listLimit=10" min="1" max="30"  name="listLimit"
+                                       data-ng-model="listLimit" class="form-control" style="width: 65px;" id="listLimit">
+                            </div>
+                            <div class="form-group">
+                                <label for="browsers">Browser</label>
+                                <select name="browser" class="form-control" ng-model="selectedBrowser"
+                                        ng-options="x.name for x in browsers">
+                                    <option value="">--All browsers--</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="bot">Bot</label>
+                                <select name="bot" class="form-control" ng-model="selectedBot"
+                                        ng-options="bot.name for bot in bots" ng-change="updateOtherCombos()">
+                                    <option value="">--All bots--</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="platform">Platform</label>
+                                <select name="platform" class="form-control" ng-model="selectedPlatform" ng-disabled="selectedBot">
+                                    <option value="">--All platforms--</option>
+                                    <option ng-repeat="x in platforms" value="{{ x.name }}">{{ x.name }}</option>
+                                    <option value="{{ selectedBot.platform }}" ng-selected="selectedBot" ng-show="selectedBot">
+                                        {{ selectedBot.platform}}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="platform">GPU</label>
+                                <select name="gpu" class="form-control" ng-model="selectedGPU" ng-disabled="selectedBot">
+                                    <option value="">--All GPU--</option>
+                                    <option ng-repeat="x in gpus" value="{{ x.name }}">{{ x.name }}</option>
+                                    <option value="{{ selectedBot.gpuType }}" ng-selected="selectedBot" ng-show="selectedBot">
+                                        {{ selectedBot.gpuType}}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="cpu">CPU</label>
+                                <select class="form-control" ng-model="selectedCPU" ng-disabled="selectedBot">
+                                    <option value="">--All CPU--</option>
+                                    <option ng-repeat="x in cpus" value="{{ x.name }}">{{ x.name }}</option>
+                                    <option value="{{ selectedBot.cpuArchitecture }}" ng-selected="selectedBot" ng-show="selectedBot">
+                                        {{ selectedBot.cpuArchitecture }}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="days">Days</label>
+                                <input type="number" ng-init="selectedDays=5" min="0" max="20"  name="selectedDays"
+                                       data-ng-model="selectedDays" class="form-control" style="width: 65px;" id="selectedDays">
+                            </div>
+                            <button type="button" class="btn btn-default" ng-click="reload()" id="reload">
+                                <i class="glyphicon glyphicon-refresh"></i></button>
+                        </div>
+                        {% endverbatim %}
+                    </form>
+                    {% verbatim %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            Improvements for past {{ selectedDays }}* days
+                        </div>
+                        <div class="panel-body">
+                            <table class="table table-hover table-condensed table-bordered perftable">
+                                <thead>
+                                <td>Bot</td>
+                                <td>Browser</td>
+                                <td>Version</td>
+                                <td>Platform</td>
+                                <td>Test</td>
+                                <td>Description</td>
+                                <td>Test Version</td>
+                                <td>Metric</td>
+                                <td>Mean</td>
+                                <td>Std.Dev</td>
+                                <td>Delta</td>
+                                </thead>
+                                <tbody>
+
+                                <tr ng-repeat="data in reports | filter: { browser: selectedBrowser.id }
+                        | filter: {bot: selectedBot.name} | filter: {cpu_arch:selectedCPU}
+                        | filter: {platform: selectedPlatform } | filter: {gpu_type: selectedGPU} | orderBy: '-delta'
+                        | limitTo:listLimit "
+                                    ng-if="data.days_since < selectedDays || delta > 0">
+                                    <td>{{ data.bot }}</td>
+                                    <td>{{ data.browser }}</td>
+                                    <td>{{ data.browser_version }}</td>
+                                    <td>{{ data.platform }}</td>
+                                    <td>{{ data.root_test }}</td>
+                                    <td>{{ data.test_path }}</td>
+                                    <td>{{ data.test_version }}</td>
+                                    <td>{{ data.metric_tested }}</td>
+                                    <td>{{ data.mean_value }}</td>
+                                    <td>{{ data.stddev }}</td>
+                                    <td>{{ data.delta}}</td>
+                                </tr>
+                                {% endverbatim %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="panel-footer">
+                            * change in days require manual reload with the button
+                        </div>
+                    </div>
+
+                    {% verbatim %}
+                    <div class="panel panel-danger">
+                        <div class="panel-heading">
+                            Regressions for past {{ selectedDays }}* days
+                        </div>
+                        <div class="panel-body">
+                            <table class="table table-hover table-condensed table-bordered perftable">
+                                <thead>
+                                <td>Bot</td>
+                                <td>Browser</td>
+                                <td>Version</td>
+                                <td>Platform</td>
+                                <td>Test</td>
+                                <td>Description</td>
+                                <td>Test Version</td>
+                                <td>Metric</td>
+                                <td>Mean</td>
+                                <td>Std.Dev</td>
+                                <td>Delta</td>
+                                </thead>
+                                <tbody>
+
+                                <tr ng-repeat="data in reports | filter: { browser: selectedBrowser.id }
+                        | filter: {bot: selectedBot.name} | filter: {cpu_arch:selectedCPU}
+                        | filter: {platform: selectedPlatform } | filter: {gpu_type: selectedGPU} | orderBy: 'delta'
+                        | limitTo:listLimit "
+                                    ng-if="data.days_since < selectedDays || delta < -1 ">
+                                    <td>{{ data.bot }}</td>
+                                    <td>{{ data.browser }}</td>
+                                    <td>{{ data.browser_version }}</td>
+                                    <td>{{ data.platform }}</td>
+                                    <td>{{ data.root_test }}</td>
+                                    <td>{{ data.test_path }}</td>
+                                    <td>{{ data.test_version }}</td>
+                                    <td>{{ data.metric_tested }}</td>
+                                    <td>{{ data.mean_value }}</td>
+                                    <td>{{ data.stddev }}</td>
+                                    <td>{{ data.delta}}</td>
+                                </tr>
+                                {% endverbatim %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="panel-footer">
+                            * change in days require manual reload with the button
+                        </div>
+                    </div>
                 </div>
             </div>
         {% endblock content %}

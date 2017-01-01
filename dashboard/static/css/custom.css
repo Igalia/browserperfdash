@@ -19,3 +19,7 @@
     from { -moz-transform: rotate(0deg);}
     to { -moz-transform: rotate(360deg);}
 }
+
+.perftable thead tr td {
+    font-weight:bold;
+}

@@ -48,3 +48,29 @@ app.controller('AppController', function($scope, botReportsFactory, browserFacto
     };
     $scope.reload();
 });
+
+app.controller('DeltaController', function($scope, botReportsFactory, browserFactory,
+                                         botFactory, platformFactory, gpuFactory,
+                                         cpuArchFactory, $interval) {
+    $scope.browsers = browserFactory.query();
+    $scope.bots = botFactory.query();
+    $scope.platforms = platformFactory.query();
+    $scope.gpus = gpuFactory.query();
+    $scope.cpus = cpuArchFactory.query();
+    $scope.updateOtherCombos = function () {
+        if ( !$scope.selectedBot ) {
+            $scope.selectedPlatform = '';
+            $scope.selectedCPU = '';
+            $scope.selectedGPU = '';
+        } else {
+            $scope.selectedPlatform = $scope.selectedBot.platform;
+            $scope.selectedCPU = $scope.selectedBot.cpuArchitecture;
+            $scope.selectedGPU = $scope.selectedBot.gpuType;
+        }
+    };
+    $scope.reload = function () {
+        $scope.reports = botReportsFactory.query();
+    };
+    $scope.reload();
+});
+
