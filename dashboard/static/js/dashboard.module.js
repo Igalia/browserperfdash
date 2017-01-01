@@ -1,27 +1,27 @@
 app = angular.module('browserperfdash.dashboard.static', ['ngResource']);
 
 app.factory('botReportsFactory', function($resource) {
-  return $resource('/dash/result');
+    return $resource('/dash/result');
 });
 
 app.factory('browserFactory', function($resource) {
-  return $resource('/dash/browser');
+    return $resource('/dash/browser');
 });
 
 app.factory('botFactory', function($resource) {
-  return $resource('/dash/bot');
+    return $resource('/dash/bot');
 });
 
 app.factory('platformFactory', function($resource) {
-  return $resource('/dash/platform');
+    return $resource('/dash/platform');
 });
 
 app.factory('gpuFactory', function($resource) {
-  return $resource('/dash/gpu');
+    return $resource('/dash/gpu');
 });
 
 app.factory('cpuArchFactory', function($resource) {
-  return $resource('/dash/cpu');
+    return $resource('/dash/cpu');
 });
 
 app.controller('AppController', function($scope, botReportsFactory, browserFactory,
@@ -50,8 +50,8 @@ app.controller('AppController', function($scope, botReportsFactory, browserFacto
 });
 
 app.controller('DeltaController', function($scope, botReportsFactory, browserFactory,
-                                         botFactory, platformFactory, gpuFactory,
-                                         cpuArchFactory, $interval) {
+                                           botFactory, platformFactory, gpuFactory,
+                                           cpuArchFactory, $interval) {
     $scope.browsers = browserFactory.query();
     $scope.bots = botFactory.query();
     $scope.platforms = platformFactory.query();
@@ -70,6 +70,16 @@ app.controller('DeltaController', function($scope, botReportsFactory, browserFac
     };
     $scope.reload = function () {
         $scope.reports = botReportsFactory.query();
+    };
+    $scope.greaterThan = function (prop, val) {
+        return function (item) {
+            return item[prop] > val;
+        }
+    };
+    $scope.lessThan = function (prop, val) {
+        return function (item) {
+            return item[prop] < val;
+        }
     };
     $scope.reload();
 });
