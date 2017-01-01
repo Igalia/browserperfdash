@@ -68,7 +68,7 @@
                     {% verbatim %}
                     <div class="panel panel-primary">
                         <div class="panel-heading">
-                            Improvements for past {{ selectedDays }}* days
+                            Top {{ listLimit }} improvements in the last {{ selectedDays }}* days
                         </div>
                         <div class="panel-body">
                             <table class="table table-hover table-condensed table-bordered perftable">
@@ -116,7 +116,7 @@
                     {% verbatim %}
                     <div class="panel panel-danger">
                         <div class="panel-heading">
-                            Regressions for past {{ selectedDays }}* days
+                            Top {{ listLimit }} regressions in the past {{ selectedDays }}* days
                         </div>
                         <div class="panel-body">
                             <table class="table table-hover table-condensed table-bordered perftable">
