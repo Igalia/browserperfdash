@@ -115,6 +115,7 @@ class BotReportDataManger(models.Manager):
 
 
 class BotReportData(models.Model):
+    id = models.AutoField(primary_key=True)
     bot = models.ForeignKey(Bot, blank=False, null=False, related_name='bot_relation', related_query_name='bot_relation')
     browser = models.ForeignKey(Browser, blank=False, null=False)
     browser_version = models.CharField(_('Browser Version'), max_length=50, blank=True, unique=False)

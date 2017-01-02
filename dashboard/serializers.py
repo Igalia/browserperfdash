@@ -59,7 +59,7 @@ class BotReportDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BotReportData
-        fields = ('bot', 'gpu_type', 'cpu_arch', 'platform', 'browser', 'browser_version', 'root_test',
+        fields = ( 'id', 'bot', 'gpu_type', 'cpu_arch', 'platform', 'browser', 'browser_version', 'root_test',
                   'test_path', 'test_version', 'metric_tested', 'mean_value', 'stddev', 'days_since' ,'delta')
 
 

@@ -1,7 +1,7 @@
 app = angular.module('browserperfdash.dashboard.static', ['ngResource']);
 
 app.factory('botReportsFactory', function($resource) {
-    return $resource('/dash/result');
+    return $resource('/dash/report');
 });
 
 app.factory('browserFactory', function($resource) {

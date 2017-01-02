@@ -11,11 +11,8 @@ from dashboard.models import *
 from rest_framework import exceptions
 import json
 from helpers.benchmark_results import BenchmarkResults
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 from .serializers import *
-from django.db.models import Sum
-from django.db.models import F, Count
-from django.db.models import Max, Min
 
 import logging
 
@@ -40,7 +37,13 @@ class BotAuthentication(authentication.BaseAuthentication):
         return (bot, bot_name)
 
 
-class BotDataReportList(generics.ListAPIView):
+class BotDataReportListView(generics.ListCreateAPIView):
+    model = BotReportData
+    queryset = BotReportData.objects.filter(aggregation='None')
+    serializer_class = BotReportDataSerializer
+
+
+class BotDataReportDetailView(generics.RetrieveAPIView):
     model = BotReportData
     queryset = BotReportData.objects.filter(aggregation='None')
     serializer_class = BotReportDataSerializer
@@ -83,9 +86,12 @@ class DefaultHomeView(ListView):
         return BotReportData.objects.all()
 
 
-
-class AllResultsView(TemplateView):
+class BotDataReportList(TemplateView):
     template_name="allresults.html"
+
+
+class BotDataReportDetail(TemplateView):
+    template_name = "report.html"
 
 
 class BotReportView(APIView):
