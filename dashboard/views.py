@@ -49,6 +49,19 @@ class BotDataReportDetailView(generics.RetrieveAPIView):
     serializer_class = BotReportDataSerializer
 
 
+class BotResultsForTestListView(generics.ListAPIView):
+    model = BotReportData
+    queryset = BotReportData.objects.filter(aggregation='None')
+    serializer_class = BotReportDataSerializer
+
+    def get_queryset(self):
+        obj = BotReportData.objects.get(pk=self.kwargs.get('pk'))
+        queryset = super(BotResultsForTestListView, self).get_queryset()
+        return queryset.filter(browser=obj.browser, browser_version=obj.browser_version,
+                               root_test=obj.root_test, test_path=obj.test_path, aggregation=obj.aggregation,
+                               bot=obj.bot)
+
+
 class BrowsersList(generics.ListAPIView):
     model = Browser
     queryset = Browser.objects.filter(enabled=True)

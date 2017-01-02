@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^cpu/$', CPUArchitectureList.as_view(), name='bots-list'),
     url(r'^report/$', BotDataReportListView.as_view()),
     url(r'^report/(?P<pk>\d+)$', BotDataReportDetailView.as_view()),
+    url(r'^report/test/(?P<pk>\d+)$', BotResultsForTestListView.as_view()),
 ]
