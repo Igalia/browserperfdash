@@ -1,5 +1,6 @@
 from django.contrib import admin
 from dashboard.models import CPUArchitecture, GPUType, Platform, Bot, Browser, Test, MetricUnit, BotReportData
+from .forms import BotForm
 
 # Register your models here.
 
@@ -21,6 +22,7 @@ admin.site.register(Platform, PlatformAdmin)
 
 class BotAdmin(admin.ModelAdmin):
     list_display = ('name', 'cpuArchitecture', 'gpuType', 'platform', 'enabled')
+    form = BotForm
 admin.site.register(Bot, BotAdmin)
 
 
