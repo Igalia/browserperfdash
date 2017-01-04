@@ -121,7 +121,7 @@ class BotReportData(models.Model):
     browser_version = models.CharField(_('Browser Version'), max_length=50, blank=True, unique=False)
     root_test = models.ForeignKey(Test, blank=False, null=False, related_name='root_test')
     test_path = models.CharField(_('Test Path'), max_length=500, blank=True, unique=False)
-    test_version = models.CharField(_('Test Version'), max_length=50, blank=True, unique=False)
+    test_version = models.CharField(_('Test Version'), max_length=250, blank=True, unique=False)
     aggregation = models.CharField(_('Aggregation'), max_length=20, choices=AGGREGATION_CHOICES, default='na')
     metric_tested = models.ForeignKey(MetricUnit, blank=False, null=False)
     mean_value = models.FloatField(_('Mean Value'),null=True, blank=True)
