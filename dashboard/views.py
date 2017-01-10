@@ -127,9 +127,9 @@ class BotReportView(APIView):
     def process_delta(cls, test_version, browser, root_test, browser_version, test_path, mean_value):
         delta = 0.0
         # We take in the previous result (if exists)
-        previous_result = BotReportData.objects.filter(test_version__lt=test_version, browser=browser,
-                                                       root_test=root_test, browser_version=browser_version,
-                                                       test_path=test_path).order_by('-timestamp')[:1]
+        previous_result = BotReportData.objects.filter(browser=browser, root_test=root_test,
+                                                       browser_version=browser_version, test_path=test_path
+                                                       ).order_by('-timestamp')[:1]
         if previous_result:
             for res in previous_result:
                 delta = float(mean_value)-float(res.mean_value)
