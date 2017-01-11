@@ -57,9 +57,8 @@ class BotResultsForTestListView(generics.ListAPIView):
     def get_queryset(self):
         obj = BotReportData.objects.get(pk=self.kwargs.get('pk'))
         queryset = super(BotResultsForTestListView, self).get_queryset()
-        return queryset.filter(browser=obj.browser, browser_version=obj.browser_version,
-                               root_test=obj.root_test, test_path=obj.test_path, aggregation=obj.aggregation,
-                               bot=obj.bot)
+        return queryset.filter(browser=obj.browser, root_test=obj.root_test, test_path=obj.test_path,
+                               aggregation=obj.aggregation, bot=obj.bot)
 
 
 class BrowsersList(generics.ListAPIView):
