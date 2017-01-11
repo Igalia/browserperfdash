@@ -57,8 +57,9 @@ class BotResultsForTestListView(generics.ListAPIView):
     def get_queryset(self):
         obj = BotReportData.objects.get(pk=self.kwargs.get('pk'))
         queryset = super(BotResultsForTestListView, self).get_queryset()
-        return queryset.filter(browser=obj.browser, root_test=obj.root_test,
-                               test_path=obj.test_path, aggregation=obj.aggregation, bot=obj.bot)
+        return queryset.filter(browser=obj.browser, browser_version=obj.browser_version,
+                               root_test=obj.root_test, test_path=obj.test_path, aggregation=obj.aggregation,
+                               bot=obj.bot)
 
 
 class BrowsersList(generics.ListAPIView):
@@ -126,9 +127,9 @@ class BotReportView(APIView):
     def process_delta(cls, test_version, browser, root_test, browser_version, test_path, mean_value):
         delta = 0.0
         # We take in the previous result (if exists)
-        previous_result = BotReportData.objects.filter(browser=browser, root_test=root_test,
-                                                       browser_version=browser_version, test_path=test_path
-                                                       ).order_by('-timestamp')[:1]
+        previous_result = BotReportData.objects.filter(
+            browser=browser, root_test=root_test, test_path=test_path
+        ).order_by('-timestamp')[:1]
         if previous_result:
             for res in previous_result:
                 delta = float(mean_value)-float(res.mean_value)
