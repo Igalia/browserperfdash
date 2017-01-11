@@ -170,10 +170,6 @@ class BotReportView(APIView):
                       (test_id, bot_id, browser_id, browser_version))
             return HttpResponseBadRequest("The test %s does not exist"% test_id )
 
-        test_data_id = test_data.keys()[0]
-        if test_data_id.lower() != test_id.lower():
-            return HttpResponseBadRequest("The data do not correspond to the test param")
-
         test_data_results = BenchmarkResults(test_data)
         results_table = test_data_results.fetch_db_entries(test_data_results)
 
