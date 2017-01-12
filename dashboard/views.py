@@ -123,7 +123,7 @@ class BotReportView(APIView):
         return metric.split(':')[1]
 
     @classmethod
-    def process_delta(cls, test_version, browser, root_test, browser_version, test_path, mean_value):
+    def process_delta(cls, browser, root_test, test_path, mean_value):
         delta = 0.0
         # We take in the previous result (if exists)
         previous_result = BotReportData.objects.filter(
@@ -131,7 +131,7 @@ class BotReportView(APIView):
         ).order_by('-timestamp')[:1]
         if previous_result:
             for res in previous_result:
-                delta = float(mean_value)-float(res.mean_value)
+                delta = (1-float(res.mean_value)/float(mean_value))*100.00
 
         return delta
 
@@ -201,7 +201,7 @@ class BotReportView(APIView):
                 aggregation = 'None'
 
             # Calculate the change and store it during processing the POST
-            delta = self.process_delta(test_version, browser, root_test, browser_version, raw_path, mean_value)
+            delta = self.process_delta(browser, root_test, raw_path, mean_value)
             report = BotReportData.objects.create_report(bot=bot, browser=browser, browser_version=browser_version,
                                                          root_test=root_test, test_path=raw_path,
                                                          test_version=test_version, aggregation=aggregation,
