@@ -51,6 +51,7 @@ class BotReportDataSerializer(serializers.ModelSerializer):
     gpu_type = serializers.CharField(source='bot.gpuType', read_only=True)
     cpu_arch = serializers.CharField(source='bot.cpuArchitecture', read_only=True)
     platform = serializers.CharField(source='bot.platform', read_only=True)
+    bot_enabled = serializers.BooleanField(source='bot.enabled', read_only=True)
     days_since = serializers.SerializerMethodField()
 
     def get_days_since(self,obj):
@@ -59,7 +60,8 @@ class BotReportDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BotReportData
-        fields = ( 'id', 'bot', 'gpu_type', 'cpu_arch', 'platform', 'browser', 'browser_version', 'root_test',
-                  'test_path', 'test_version', 'metric_tested', 'mean_value', 'stddev', 'days_since' ,'timestamp','delta')
+        fields = ('id', 'bot', 'gpu_type', 'cpu_arch', 'platform', 'browser', 'browser_version',
+                  'root_test','test_path', 'test_version', 'metric_tested', 'mean_value', 'stddev',
+                  'days_since' ,'timestamp','delta', 'bot_enabled')
 
 

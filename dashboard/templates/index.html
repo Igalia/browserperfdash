@@ -90,7 +90,7 @@
                                 <tr ng-repeat="data in reports | filter: { browser: selectedBrowser.id }
                         | filter: {bot: selectedBot.name} | filter: {cpu_arch:selectedCPU}
                         | filter: {platform: selectedPlatform } | filter: {gpu_type: selectedGPU} | orderBy: '-delta'
-                        | filter: greaterThanOrEqualTo('delta', 0) | limitTo:listLimit "
+                        | filter: greaterThanOrEqualTo('delta', 0) | filter: {bot_enabled:true} | limitTo:listLimit "
                                     ng-if="data.days_since < selectedDays">
                                     <td>{{ data.bot }}</td>
                                     <td>{{ data.browser }}</td>
@@ -138,7 +138,7 @@
                                 <tr ng-repeat="data in reports | filter: { browser: selectedBrowser.id }
                         | filter: {bot: selectedBot.name} | filter: {cpu_arch:selectedCPU}
                         | filter: {platform: selectedPlatform } | filter: {gpu_type: selectedGPU}
-                        | filter: lessThan('delta', 0)
+                        | filter: lessThan('delta', 0) | filter: {bot_enabled:true}
                         | orderBy: 'delta' | limitTo:listLimit"
                                     ng-if="data.days_since < selectedDays">
                                     <td>{{ data.bot }}</td>
