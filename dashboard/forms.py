@@ -8,5 +8,5 @@ class BotForm(ModelForm):
         fields = ['name', 'password', 'cpuArchitecture', 'cpuDetail', 'gpuType',
                   'gpuDetail', 'platform', 'platformDetail', 'enabled']
         widgets = {
-            'password': PasswordInput(),
+            'password': PasswordInput(render_value = True),
         }
