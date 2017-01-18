@@ -123,17 +123,29 @@ class BotReportView(APIView):
         return metric.split(':')[1]
 
     @classmethod
-    def process_delta(cls, browser, root_test, test_path, mean_value):
+    def process_delta_and_improvement(cls, browser, root_test, test_path, mean_value, current_metric):
         delta = 0.0
         # We take in the previous result (if exists)
         previous_result = BotReportData.objects.filter(
             browser=browser, root_test=root_test, test_path=test_path
         ).order_by('-timestamp')[:1]
+
+        is_improvement = False
         if previous_result:
             for res in previous_result:
                 delta = (1-float(res.mean_value)/float(mean_value))*100.00
+                if current_metric.is_better == 'up':
+                    if previous_result < res.mean_value:
+                        is_improvement = True
+                    else:
+                        is_improvement = False
+                elif current_metric.is_better == 'dw':
+                    if previous_result > res.mean_value:
+                        is_improvement = True
+                    else:
+                        is_improvement = False
 
-        return delta
+        return [delta,is_improvement]
 
     def post(self, request, format=None):
         try:
@@ -201,12 +213,15 @@ class BotReportView(APIView):
                 aggregation = 'None'
 
             # Calculate the change and store it during processing the POST
-            delta = self.process_delta(browser, root_test, raw_path, mean_value)
+            is_improvement = False
+            delta_improvements = self.process_delta_and_improvement(browser, root_test, raw_path, mean_value, current_metric)
+            delta = delta_improvements[0]
+            is_improvement = delta_improvements[1]
             report = BotReportData.objects.create_report(bot=bot, browser=browser, browser_version=browser_version,
                                                          root_test=root_test, test_path=raw_path,
                                                          test_version=test_version, aggregation=aggregation,
                                                          metric_tested= current_metric, mean_value=mean_value,
-                                                         stddev=stddev,delta=delta
+                                                         stddev=stddev,delta=delta,is_improvement=is_improvement
                                                          )
             if not report:
                 log.error("Failed inserting data for bot: %s, browser: %s, browser_version: %s, root_test: %s, "
