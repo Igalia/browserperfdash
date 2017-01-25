@@ -71,16 +71,6 @@ app.controller('DeltaController', function($scope, botReportsFactory, browserFac
     $scope.reload = function () {
         $scope.reports = botReportsFactory.query();
     };
-    $scope.greaterThanOrEqualTo = function (prop, val) {
-        return function (item) {
-            return item[prop] >= val;
-        }
-    };
-    $scope.lessThan = function (prop, val) {
-        return function (item) {
-            return item[prop] < val;
-        }
-    };
     $scope.reload();
 });
 

@@ -90,7 +90,7 @@
                                 <tr ng-repeat="data in reports | filter: { browser: selectedBrowser.id }
                         | filter: {bot: selectedBot.name} | filter: {cpu_arch:selectedCPU}
                         | filter: {platform: selectedPlatform } | filter: {gpu_type: selectedGPU} | orderBy: '-delta'
-                        | filter: greaterThanOrEqualTo('delta', 0) | filter: {bot_enabled:true} | limitTo:listLimit "
+                        | filter: {bot_enabled:true} | filter: {is_improvement: true} | limitTo:listLimit "
                                     ng-if="data.days_since < selectedDays">
                                     <td>{{ data.bot }}</td>
                                     <td>{{ data.browser }}</td>
@@ -101,8 +101,8 @@
                                     <td><a ng-href="dash/report/{{ data.id }}">{{ data.test_version }}</td>
                                     <td>{{ data.metric_tested }}</td>
                                     <td>{{ data.mean_value }}</td>
-                                    <td>{{ data.stddev }}</td>
-                                    <td>{{ data.delta}}%</td>
+                                    <td>{{ data.stddev| number:3}}</td>
+                                    <td>{{ data.delta| number:3}}%</td>
                                 </tr>
                                 {% endverbatim %}
                                 </tbody>
@@ -138,8 +138,8 @@
                                 <tr ng-repeat="data in reports | filter: { browser: selectedBrowser.id }
                         | filter: {bot: selectedBot.name} | filter: {cpu_arch:selectedCPU}
                         | filter: {platform: selectedPlatform } | filter: {gpu_type: selectedGPU}
-                        | filter: lessThan('delta', 0) | filter: {bot_enabled:true}
-                        | orderBy: 'delta' | limitTo:listLimit"
+                        | filter: {is_improvement: false} | filter: {bot_enabled:true}
+                        | orderBy: '-delta' | limitTo:listLimit"
                                     ng-if="data.days_since < selectedDays">
                                     <td>{{ data.bot }}</td>
                                     <td>{{ data.browser }}</td>
@@ -150,8 +150,8 @@
                                     <td><a ng-href="dash/report/{{ data.id }}">{{ data.test_version }}</td>
                                     <td>{{ data.metric_tested }}</td>
                                     <td>{{ data.mean_value }}</td>
-                                    <td>{{ data.stddev }}</td>
-                                    <td>{{ data.delta}}%</td>
+                                    <td>{{ data.stddev| number:3}}</td>
+                                    <td>{{ data.delta| number:3 }}%</td>
                                 </tr>
                                 {% endverbatim %}
                                 </tbody>

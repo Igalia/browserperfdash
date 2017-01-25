@@ -30,7 +30,7 @@ class BotAuthentication(authentication.BaseAuthentication):
         try:
             bot = Bot.objects.get(name=bot_name)
             if bot.password != bot_password:
-                return None
+                raise exceptions.AuthenticationFailed('Bad authentication details')
         except Bot.DoesNotExist:
             raise exceptions.AuthenticationFailed('This bot cannot be authenticated')
 
@@ -135,17 +135,17 @@ class BotReportView(APIView):
             for res in previous_result:
                 delta = (1-float(res.mean_value)/float(mean_value))*100.00
                 if current_metric.is_better == 'up':
-                    if previous_result < res.mean_value:
+                    if float(res.mean_value) < float(mean_value):
                         is_improvement = True
                     else:
                         is_improvement = False
                 elif current_metric.is_better == 'dw':
-                    if previous_result > res.mean_value:
+                    if float(res.mean_value) > float(mean_value):
                         is_improvement = True
                     else:
                         is_improvement = False
 
-        return [delta,is_improvement]
+        return [delta, is_improvement]
 
     def post(self, request, format=None):
         try:
