@@ -84,7 +84,7 @@
                                 </thead>
                                 <tbody>
 
-                                <tr ng-repeat="data in reports | filter: {root_test: selectedTest} | filter: { browser: selectedBrowser.id }
+                                <tr ng-repeat="data in reports | filter: {root_test: selectedTest.id} | filter: { browser: selectedBrowser.id }
                         | filter: {bot: selectedBot.name} | filter: {cpu_arch:selectedCPU}
                         | filter: {platform: selectedPlatform } | filter: {gpu_type: selectedGPU} | orderBy: '-delta'
                         | filter: {bot_enabled:true} | filter: {is_improvement: true} | limitTo:listLimit "
