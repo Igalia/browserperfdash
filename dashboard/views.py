@@ -135,7 +135,7 @@ class BotReportView(APIView):
         if previous_result:
             for res in previous_result:
                 prev_result = res
-                delta = (1-float(res.mean_value)/float(mean_value))*100.00
+                delta = abs(1-float(res.mean_value)/float(mean_value))*100.00
                 if current_metric.is_better == 'up':
                     if float(res.mean_value) < float(mean_value):
                         is_improvement = True
