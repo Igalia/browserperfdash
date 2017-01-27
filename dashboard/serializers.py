@@ -62,7 +62,7 @@ class BotReportDataSerializer(serializers.ModelSerializer):
     bot_enabled = serializers.BooleanField(source='bot.enabled', read_only=True)
     days_since = serializers.SerializerMethodField()
     prev_results = serializers.SerializerMethodField()
-    metric_unit_value = serializers.SerializerMethodField()
+    metric_unit = serializers.SerializerMethodField()
 
     def get_days_since(self,obj):
         current_time = pytz.utc.localize(datetime.datetime.utcnow())
@@ -79,13 +79,13 @@ class BotReportDataSerializer(serializers.ModelSerializer):
         else:
             return None
 
-    def get_metric_unit_value(self, obj):
-        return obj.metric_tested.unit
+    def get_metric_unit(self, obj):
+        return { "name": obj.metric_tested.name, "unit": obj.metric_tested.unit, "is_better": obj.metric_tested.is_better }
 
     class Meta:
         model = BotReportData
         fields = ('id', 'bot', 'gpu_type', 'cpu_arch', 'platform', 'browser', 'browser_version',
-                  'root_test','test_path', 'test_version', 'metric_tested', 'metric_unit_value', 'mean_value', 'stddev',
+                  'root_test','test_path', 'test_version', 'metric_unit', 'mean_value', 'stddev',
                   'days_since' ,'timestamp','delta', 'bot_enabled', 'is_improvement', 'prev_results')
 
 
