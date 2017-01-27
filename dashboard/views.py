@@ -131,21 +131,19 @@ class BotReportView(APIView):
         ).order_by('-timestamp')[:1]
 
         is_improvement = False
+        prev_result = None
         if previous_result:
             for res in previous_result:
+                prev_result = res
                 delta = (1-float(res.mean_value)/float(mean_value))*100.00
                 if current_metric.is_better == 'up':
                     if float(res.mean_value) < float(mean_value):
                         is_improvement = True
-                    else:
-                        is_improvement = False
                 elif current_metric.is_better == 'dw':
                     if float(res.mean_value) > float(mean_value):
                         is_improvement = True
-                    else:
-                        is_improvement = False
 
-        return [delta, is_improvement]
+        return [delta, is_improvement, prev_result]
 
     def post(self, request, format=None):
         try:
@@ -154,12 +152,12 @@ class BotReportView(APIView):
             test_id = self.request.POST.get('test_id')
             test_version = self.request.POST.get('test_version')
             bot_id = self.request.POST.get('bot_id')
-            json_data = self.request.POST.get('test_data')
+            json_data = self.request.FILES['test_data']
         except AttributeError:
             log.error("Got invalid params from the bot: %s"% request.auth)
             return HttpResponseBadRequest("Some params are missing in the request")
         try:
-            test_data = json.loads(json_data)
+            test_data = json.load(json_data)
         except AttributeError:
             return HttpResponseBadRequest("Error parsing JSON file from bot: %s "% request.auth)
 
@@ -213,16 +211,16 @@ class BotReportView(APIView):
                 aggregation = 'None'
 
             # Calculate the change and store it during processing the POST
-            is_improvement = False
             delta_improvements = self.process_delta_and_improvement(browser, root_test, raw_path, mean_value, current_metric)
             delta = delta_improvements[0]
             is_improvement = delta_improvements[1]
+            prev_result = delta_improvements[2]
             report = BotReportData.objects.create_report(bot=bot, browser=browser, browser_version=browser_version,
                                                          root_test=root_test, test_path=raw_path,
                                                          test_version=test_version, aggregation=aggregation,
                                                          metric_tested= current_metric, mean_value=mean_value,
-                                                         stddev=stddev,delta=delta,is_improvement=is_improvement
-                                                         )
+                                                         stddev=stddev,delta=delta,is_improvement=is_improvement,
+                                                         prev_result=prev_result)
             if not report:
                 log.error("Failed inserting data for bot: %s, browser: %s, browser_version: %s, root_test: %s, "
                           "test_description: %s" % (bot_id, browser_id, browser_version, test_id,raw_path)

@@ -47,21 +47,36 @@ class CPUArchitectureListSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
+class BotResultMinimalSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = BotReportData
+        fields = ('id', 'test_version')
+
+
 class BotReportDataSerializer(serializers.ModelSerializer):
     gpu_type = serializers.CharField(source='bot.gpuType', read_only=True)
     cpu_arch = serializers.CharField(source='bot.cpuArchitecture', read_only=True)
     platform = serializers.CharField(source='bot.platform', read_only=True)
     bot_enabled = serializers.BooleanField(source='bot.enabled', read_only=True)
     days_since = serializers.SerializerMethodField()
+    prev_results = serializers.SerializerMethodField()
 
     def get_days_since(self,obj):
         current_time = pytz.utc.localize(datetime.datetime.utcnow())
         return (current_time - obj.timestamp).days
 
+    def get_prev_results(self, obj):
+        if obj.prev_result:
+            return obj.prev_result.id
+        else:
+            return None
+
+
     class Meta:
         model = BotReportData
         fields = ('id', 'bot', 'gpu_type', 'cpu_arch', 'platform', 'browser', 'browser_version',
                   'root_test','test_path', 'test_version', 'metric_tested', 'mean_value', 'stddev',
-                  'days_since' ,'timestamp','delta', 'bot_enabled', 'is_improvement')
+                  'days_since' ,'timestamp','delta', 'bot_enabled', 'is_improvement', 'prev_results')
 
 
