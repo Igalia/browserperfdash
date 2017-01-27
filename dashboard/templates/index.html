@@ -77,8 +77,8 @@
                                 <td>Browser</td>
                                 <td>Bot</td>
                                 <td>Revision range</td>
-                                <td>Bot</td>
                                 <td>Test</td>
+                                <td>Description</td>
                                 <td>Metric</td>
                                 <td>Values in revision</td>
                                 </thead>
@@ -92,13 +92,19 @@
                                     <td>{{ data.delta| number:3}}%</td>
                                     <td>{{ data.browser }}</td>
                                     <td>{{ data.bot }}</td>
-                                    <td>{{ data.browser_version }} - {{ data.prev_results.browser_version }}</td>
+                                    <td style="text-align: center">
+                                        <span style="float: left">{{ data.browser_version }}</span> -
+                                        <span style="float: right">{{ data.prev_results.browser_version }}</span>
+                                    </td>
                                     <td>{{ data.root_test }}</td>
                                     <td><a ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}...</a></td>
                                     <td>{{ data.metric_tested }}</td>
-                                    <td><a ng-href="dash/report/{{ data.id }}">{{ data.mean_value }}{{ data.metric_unit_value }}</a> -
-                                        <a ng-href="dash/report/{{ data.prev_results.id }}">{{ data.prev_results.mean_value }}
-                                            {{ data.prev_resultsmetric_unit_value }}</a></td>
+                                    <td style="text-align: center">
+                                        <a ng-href="dash/report/{{ data.id }}" style="float: left">{{ data.prev_results.mean_value }}{{ data.metric_unit_value }}</a>
+                                        <span style="text-align: center">-</span>
+                                        <a ng-href="dash/report/{{ data.prev_results.id }}" style="float: right">{{ data.mean_value }}
+                                            {{ data.metric_unit_value }}</a>
+                                    </td>
                                 </tr>
                                 {% endverbatim %}
                                 </tbody>
@@ -122,7 +128,7 @@
                                 <td>Bot</td>
                                 <td>Revision range</td>
                                 <td>Test</td>
-                                <td>Test Version</td>
+                                <td>Description</td>
                                 <td>Metric</td>
                                 <td>Values in Revision</td>
                                 </thead>
@@ -134,16 +140,22 @@
                         | filter: {is_improvement: false} | filter: {bot_enabled:true}
                         | orderBy: '-delta' | limitTo:listLimit"
                                     ng-if="data.days_since < selectedDays">
-                                          <td>{{ data.delta| number:3}}%</td>
+                                    <td>{{ data.delta| number:3}}%</td>
                                     <td>{{ data.browser }}</td>
                                     <td>{{ data.bot }}</td>
-                                    <td>{{ data.browser_version }} - {{ data.prev_results.browser_version }}</td>
+                                    <td style="text-align: center">
+                                        <span style="float: left">{{ data.browser_version }}</span> -
+                                        <span style="float: right">{{ data.prev_results.browser_version }}</span>
+                                    </td>
                                     <td>{{ data.root_test }}</td>
                                     <td><a ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}</a></td>
                                     <td>{{ data.metric_tested }}</td>
-                                    <td><a ng-href="dash/report/{{ data.id }}">{{ data.mean_value }}{{ data.metric_unit_value }}</a> -
-                                        <a ng-href="dash/report/{{ data.prev_results.id }}">{{ data.prev_results.mean_value }}
-                                            {{ data.prev_resultsmetric_unit_value }}</a></td>
+                                    <td style="text-align: center">
+                                        <a ng-href="dash/report/{{ data.id }}" style="float: left">{{ data.prev_results.mean_value }}{{ data.metric_unit_value }}</a>
+                                        <span style="text-align: center">-</span>
+                                        <a ng-href="dash/report/{{ data.prev_results.id }}" style="float: right">{{ data.mean_value }}
+                                            {{ data.metric_unit_value }}</a>
+                                    </td>
                                 </tr>
                                 {% endverbatim %}
                                 </tbody>
