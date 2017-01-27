@@ -24,14 +24,19 @@ app.factory('cpuArchFactory', function($resource) {
     return $resource('/dash/cpu');
 });
 
+app.factory('testFactory', function($resource) {
+    return $resource('/dash/test');
+});
+
 app.controller('AppController', function($scope, botReportsFactory, browserFactory,
                                          botFactory, platformFactory, gpuFactory,
-                                         cpuArchFactory, $interval) {
+                                         cpuArchFactory, testFactory,  $interval) {
     $scope.browsers = browserFactory.query();
     $scope.bots = botFactory.query();
     $scope.platforms = platformFactory.query();
     $scope.gpus = gpuFactory.query();
     $scope.cpus = cpuArchFactory.query();
+    $scope.tests = testFactory.query();
     $scope.updateOtherCombos = function () {
         if ( !$scope.selectedBot ) {
             $scope.selectedPlatform = '';
@@ -51,12 +56,13 @@ app.controller('AppController', function($scope, botReportsFactory, browserFacto
 
 app.controller('DeltaController', function($scope, botReportsFactory, browserFactory,
                                            botFactory, platformFactory, gpuFactory,
-                                           cpuArchFactory, $interval) {
+                                           cpuArchFactory, testFactory, $interval) {
     $scope.browsers = browserFactory.query();
     $scope.bots = botFactory.query();
     $scope.platforms = platformFactory.query();
     $scope.gpus = gpuFactory.query();
     $scope.cpus = cpuArchFactory.query();
+    $scope.tests = testFactory.query();
     $scope.updateOtherCombos = function () {
         if ( !$scope.selectedBot ) {
             $scope.selectedPlatform = '';

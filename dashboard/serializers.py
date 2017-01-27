@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BotReportData, Browser, Bot, Platform, GPUType, CPUArchitecture
+from .models import BotReportData, Browser, Bot, Platform, GPUType, CPUArchitecture, Test
 import datetime
 import pytz
 import json
@@ -47,6 +47,11 @@ class CPUArchitectureListSerializer(serializers.ModelSerializer):
         model = CPUArchitecture
         fields = ('id', 'name')
 
+
+class TestListListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Test
+        fields = ('id', 'description')
 
 class BotResultMinimalSerializer(serializers.ModelSerializer):
 

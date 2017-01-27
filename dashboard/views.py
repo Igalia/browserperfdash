@@ -91,6 +91,11 @@ class CPUArchitectureList(generics.ListAPIView):
     serializer_class = CPUArchitectureListSerializer
 
 
+class TestList(generics.ListAPIView):
+    model = Test
+    queryset = Test.objects.filter(enabled=True)
+    serializer_class = TestListListSerializer
+
 class DefaultHomeView(ListView):
     template_name="index.html"
 

@@ -15,21 +15,24 @@
                                        data-ng-model="listLimit" class="form-control" style="width: 65px;" id="listLimit">
                             </div>
                             <div class="form-group">
-                                <label for="browsers">Browser</label>
                                 <select name="browser" class="form-control" ng-model="selectedBrowser"
                                         ng-options="x.name for x in browsers">
                                     <option value="">--All browsers--</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="bot">Bot</label>
+                                <select name="test" class="form-control" ng-model="selectedTest"
+                                        ng-options="x.id for x in tests">
+                                    <option value="">--All tests--</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <select name="bot" class="form-control" ng-model="selectedBot"
                                         ng-options="bot.name for bot in bots" ng-change="updateOtherCombos()">
                                     <option value="">--All bots--</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="platform">Platform</label>
                                 <select name="platform" class="form-control" ng-model="selectedPlatform" ng-disabled="selectedBot">
                                     <option value="">--All platforms--</option>
                                     <option ng-repeat="x in platforms" value="{{ x.name }}">{{ x.name }}</option>
@@ -38,7 +41,6 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="platform">GPU</label>
                                 <select name="gpu" class="form-control" ng-model="selectedGPU" ng-disabled="selectedBot">
                                     <option value="">--All GPU--</option>
                                     <option ng-repeat="x in gpus" value="{{ x.name }}">{{ x.name }}</option>
@@ -47,7 +49,6 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="cpu">CPU</label>
                                 <select class="form-control" ng-model="selectedCPU" ng-disabled="selectedBot">
                                     <option value="">--All CPU--</option>
                                     <option ng-repeat="x in cpus" value="{{ x.name }}">{{ x.name }}</option>
@@ -83,7 +84,7 @@
                                 </thead>
                                 <tbody>
 
-                                <tr ng-repeat="data in reports | filter: { browser: selectedBrowser.id }
+                                <tr ng-repeat="data in reports | filter: {root_test: selectedTest} | filter: { browser: selectedBrowser.id }
                         | filter: {bot: selectedBot.name} | filter: {cpu_arch:selectedCPU}
                         | filter: {platform: selectedPlatform } | filter: {gpu_type: selectedGPU} | orderBy: '-delta'
                         | filter: {bot_enabled:true} | filter: {is_improvement: true} | limitTo:listLimit "
@@ -139,7 +140,7 @@
                                 </thead>
                                 <tbody>
 
-                                <tr ng-repeat="data in reports | filter: { browser: selectedBrowser.id }
+                                <tr ng-repeat="data in reports | filter: {root_test:selectedTest} | filter: { browser: selectedBrowser.id }
                         | filter: {bot: selectedBot.name} | filter: {cpu_arch:selectedCPU}
                         | filter: {platform: selectedPlatform } | filter: {gpu_type: selectedGPU}
                         | filter: {is_improvement: false} | filter: {bot_enabled:true}
