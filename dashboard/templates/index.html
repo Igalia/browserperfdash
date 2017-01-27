@@ -73,17 +73,14 @@
                         <div class="panel-body">
                             <table class="table table-hover table-condensed table-bordered table-responsive perftable">
                                 <thead>
-                                <td>Bot</td>
-                                <td>Browser</td>
-                                <td>Version</td>
-                                <td>Platform</td>
-                                <td>Test</td>
-                                <td>Description</td>
-                                <td>Test Version</td>
-                                <td>Metric</td>
-                                <td>Mean</td>
-                                <td>Std.Dev</td>
                                 <td>Delta</td>
+                                <td>Browser</td>
+                                <td>Bot</td>
+                                <td>Revision range</td>
+                                <td>Bot</td>
+                                <td>Test</td>
+                                <td>Metric</td>
+                                <td>Values in revision</td>
                                 </thead>
                                 <tbody>
 
@@ -92,17 +89,16 @@
                         | filter: {platform: selectedPlatform } | filter: {gpu_type: selectedGPU} | orderBy: '-delta'
                         | filter: {bot_enabled:true} | filter: {is_improvement: true} | limitTo:listLimit "
                                     ng-if="data.days_since < selectedDays">
-                                    <td>{{ data.bot }}</td>
+                                    <td>{{ data.delta| number:3}}%</td>
                                     <td>{{ data.browser }}</td>
-                                    <td>{{ data.browser_version }}</td>
-                                    <td>{{ data.platform }}</td>
+                                    <td>{{ data.bot }}</td>
+                                    <td>{{ data.browser_version }} - {{ data.prev_results.browser_version }}</td>
                                     <td>{{ data.root_test }}</td>
                                     <td><a ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}...</a></td>
-                                    <td><a ng-href="dash/report/{{ data.id }}">{{ data.test_version |limitTo:50 }}...</td>
                                     <td>{{ data.metric_tested }}</td>
-                                    <td>{{ data.mean_value }}</td>
-                                    <td>{{ data.stddev| number:3}}</td>
-                                    <td>{{ data.delta| number:3}}%</td>
+                                    <td><a ng-href="dash/report/{{ data.id }}">{{ data.mean_value }}{{ data.metric_unit_value }}</a> -
+                                        <a ng-href="dash/report/{{ data.prev_results.id }}">{{ data.prev_results.mean_value }}
+                                            {{ data.prev_resultsmetric_unit_value }}</a></td>
                                 </tr>
                                 {% endverbatim %}
                                 </tbody>
@@ -121,17 +117,14 @@
                         <div class="panel-body">
                             <table class="table table-hover table-condensed table-bordered perftable">
                                 <thead>
-                                <td>Bot</td>
+                                <td>Delta</td>
                                 <td>Browser</td>
-                                <td>Version</td>
-                                <td>Platform</td>
+                                <td>Bot</td>
+                                <td>Revision range</td>
                                 <td>Test</td>
-                                <td>Description</td>
                                 <td>Test Version</td>
                                 <td>Metric</td>
-                                <td>Mean</td>
-                                <td>Std.Dev</td>
-                                <td>Delta</td>
+                                <td>Values in Revision</td>
                                 </thead>
                                 <tbody>
 
@@ -141,17 +134,16 @@
                         | filter: {is_improvement: false} | filter: {bot_enabled:true}
                         | orderBy: '-delta' | limitTo:listLimit"
                                     ng-if="data.days_since < selectedDays">
-                                    <td>{{ data.bot }}</td>
+                                          <td>{{ data.delta| number:3}}%</td>
                                     <td>{{ data.browser }}</td>
-                                    <td>{{ data.browser_version }}</td>
-                                    <td>{{ data.platform }}</td>
+                                    <td>{{ data.bot }}</td>
+                                    <td>{{ data.browser_version }} - {{ data.prev_results.browser_version }}</td>
                                     <td>{{ data.root_test }}</td>
                                     <td><a ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}</a></td>
-                                    <td><a ng-href="dash/report/{{ data.id }}">{{ data.test_version |limitTo:50 }}</td>
                                     <td>{{ data.metric_tested }}</td>
-                                    <td>{{ data.mean_value }}</td>
-                                    <td>{{ data.stddev| number:3}}</td>
-                                    <td>{{ data.delta| number:3 }}%</td>
+                                    <td><a ng-href="dash/report/{{ data.id }}">{{ data.mean_value }}{{ data.metric_unit_value }}</a> -
+                                        <a ng-href="dash/report/{{ data.prev_results.id }}">{{ data.prev_results.mean_value }}
+                                            {{ data.prev_resultsmetric_unit_value }}</a></td>
                                 </tr>
                                 {% endverbatim %}
                                 </tbody>

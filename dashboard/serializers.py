@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import BotReportData, Browser, Bot, Platform, GPUType, CPUArchitecture
 import datetime
 import pytz
+import json
 
 # Serializers define the API representation.
 class BrowserListSerializer(serializers.ModelSerializer):
@@ -61,6 +62,7 @@ class BotReportDataSerializer(serializers.ModelSerializer):
     bot_enabled = serializers.BooleanField(source='bot.enabled', read_only=True)
     days_since = serializers.SerializerMethodField()
     prev_results = serializers.SerializerMethodField()
+    metric_unit_value = serializers.SerializerMethodField()
 
     def get_days_since(self,obj):
         current_time = pytz.utc.localize(datetime.datetime.utcnow())
@@ -68,15 +70,22 @@ class BotReportDataSerializer(serializers.ModelSerializer):
 
     def get_prev_results(self, obj):
         if obj.prev_result:
-            return obj.prev_result.id
+            return {"id": obj.prev_result.id,
+                    "test_version": obj.prev_result.test_version,
+                    "mean_value": obj.prev_result.mean_value,
+                    "timestamp": obj.prev_result.timestamp,
+                    "browser_version": obj.prev_result.browser_version,
+                    }
         else:
             return None
 
+    def get_metric_unit_value(self, obj):
+        return obj.metric_tested.unit
 
     class Meta:
         model = BotReportData
         fields = ('id', 'bot', 'gpu_type', 'cpu_arch', 'platform', 'browser', 'browser_version',
-                  'root_test','test_path', 'test_version', 'metric_tested', 'mean_value', 'stddev',
+                  'root_test','test_path', 'test_version', 'metric_tested', 'metric_unit_value', 'mean_value', 'stddev',
                   'days_since' ,'timestamp','delta', 'bot_enabled', 'is_improvement', 'prev_results')
 
 
