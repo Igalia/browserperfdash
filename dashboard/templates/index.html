@@ -93,9 +93,12 @@
                                     <td>{{ data.browser }}</td>
                                     <td style="text-align: center">
                                         <a ng-href="dash/report/{{ data.id }}" style="float: left">{{ data.browser_version }}</a> -
-                                        <a ng-href="dash/report/{{ data.prev_results.id }}" style="float: right">
-                                            {{ data.prev_results.browser_version }}
-                                        </a>
+                                        <span ng-if="data.prev_results.browser_version">
+                                            <a ng-href="dash/report/{{ data.prev_results.id }}" style="float: right">
+                                                {{ data.prev_results.browser_version }}
+                                            </a>
+                                        </span>
+                                        <span ng-if="data.prev_results.browser_version == undefined" style="float: right">NULL</span>
                                     </td>
                                     <td>{{ data.bot }}</td>
                                     <td><a ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}</a></td>
@@ -150,9 +153,12 @@
                                     <td>{{ data.browser }}</td>
                                     <td style="text-align: center">
                                         <a ng-href="dash/report/{{ data.id }}" style="float: left">{{ data.browser_version }}</a> -
-                                        <a ng-href="dash/report/{{ data.prev_results.id }}" style="float: right">
-                                            {{ data.prev_results.browser_version }}
-                                        </a>
+                                        <span ng-if="data.prev_results.browser_version">
+                                            <a ng-href="dash/report/{{ data.prev_results.id }}" style="float: right">
+                                                {{ data.prev_results.browser_version }}
+                                            </a>
+                                        </span>
+                                        <span ng-if="data.prev_results.browser_version == undefined" style="float: right">NULL</span>
                                     </td>
                                     <td>{{ data.bot }}</td>
                                     <td><a ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}</a></td>
