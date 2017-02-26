@@ -80,6 +80,7 @@ class BotReportDataSerializer(serializers.ModelSerializer):
                     "mean_value": obj.prev_result.mean_value,
                     "timestamp": obj.prev_result.timestamp,
                     "browser_version": obj.prev_result.browser_version,
+                    "stddev": obj.prev_result.stddev,
                     }
         else:
             return None
