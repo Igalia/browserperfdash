@@ -87,7 +87,7 @@
                         | filter: {bot: selectedBot.name} | filter: {cpu_arch:selectedCPU}
                         | filter: {platform: selectedPlatform } | filter: {gpu_type: selectedGPU} | orderBy: '-delta'
                         | filter: {bot_enabled:true} | filter: {is_improvement: true} | limitTo:listLimit "
-                                    ng-if="data.days_since < selectedDays">
+                                    ng-if="data.days_since < selectedDays" ng-class="(data.test_version==data.prev_results.test_version) ? 'active' : 'danger'">
                                     <td>{{ data.delta| number: 1}}%</td>
                                     <td>{{ data.browser }}</td>
                                     <td style="text-align: center">
@@ -99,9 +99,7 @@
                                         </span>
                                         <span ng-if="data.prev_results.browser_version == undefined" style="float: right">NULL</span>
                                     </td>
-                                    <td><span popover-trigger="mouseenter" uib-popover="CPU: {{ data.cpu_arch }}
-GPU: {{ data.gpu_type }}
-Platform: {{ data.platform }}">{{ data.bot }}</span></td>
+                                    <td><span popover-trigger="mouseenter" uib-popover="CPU: {{ data.cpu_arch }}, GPU: {{ data.gpu_type }}, Platform: {{ data.platform }}">{{ data.bot }}</span></td>
                                     <td><a ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}</a></td>
                                     <td style="text-align: center">
                                         <span popover-trigger="mouseenter" uib-popover="std.dev: {{ data.prev_results.stddev | number:3 }}" style="float: left" >
@@ -149,7 +147,7 @@ Platform: {{ data.platform }}">{{ data.bot }}</span></td>
                         | filter: {platform: selectedPlatform } | filter: {gpu_type: selectedGPU}
                         | filter: {is_improvement: false} | filter: {bot_enabled:true}
                         | orderBy: '-delta' | limitTo:listLimit"
-                                    ng-if="data.days_since < selectedDays">
+                                    ng-if="data.days_since < selectedDays" ng-class="(data.test_version==data.prev_results.test_version) ? 'active' : 'danger'">
                                     <td>{{ data.delta| number:1}}%</td>
                                     <td>{{ data.browser }}</td>
                                     <td style="text-align: center">
@@ -162,9 +160,7 @@ Platform: {{ data.platform }}">{{ data.bot }}</span></td>
                                         <span ng-if="data.prev_results.browser_version == undefined" style="float: right">NULL</span>
                                     </td>
                                     <td><span tabindex="0" data-html="true"
-                                              uib-popover="CPU: {{ data.cpu_arch }}
-GPU: {{ data.gpu_type }}
-Platform: {{ data.platform }}" popover-trigger="mouseenter">
+                                              uib-popover="CPU: {{ data.cpu_arch }}, GPU: {{ data.gpu_type }}, Platform: {{ data.platform }}" popover-trigger="mouseenter">
                                         {{ data.bot }}
                                     </span></td>
                                     <td><a ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}</a></td>
