@@ -87,7 +87,8 @@
                         | filter: {bot: selectedBot.name} | filter: {cpu_arch:selectedCPU}
                         | filter: {platform: selectedPlatform } | filter: {gpu_type: selectedGPU} | orderBy: '-delta'
                         | filter: {bot_enabled:true} | filter: {is_improvement: true} | limitTo:listLimit "
-                                    ng-if="data.days_since < selectedDays" ng-class="(data.test_version==data.prev_results.test_version) ? 'active' : 'danger'">
+                                    ng-if="data.days_since < selectedDays" ng-class="(data.test_version==data.prev_results.test_version) ? 'active' : 'danger'"
+                                    popover-trigger="mouseenter">
                                     <td>{{ data.delta| number: 1}}%</td>
                                     <td>{{ data.browser }}</td>
                                     <td style="text-align: center">
@@ -100,7 +101,16 @@
                                         <span ng-if="data.prev_results.browser_version == undefined" style="float: right">NULL</span>
                                     </td>
                                     <td><span popover-trigger="mouseenter" uib-popover="CPU: {{ data.cpu_arch }}, GPU: {{ data.gpu_type }}, Platform: {{ data.platform }}">{{ data.bot }}</span></td>
-                                    <td><a ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}</a></td>
+                                    <td>
+                                        <a ng-if="data.test_version==data.prev_results.test_version" popover-trigger="mouseenter"
+                                           uib-popover="Test version: {{ data.test_version }}, Test: {{ data.root_test }}"
+                                           ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}
+                                        </a>
+                                        <a ng-if="data.test_version != data.prev_results.test_version" popover-trigger="mouseenter"
+                                           uib-popover="Test: {{ data.root_test }}. Warning: The test version changed in between the revisions."
+                                           ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}
+                                        </a>
+                                    </td>
                                     <td style="text-align: center">
                                         <span popover-trigger="mouseenter" uib-popover="std.dev: {{ data.prev_results.stddev | number:3 }}" style="float: left" >
                                             {{ data.prev_results.mean_value | number:2 }} {{ data.metric_unit.unit }}
@@ -141,7 +151,6 @@
                                 <td>Metric</td>
                                 </thead>
                                 <tbody>
-
                                 <tr ng-repeat="data in reports | filter: {root_test:selectedTest.id} | filter: { browser: selectedBrowser.id }
                         | filter: {bot: selectedBot.name} | filter: {cpu_arch:selectedCPU}
                         | filter: {platform: selectedPlatform } | filter: {gpu_type: selectedGPU}
@@ -159,11 +168,19 @@
                                         </span>
                                         <span ng-if="data.prev_results.browser_version == undefined" style="float: right">NULL</span>
                                     </td>
-                                    <td><span tabindex="0" data-html="true"
-                                              uib-popover="CPU: {{ data.cpu_arch }}, GPU: {{ data.gpu_type }}, Platform: {{ data.platform }}" popover-trigger="mouseenter">
+                                    <td><span tabindex="0" uib-popover="CPU: {{ data.cpu_arch }}, GPU: {{ data.gpu_type }}, Platform: {{ data.platform }}" popover-trigger="mouseenter">
                                         {{ data.bot }}
                                     </span></td>
-                                    <td><a ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}</a></td>
+                                    <td>
+                                        <a ng-if="data.test_version==data.prev_results.test_version" popover-trigger="mouseenter"
+                                           uib-popover="Test version: {{ data.test_version }}, Test: {{ data.root_test }}"
+                                           ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}
+                                        </a>
+                                        <a ng-if="data.test_version != data.prev_results.test_version" popover-trigger="mouseenter"
+                                           uib-popover="Test: {{ data.root_test }}. Warning: The test version changed in between the revisions."
+                                           ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}
+                                        </a>
+                                    </td>
                                     <td style="text-align: center">
                                         <span popover-trigger="mouseenter" uib-popover="std.dev: {{ data.prev_results.stddev | number: 3}}" style="float: left" >
                                             {{ data.prev_results.mean_value | number:2 }} {{ data.metric_unit.unit }}
