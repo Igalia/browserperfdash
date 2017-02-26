@@ -6,7 +6,6 @@
             <div class="row">
                 <div class="container-fluid">
                     <form class="form-inline">
-
                         <div class="row" style="text-align: center; padding-bottom: 10px;">
                             {% verbatim %}
                             <div class="form-group">
@@ -100,7 +99,12 @@
                                         </span>
                                         <span ng-if="data.prev_results.browser_version == undefined" style="float: right">NULL</span>
                                     </td>
-                                    <td>{{ data.bot }}</td>
+                                    <td><span tabindex="0" data-html="true"
+                                              uib-popover="CPU: {{ data.cpu_arch }}
+GPU: {{ data.gpu_type }}
+Platform: {{ data.platform }}" popover-trigger="mouseenter">
+                                        {{ data.bot }}
+                                    </span></td>
                                     <td><a ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}</a></td>
                                     <td style="text-align: center">
                                         <a ng-href="dash/report/{{ data.id }}" style="float: left">
@@ -160,7 +164,12 @@
                                         </span>
                                         <span ng-if="data.prev_results.browser_version == undefined" style="float: right">NULL</span>
                                     </td>
-                                    <td>{{ data.bot }}</td>
+                                    <td><span tabindex="0" data-html="true"
+                                              uib-popover="CPU: {{ data.cpu_arch }}
+GPU: {{ data.gpu_type }}
+Platform: {{ data.platform }}" popover-trigger="mouseenter">
+                                        {{ data.bot }}
+                                    </span></td>
                                     <td><a ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}</a></td>
                                     <td style="text-align: center">
                                         <a ng-href="dash/report/{{ data.id }}" style="float: left">
