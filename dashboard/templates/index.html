@@ -122,8 +122,8 @@
                                         </script>
                                     </td>
                                     <td>
-                                        <a ng-if="data.test_version==data.prev_results.test_version" popover-trigger="'mouseenter'"
-                                           uib-popover-template="testDetailsPopover.templateUrl" popover-title="test details of both revisions"
+                                         <a ng-if="data.test_version==data.prev_results.test_version" popover-trigger="'mouseenter'"
+                                           uib-popover-template="testDetailsPopover.templateUrl" popover-title="test details of both revisions (unchanged)"
                                            ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}
                                         </a>
                                         <script type="text/ng-template" id="test-template.html">
@@ -134,12 +134,12 @@
                                                 </tr>
                                                 <tr>
                                                     <td><strong>version</strong></td>
-                                                    <td>{{ data.test_version }}</td>
+                                                    <td>..{{ data.test_version.substr(data.test_version.length - 28) }}</td>
                                                 </tr>
                                             </table>
                                         </script>
                                         <a ng-if="data.test_version != data.prev_results.test_version"  popover-title="test: {{ data.root_test  }}"
-                                           uib-popover="Warning: The test version changed in between the revisions."
+                                           uib-popover="Warning: The test version changed in between the revisions." popover-trigger="'mouseenter'"
                                            ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}
                                         </a>
                                     </td>
@@ -243,7 +243,7 @@
                                     </td>
                                     <td>
                                         <a ng-if="data.test_version==data.prev_results.test_version" popover-trigger="'mouseenter'"
-                                           uib-popover-template="testDetailsPopover.templateUrl" popover-title="test details of both revisions"
+                                           uib-popover-template="testDetailsPopover.templateUrl" popover-title="test details of both revisions (unchanged)"
                                            ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}
                                         </a>
                                         <script type="text/ng-template" id="test-template.html">
@@ -254,12 +254,12 @@
                                                 </tr>
                                                 <tr>
                                                     <td><strong>version</strong></td>
-                                                    <td>{{ data.test_version }}</td>
+                                                    <td>..{{ data.test_version.substr(data.test_version.length - 28) }}</td>
                                                 </tr>
                                             </table>
                                         </script>
                                         <a ng-if="data.test_version != data.prev_results.test_version"  popover-title="test: {{ data.root_test  }}"
-                                           uib-popover="Warning: The test version changed in between the revisions."
+                                           uib-popover="Warning: The test version changed in between the revisions." popover-trigger="'mouseenter'"
                                            ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}
                                         </a>
 
