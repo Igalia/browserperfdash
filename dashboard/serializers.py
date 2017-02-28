@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from .models import BotReportData, Browser, Bot, Platform, GPUType, CPUArchitecture, Test
 import datetime
-import pytz
-import json
 
 # Serializers define the API representation.
 class BrowserListSerializer(serializers.ModelSerializer):
@@ -70,7 +68,7 @@ class BotReportDataSerializer(serializers.ModelSerializer):
     metric_unit = serializers.SerializerMethodField()
 
     def get_days_since(self,obj):
-        current_time = pytz.utc.localize(datetime.datetime.utcnow())
+        current_time = datetime.datetime.utcnow()
         return (current_time - obj.timestamp).days
 
     def get_prev_results(self, obj):

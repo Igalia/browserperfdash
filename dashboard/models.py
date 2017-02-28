@@ -136,7 +136,7 @@ class BotReportData(models.Model):
 
     def save(self, *args, **kwargs):
         if self.timestamp is None:
-            self.timestamp = datetime.datetime.now()
+            self.timestamp = datetime.datetime.utcnow()
         super(BotReportData, self).save(*args, **kwargs)
 
     def __unicode__(self):
