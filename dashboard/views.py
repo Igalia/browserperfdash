@@ -13,6 +13,7 @@ import json
 from helpers.benchmark_results import BenchmarkResults
 from django.views.generic import ListView, DetailView
 from .serializers import *
+import datetime
 
 import logging
 
@@ -161,6 +162,9 @@ class BotReportView(APIView):
         except AttributeError:
             log.error("Got invalid params from the bot: %s"% request.auth)
             return HttpResponseBadRequest("Some params are missing in the request")
+        # The timestamp may/may not be there - hence not checking
+        timestamp = datetime.datetime.fromtimestamp(float(self.request.POST.get('timestamp'))) \
+            if self.request.POST.get('timestamp') else None
         try:
             test_data = json.loads(json_data)
         except AttributeError:
@@ -220,12 +224,13 @@ class BotReportView(APIView):
             delta = delta_improvements[0]
             is_improvement = delta_improvements[1]
             prev_result = delta_improvements[2]
+
             report = BotReportData.objects.create_report(bot=bot, browser=browser, browser_version=browser_version,
                                                          root_test=root_test, test_path=raw_path,
                                                          test_version=test_version, aggregation=aggregation,
                                                          metric_tested= current_metric, mean_value=mean_value,
                                                          stddev=stddev,delta=delta,is_improvement=is_improvement,
-                                                         prev_result=prev_result)
+                                                         prev_result=prev_result, timestamp=timestamp)
             if not report:
                 log.error("Failed inserting data for bot: %s, browser: %s, browser_version: %s, root_test: %s, "
                           "test_description: %s" % (bot_id, browser_id, browser_version, test_id,raw_path)

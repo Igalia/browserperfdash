@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
+import datetime
 # Create your models here.
 
 
@@ -107,11 +107,11 @@ AGGREGATION_CHOICES = (
 
 class BotReportDataManger(models.Manager):
     def create_report(self, bot, browser, browser_version, root_test, test_path, test_version, aggregation,
-                      metric_tested, mean_value, stddev, delta, is_improvement,prev_result):
+                      metric_tested, mean_value, stddev, delta, is_improvement,prev_result,timestamp=None):
         bot_report_data = self.create(bot=bot, browser=browser, browser_version=browser_version, root_test=root_test,
                                       test_path=test_path, test_version=test_version, aggregation=aggregation,
                                       metric_tested=metric_tested, mean_value=mean_value, stddev=stddev, delta=delta,
-                                      is_improvement=is_improvement, prev_result=prev_result)
+                                      is_improvement=is_improvement, prev_result=prev_result, timestamp=timestamp)
         return bot_report_data
 
 
@@ -128,11 +128,16 @@ class BotReportData(models.Model):
     mean_value = models.FloatField(_('Mean Value'),null=True, blank=True)
     stddev = models.FloatField(_('Standard Deviation'),null=True, blank=True)
     delta = models.FloatField(_('Delta Field'), null=True, blank=True, default=0.00)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField()
     is_improvement = models.BooleanField(default=False)
     prev_result = models.ForeignKey('self', blank=True, null=True, related_name='prev_results')
 
     objects = BotReportDataManger()
+
+    def save(self, *args, **kwargs):
+        if self.timestamp is None:
+            self.timestamp = datetime.datetime.now()
+        super(BotReportData, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.bot.name + ":" + str(self.browser) + ":" + self.test_version + ":" +\
