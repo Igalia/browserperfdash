@@ -112,9 +112,10 @@
                                         </a>
                                     </td>
                                     <td style="text-align: center">
-                                        <span popover-trigger="mouseenter" uib-popover="std.dev: {{ data.prev_results.stddev | number:3 }}" style="float: left" >
+                                        <span ng-if="data.prev_results.mean_value" popover-trigger="mouseenter" uib-popover="std.dev: {{ data.prev_results.stddev | number:3 }}" style="float: left" >
                                             {{ data.prev_results.mean_value | number:2 }} {{ data.metric_unit.unit }}
                                         </span>
+                                        <span ng-if="data.prev_results.mean_value == undefined" style="float: left">NULL</span>
                                         <span style="text-align: center">-</span>
                                         <span popover-trigger="mouseenter" uib-popover="std.dev: {{stddev | number:3}}" style="float: right">
                                             {{ data.mean_value | number:2 }} {{ data.metric_unit.unit }}
@@ -182,9 +183,10 @@
                                         </a>
                                     </td>
                                     <td style="text-align: center">
-                                        <span popover-trigger="mouseenter" uib-popover="std.dev: {{ data.prev_results.stddev | number: 3}}" style="float: left" >
+                                        <span ng-if="data.prev_results.mean_value" popover-trigger="mouseenter" uib-popover="std.dev: {{ data.prev_results.stddev | number: 3}}" style="float: left" >
                                             {{ data.prev_results.mean_value | number:2 }} {{ data.metric_unit.unit }}
                                         </span>
+                                        <span ng-if="data.prev_results.mean_value == undefined" style="float: left">NULL</span>
                                         <span style="text-align: center">-</span>
                                         <span popover-trigger="mouseenter" uib-popover="std.dev: {{stddev | number:3}}" style="float: right">
                                             {{ data.mean_value | number:2}} {{ data.metric_unit.unit }}
