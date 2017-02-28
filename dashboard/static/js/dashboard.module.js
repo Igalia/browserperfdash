@@ -1,4 +1,4 @@
-app = angular.module('browserperfdash.dashboard.static', ['ngResource','ngAnimate', 'ui.bootstrap']);
+app = angular.module('browserperfdash.dashboard.static', ['ngResource','ngAnimate', 'ngSanitize', 'ui.bootstrap']);
 
 app.factory('botReportsFactory', function($resource) {
     return $resource('/dash/report');
@@ -63,7 +63,18 @@ app.controller('DeltaController', function($scope, botReportsFactory, browserFac
     $scope.gpus = gpuFactory.query();
     $scope.cpus = cpuArchFactory.query();
     $scope.tests = testFactory.query();
-    $scope.htmlToolTip = $sce.trustAsHtml("<div> hello </div>");
+    $scope.botDetailsPopover = {
+        templateUrl: 'bot-template.html'
+    };
+    $scope.prevResultDetailsPopover = {
+        templateUrl: 'prev-result-template.html'
+    };
+    $scope.currResultDetailsPopover = {
+        templateUrl: 'result-template.html'
+    };
+    $scope.testDetailsPopover = {
+        templateUrl: 'test-template.html'
+    };
     $scope.updateOtherCombos = function () {
         if ( !$scope.selectedBot ) {
             $scope.selectedPlatform = '';
