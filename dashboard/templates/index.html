@@ -92,13 +92,13 @@
                                     <td>{{ data.delta| number: 1}}%</td>
                                     <td>{{ data.browser }}</td>
                                     <td style="text-align: center">
-                                        <a ng-href="dash/report/{{ data.id }}" style="float: left">{{ data.browser_version }}</a> -
+                                        <span ng-if="data.prev_results.browser_version == undefined" style="float: left">NULL</span>
                                         <span ng-if="data.prev_results.browser_version">
-                                            <a ng-href="dash/report/{{ data.prev_results.id }}" style="float: right">
+                                            <a ng-href="dash/report/{{ data.prev_results.id }}" style="float: left">
                                                 {{ data.prev_results.browser_version }}
                                             </a>
-                                        </span>
-                                        <span ng-if="data.prev_results.browser_version == undefined" style="float: right">NULL</span>
+                                        </span> -
+                                        <a ng-href="dash/report/{{ data.id }}" style="float: right">{{ data.browser_version }}</a>
                                     </td>
                                     <td><span popover-trigger="'mouseenter'" uib-popover-template="botDetailsPopover.templateUrl"
                                               popover-title="bot: {{ data.bot }}">
@@ -122,7 +122,7 @@
                                         </script>
                                     </td>
                                     <td>
-                                         <a ng-if="data.test_version==data.prev_results.test_version" popover-trigger="'mouseenter'"
+                                        <a ng-if="data.test_version==data.prev_results.test_version" popover-trigger="'mouseenter'"
                                            uib-popover-template="testDetailsPopover.templateUrl" popover-title="test details of both revisions (unchanged)"
                                            ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}
                                         </a>
@@ -212,13 +212,13 @@
                                     <td>{{ data.delta| number:1}}%</td>
                                     <td>{{ data.browser }}</td>
                                     <td style="text-align: center">
-                                        <a ng-href="dash/report/{{ data.id }}" style="float: left">{{ data.browser_version }}</a> -
+                                        <span ng-if="data.prev_results.browser_version == undefined" style="float: left">NULL</span>
                                         <span ng-if="data.prev_results.browser_version">
-                                            <a ng-href="dash/report/{{ data.prev_results.id }}" style="float: right">
-                                            {{ data.prev_results.browser_version }}
-                                        </a>
-                                        </span>
-                                        <span ng-if="data.prev_results.browser_version == undefined" style="float: right">NULL</span>
+                                            <a ng-href="dash/report/{{ data.prev_results.id }}" style="float: left">
+                                                {{ data.prev_results.browser_version }}
+                                            </a>
+                                        </span> -
+                                        <a ng-href="dash/report/{{ data.id }}" style="float: right">{{ data.browser_version }}</a>
                                     </td>
                                     <td><span popover-trigger="'mouseenter'" uib-popover-template="botDetailsPopover.templateUrl"
                                               popover-title="bot: {{ data.bot }}">
@@ -265,14 +265,33 @@
 
                                     </td>
                                     <td style="text-align: center">
-                                        <span ng-if="data.prev_results.mean_value" popover-trigger="mouseenter" uib-popover="std.dev: {{ data.prev_results.stddev | number: 3}}" style="float: left" >
+                                        <span ng-if="data.prev_results.mean_value" popover-trigger="'mouseenter'"
+                                              uib-popover-template="prevResultDetailsPopover.templateUrl"
+                                              popover-title="browser rev: {{ data.prev_results.browser_version }}" style="float: left">
                                             {{ data.prev_results.mean_value | number:2 }} {{ data.metric_unit.unit }}
                                         </span>
+                                        <script type="text/ng-template" id="prev-result-template.html">
+                                            <table class="table table-condensed">
+                                                <tr>
+                                                    <td><strong>Std. dev</strong></td>
+                                                    <td>{{ data.prev_results.stddev | number:3 }}</td>
+                                                </tr>
+                                            </table>
+                                        </script>
                                         <span ng-if="data.prev_results.mean_value == undefined" style="float: left">NULL</span>
                                         <span style="text-align: center">-</span>
-                                        <span popover-trigger="mouseenter" uib-popover="std.dev: {{ data.stddev | number:3}}" style="float: right">
-                                            {{ data.mean_value | number:2}} {{ data.metric_unit.unit }}
+                                        <span popover-trigger="'mouseenter'" uib-popover-template="currResultDetailsPopover.templateUrl"
+                                              popover-title="browser rev: {{ data.browser_version }}" style="float: right">
+                                            {{ data.mean_value | number:2 }} {{ data.metric_unit.unit }}
                                         </span>
+                                        <script type="text/ng-template" id="result-template.html">
+                                            <table class="table table-condensed">
+                                                <tr>
+                                                    <td><strong>Std. dev</strong></td>
+                                                    <td>{{ data.stddev | number:3 }}</td>
+                                                </tr>
+                                            </table>
+                                        </script>
                                     </td>
                                     <td>{{ data.metric_unit.name }}
                                         <i ng-if="data.metric_unit.is_better === 'dw'"class="glyphicon glyphicon-chevron-down"></i>
