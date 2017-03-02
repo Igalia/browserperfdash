@@ -44,6 +44,12 @@ class BotDataReportListView(generics.ListCreateAPIView):
     serializer_class = BotReportDataSerializer
 
 
+class BotDataCompleteListView(generics.ListCreateAPIView):
+    model = BotReportData
+    queryset = BotReportData.objects.filter()
+    serializer_class = BotDataCompleteSerializer
+
+
 class BotDataReportDetailView(generics.RetrieveAPIView):
     model = BotReportData
     queryset = BotReportData.objects.filter(aggregation='None')
@@ -97,6 +103,26 @@ class TestList(generics.ListAPIView):
     queryset = Test.objects.filter(enabled=True)
     serializer_class = TestListListSerializer
 
+
+class TestPathList(generics.ListAPIView):
+    serializer_class = TestPathListSerializer
+
+    def get_queryset(self):
+        browser = Browser.objects.filter(pk=self.kwargs.get('browser'))
+        test = Test.objects.filter(pk=self.kwargs.get('test'))
+        return BotReportData.objects.filter(browser=browser, root_test=test)
+
+
+class TestVersionForTestPathList(generics.ListAPIView):
+    serializer_class = TestVersionForTestPathListSerializer
+
+    def get_queryset(self):
+        browser = Browser.objects.filter(pk=self.kwargs.get('browser'))
+        test = Test.objects.filter(pk=self.kwargs.get('test'))
+        test_path = self.kwargs.get('subtest')
+        return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path)
+
+
 class DefaultHomeView(ListView):
     template_name="index.html"
 
@@ -110,6 +136,10 @@ class BotDataReportList(TemplateView):
 
 class BotDataReportDetail(TemplateView):
     template_name = "report.html"
+
+
+class GraphPlotView(TemplateView):
+    template_name = "plot.html"
 
 
 class BotReportView(APIView):
@@ -132,9 +162,8 @@ class BotReportView(APIView):
     def process_delta_and_improvement(cls, browser, root_test, test_path, mean_value, current_metric):
         delta = 0.0
         # We take in the previous result (if exists)
-        previous_result = BotReportData.objects.filter(
-            browser=browser, root_test=root_test, test_path=test_path
-        ).order_by('-timestamp')[:1]
+        previous_result = BotReportData.objects.filter(browser=browser, root_test=root_test, test_path=test_path
+                                                       ).order_by('-timestamp')[:1]
 
         is_improvement = False
         prev_result = None
@@ -189,7 +218,7 @@ class BotReportView(APIView):
             return HttpResponseBadRequest("The test %s does not exist"% test_id )
 
         test_data_results = BenchmarkResults(test_data)
-        results_table = test_data_results.fetch_db_entries(test_data_results)
+        results_table = test_data_results.fetch_db_entries(skip_aggregated=False)
 
         for result in results_table:
             raw_path = result['name']

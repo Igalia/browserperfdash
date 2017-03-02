@@ -51,6 +51,16 @@ class TestListListSerializer(serializers.ModelSerializer):
         model = Test
         fields = ('id', 'description')
 
+
+class TestPathListSerializer(serializers.Serializer):
+    test_path = serializers.CharField(max_length=500)
+    root_test = serializers.CharField(max_length=200)
+
+
+class TestVersionForTestPathListSerializer(serializers.Serializer):
+    test_version = serializers.CharField(max_length=500)
+
+
 class BotResultMinimalSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -92,4 +102,16 @@ class BotReportDataSerializer(serializers.ModelSerializer):
                   'root_test','test_path', 'test_version', 'metric_unit', 'mean_value', 'stddev',
                   'days_since' ,'timestamp','delta', 'bot_enabled', 'is_improvement', 'prev_results')
 
+
+class BotDataCompleteSerializer(serializers.ModelSerializer):
+    metric_unit = serializers.SerializerMethodField()
+
+    def get_metric_unit(self, obj):
+        return { "name": obj.metric_tested.name, "unit": obj.metric_tested.unit, "is_better": obj.metric_tested.is_better }
+
+
+    class Meta:
+        model = BotReportData
+        fields = ('id', 'bot', 'root_test', 'test_path', 'test_version', 'metric_unit', 'mean_value', 'stddev',
+                  'aggregation', 'timestamp', 'is_improvement')
 

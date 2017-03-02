@@ -28,6 +28,14 @@ app.factory('testFactory', function($resource) {
     return $resource('/dash/test');
 });
 
+app.factory('testPathFactory', function ($resource) {
+    return $resource('/dash/testpath/:browser/:root_test');
+});
+
+app.factory('testVersionOfTestFactory', function ($resource) {
+    return $resource('/dash/testpath/:browser/:root_test/:subtest');
+});
+
 app.controller('AppController', function($scope, botReportsFactory, browserFactory,
                                          botFactory, platformFactory, gpuFactory,
                                          cpuArchFactory, testFactory,  $interval) {
@@ -90,5 +98,29 @@ app.controller('DeltaController', function($scope, botReportsFactory, browserFac
         $scope.reports = botReportsFactory.query();
     };
     $scope.reload();
+});
+
+app.controller('PlotController', function ($scope, browserFactory, testFactory, botFactory,
+                                           testPathFactory, testVersionOfTestFactory) {
+    $scope.browsers = browserFactory.query();
+    $scope.tests = testFactory.query();
+    $scope.bots = botFactory.query();
+    $scope.updateSubtests = function () {
+        if ( $scope.selectedBrowser != undefined ) {
+            $scope.subtests = testPathFactory.query({
+                browser: $scope.selectedBrowser.id,
+                root_test: $scope.selectedTest.id
+            });
+        }
+    };
+    $scope.updateVersions = function () {
+        if ( $scope.selectedSubtest != undefined ) {
+            $scope.testversion = testVersionOfTestFactory.query({
+                browser: $scope.selectedBrowser.id,
+                root_test: $scope.selectedTest.id,
+                subtest: $scope.selectedSubtest.test_path,
+            });
+        }
+    }
 });
 
