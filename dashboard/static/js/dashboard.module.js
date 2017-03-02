@@ -33,7 +33,7 @@ app.factory('testPathFactory', function ($resource) {
 });
 
 app.factory('testVersionOfTestFactory', function ($resource) {
-    return $resource('/dash/testpath/:browser/:root_test/:subtest');
+    return $resource('/dash/testversion/:browser/:root_test/:subtest');
 });
 
 app.controller('AppController', function($scope, botReportsFactory, browserFactory,
