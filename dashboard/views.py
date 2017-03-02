@@ -110,7 +110,7 @@ class TestPathList(generics.ListAPIView):
     def get_queryset(self):
         browser = Browser.objects.filter(pk=self.kwargs.get('browser'))
         test = Test.objects.filter(pk=self.kwargs.get('test'))
-        return BotReportData.objects.filter(browser=browser, root_test=test)
+        return BotReportData.objects.filter(browser=browser, root_test=test).distinct('test_path')
 
 
 class TestVersionForTestPathList(generics.ListAPIView):
@@ -120,7 +120,8 @@ class TestVersionForTestPathList(generics.ListAPIView):
         browser = Browser.objects.filter(pk=self.kwargs.get('browser'))
         test = Test.objects.filter(pk=self.kwargs.get('test'))
         test_path = self.kwargs.get('subtest')
-        return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path)
+        return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path).\
+            distinct('test_version')
 
 
 class DefaultHomeView(ListView):
