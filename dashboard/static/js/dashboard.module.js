@@ -143,6 +143,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     $scope.drawGraph = function () {
         $scope.data = [[]];
         $scope.labels = [];
+        var originalTimestamps = [];
         $scope.series = [$scope.selectedSubtest.test_path];
         var results = testResultsForVersionFactory.query({
             browser: $scope.selectedBrowser.browser_id,
@@ -151,9 +152,28 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         }, function (data) {
             angular.forEach(data, function (value, key) {
                 $scope.data[0].push(value['mean_value']);
-                $scope.labels.push(value['timestamp']);
+                var recvdate = new Date(value['timestamp']);
+                $scope.labels.push(recvdate.toDateString());
+                originalTimestamps.push(recvdate);
             })
         });
+        $scope.options = {
+            legend: {
+                display: true,
+            },
+            tooltips: {
+                enabled: true,
+                mode: 'single',
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        var label = originalTimestamps[tooltipItem.index].toISOString().slice(0,19);
+                        var datasetLabel = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                        return label + ': ' + parseFloat(datasetLabel).toFixed(2)+ '%';
+                    }
+                }
+            },
+        };
+
         $scope.onClick = function (points, evt) {
             console.log(points, evt);
         };
