@@ -143,7 +143,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     $scope.drawGraph = function () {
         $scope.data = [[]];
         $scope.labels = [];
-        var originalTimestamps = [];
+        var extrainformations = [];
         $scope.series = [$scope.selectedSubtest.test_path];
         var results = testResultsForVersionFactory.query({
             browser: $scope.selectedBrowser.browser_id,
@@ -151,10 +151,14 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             subtest: $scope.selectedSubtest.test_path,
         }, function (data) {
             angular.forEach(data, function (value, key) {
+                result = [];
                 $scope.data[0].push(value['mean_value']);
                 var recvdate = new Date(value['timestamp']);
                 $scope.labels.push(recvdate.toDateString());
-                originalTimestamps.push(recvdate);
+                result['originalTimestamps'] = recvdate;
+                result['browser_version'] = value['browser_version'];
+                result['stddev'] = value['stddev'];
+                extrainformations.push(result);
             })
         });
         $scope.options = {
@@ -166,9 +170,14 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 mode: 'single',
                 callbacks: {
                     label: function(tooltipItem, data) {
-                        var label = originalTimestamps[tooltipItem.index].toISOString().slice(0,19);
+                        var label = extrainformations[tooltipItem.index]['originalTimestamps'].toISOString().slice(0,19);
                         var datasetLabel = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
-                        return label + ': ' + parseFloat(datasetLabel).toFixed(2)+ '%';
+                        return [
+                            "Time: " + label,
+                            "Browser Version: " + extrainformations[tooltipItem.index]['browser_version'],
+                            "Std. Dev: " + extrainformations[tooltipItem.index]['stddev'],
+                            "Value: " + datasetLabel + '%'
+                        ];
                     }
                 }
             },

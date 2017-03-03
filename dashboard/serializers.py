@@ -77,7 +77,7 @@ class ResultsForVersionListSerializer(serializers.Serializer):
     timestamp = serializers.DateTimeField()
     mean_value = serializers.FloatField()
     stddev = serializers.FloatField()
-
+    browser_version = serializers.CharField(max_length=500)
 
 class BotResultMinimalSerializer(serializers.ModelSerializer):
 
