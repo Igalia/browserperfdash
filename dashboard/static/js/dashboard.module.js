@@ -157,6 +157,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 result['originalTimestamps'] = value['timestamp'];;
                 result['browser_version'] = value['browser_version'];
                 result['stddev'] = value['stddev'];
+                result['delta'] = value['delta'];
+                result['unit'] = value['unit'];
                 extrainformations.push(result);
             })
         });
@@ -174,8 +176,9 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         return [
                             "Time: " + label,
                             "Browser Version: " + extrainformations[tooltipItem.index]['browser_version'],
-                            "Std. Dev: " + extrainformations[tooltipItem.index]['stddev'],
-                            "Mean: " + datasetLabel
+                            "Std. Dev: " + parseFloat(extrainformations[tooltipItem.index]['stddev']).toFixed(3),
+                            "Delta: " + parseFloat(extrainformations[tooltipItem.index]['delta']).toFixed(3) + " %",
+                            "Mean: " + parseFloat(datasetLabel).toFixed(3) + ' ' + extrainformations[tooltipItem.index]['unit']
                         ];
                     }
                 }

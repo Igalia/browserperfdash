@@ -78,6 +78,11 @@ class ResultsForVersionListSerializer(serializers.Serializer):
     mean_value = serializers.FloatField()
     stddev = serializers.FloatField()
     browser_version = serializers.CharField(max_length=500)
+    delta = serializers.FloatField()
+    unit = serializers.SerializerMethodField()
+
+    def get_unit(self,obj):
+        return obj.metric_tested.unit
 
 class BotResultMinimalSerializer(serializers.ModelSerializer):
 
