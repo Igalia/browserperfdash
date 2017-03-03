@@ -71,6 +71,10 @@ class TestPathListSerializer(serializers.Serializer):
 
 class TestVersionForTestPathListSerializer(serializers.Serializer):
     test_version = serializers.CharField(max_length=500)
+    metrics = serializers.SerializerMethodField()
+
+    def get_metrics(self,obj):
+        return { 'metric': obj.metric_tested.name, 'is_better': obj.metric_tested.is_better }
 
 
 class ResultsForVersionListSerializer(serializers.Serializer):
@@ -80,9 +84,13 @@ class ResultsForVersionListSerializer(serializers.Serializer):
     browser_version = serializers.CharField(max_length=500)
     delta = serializers.FloatField()
     unit = serializers.SerializerMethodField()
+    is_better = serializers.SerializerMethodField()
 
     def get_unit(self,obj):
         return obj.metric_tested.unit
+
+    def get_is_better(self,obj):
+        return obj.metric_tested.is_better
 
 class BotResultMinimalSerializer(serializers.ModelSerializer):
 

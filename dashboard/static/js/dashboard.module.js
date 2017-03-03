@@ -140,6 +140,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             });
         }
     };
+
     $scope.drawGraph = function () {
         $scope.data = [[]];
         $scope.labels = [];
@@ -163,8 +164,18 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             })
         });
         $scope.options = {
+            responsive: true,
             legend: {
                 display: true,
+            },
+            scales: {
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: $scope.testversion[0]['metrics']['metric'] +
+                        ' (' +  ($scope.testversion[0]['metrics']['metric'] == 'up' ? 'up' : 'down') + ' is better)'
+                    }
+                }]
             },
             tooltips: {
                 enabled: true,
@@ -178,11 +189,12 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                             "Browser Version: " + extrainformations[tooltipItem.index]['browser_version'],
                             "Std. Dev: " + parseFloat(extrainformations[tooltipItem.index]['stddev']).toFixed(3),
                             "Delta: " + parseFloat(extrainformations[tooltipItem.index]['delta']).toFixed(3) + " %",
-                            "Mean: " + parseFloat(datasetLabel).toFixed(3) + ' ' + extrainformations[tooltipItem.index]['unit']
+                            "Mean: " + parseFloat(datasetLabel).toFixed(3) + ' ' +
+                            extrainformations[tooltipItem.index]['unit']
                         ];
                     }
                 }
-            },
+            }
         };
 
         $scope.onClick = function (points, evt) {
