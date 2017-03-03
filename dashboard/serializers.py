@@ -73,6 +73,12 @@ class TestVersionForTestPathListSerializer(serializers.Serializer):
     test_version = serializers.CharField(max_length=500)
 
 
+class ResultsForVersionListSerializer(serializers.Serializer):
+    timestamp = serializers.DateTimeField()
+    mean_value = serializers.FloatField()
+    stddev = serializers.FloatField()
+
+
 class BotResultMinimalSerializer(serializers.ModelSerializer):
 
     class Meta:

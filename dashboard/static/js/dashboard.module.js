@@ -1,4 +1,5 @@
-app = angular.module('browserperfdash.dashboard.static', ['ngResource','ngAnimate', 'ngSanitize', 'ui.bootstrap']);
+app = angular.module('browserperfdash.dashboard.static', ['ngResource','ngAnimate', 'ngSanitize', 'ui.bootstrap',
+    'chart.js' ]);
 
 app.factory('botReportsFactory', function($resource) {
     return $resource('/dash/report');
@@ -46,6 +47,10 @@ app.factory('testPathFactory', function ($resource) {
 
 app.factory('testVersionOfTestFactory', function ($resource) {
     return $resource('/dash/test_version/:browser/:root_test/:subtest');
+});
+
+app.factory('testResultsForVersionFactory', function ($resource) {
+    return $resource('/dash/results_for_version/:browser/:root_test/:subtest');
 });
 
 app.controller('AppController', function($scope, botReportsFactory, browserFactory,
@@ -113,7 +118,8 @@ app.controller('DeltaController', function($scope, botReportsFactory, browserFac
 });
 
 app.controller('PlotController', function ($scope, browserForResultExistFactory, testForResultsExistFactory,
-                                           botForResultsExistFactory, testPathFactory, testVersionOfTestFactory) {
+                                           botForResultsExistFactory, testPathFactory, testVersionOfTestFactory,
+                                           testResultsForVersionFactory) {
     $scope.browsers = browserForResultExistFactory.query();
     $scope.tests = testForResultsExistFactory.query();
     $scope.bots = botForResultsExistFactory.query();
@@ -133,6 +139,26 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 subtest: $scope.selectedSubtest.test_path,
             });
         }
-    }
+    };
+    $scope.drawGraph = function () {
+        $scope.data = [[]];
+        $scope.labels = [];
+        $scope.series = [$scope.selectedSubtest.test_path];
+        var results = testResultsForVersionFactory.query({
+            browser: $scope.selectedBrowser.browser_id,
+            root_test: $scope.selectedTest.root_test_id,
+            subtest: $scope.selectedSubtest.test_path,
+        }, function (data) {
+            angular.forEach(data, function (value, key) {
+                $scope.data[0].push(value['mean_value']);
+                $scope.labels.push(value['timestamp']);
+            })
+        });
+        $scope.onClick = function (points, evt) {
+            console.log(points, evt);
+        };
+    };
+
+
 });
 

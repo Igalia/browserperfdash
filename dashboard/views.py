@@ -141,6 +141,16 @@ class TestVersionForTestPathList(generics.ListAPIView):
             distinct('test_version')
 
 
+class ResultsForVersionList(generics.ListAPIView):
+    serializer_class = ResultsForVersionListSerializer
+
+    def get_queryset(self):
+        browser = Browser.objects.filter(pk=self.kwargs.get('browser'))
+        test = Test.objects.filter(pk=self.kwargs.get('test'))
+        test_path = self.kwargs.get('subtest')
+        return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path)
+
+
 class DefaultHomeView(ListView):
     template_name="index.html"
 
