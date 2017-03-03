@@ -85,6 +85,12 @@ class BotsList(generics.ListAPIView):
     serializer_class = BotListSerializer
 
 
+class BotsForResultsExistList(generics.ListAPIView):
+    model = BotReportData
+    queryset = BotReportData.objects.distinct('bot')
+    serializer_class = BotsForResultsExistListSerializer
+
+
 class PlatformList(generics.ListAPIView):
     model = Platform
     queryset = Platform.objects.filter(enabled=True)

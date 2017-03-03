@@ -9,11 +9,15 @@ app.factory('browserFactory', function($resource) {
 });
 
 app.factory('browserForResultExistFactory', function ($resource) {
-    return $resource('/dash/browserresultsexist');
+    return $resource('/dash/browser_results_exist');
 });
 
 app.factory('botFactory', function($resource) {
     return $resource('/dash/bot');
+});
+
+app.factory('botForResultsExistFactory', function($resource) {
+    return $resource('/dash/bot_results_exist');
 });
 
 app.factory('platformFactory', function($resource) {
@@ -33,7 +37,7 @@ app.factory('testFactory', function($resource) {
 });
 
 app.factory('testForResultsExistFactory', function($resource) {
-    return $resource('/dash/testresultsexist');
+    return $resource('/dash/test_results_exist');
 });
 
 app.factory('testPathFactory', function ($resource) {
@@ -41,7 +45,7 @@ app.factory('testPathFactory', function ($resource) {
 });
 
 app.factory('testVersionOfTestFactory', function ($resource) {
-    return $resource('/dash/testversion/:browser/:root_test/:subtest');
+    return $resource('/dash/test_version/:browser/:root_test/:subtest');
 });
 
 app.controller('AppController', function($scope, botReportsFactory, browserFactory,
@@ -108,11 +112,11 @@ app.controller('DeltaController', function($scope, botReportsFactory, browserFac
     $scope.reload();
 });
 
-app.controller('PlotController', function ($scope, browserForResultExistFactory, testForResultsExistFactory, botFactory,
-                                           testPathFactory, testVersionOfTestFactory) {
+app.controller('PlotController', function ($scope, browserForResultExistFactory, testForResultsExistFactory,
+                                           botForResultsExistFactory, testPathFactory, testVersionOfTestFactory) {
     $scope.browsers = browserForResultExistFactory.query();
     $scope.tests = testForResultsExistFactory.query();
-    $scope.bots = botFactory.query();
+    $scope.bots = botForResultsExistFactory.query();
     $scope.updateSubtests = function () {
         if ( $scope.selectedBrowser != undefined ) {
             $scope.subtests = testPathFactory.query({
