@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^gpu/$', GPUTypeList.as_view(), name='gputype-list'),
     url(r'^cpu/$', CPUArchitectureList.as_view(), name='cpuarch-list'),
     url(r'^test/$', TestList.as_view(), name='test-list'),
+    url(r'^testresultsexist/$', TestsForResultsExistList.as_view()),
     url(r'^testpath/(?P<browser>.+)/(?P<test>.+)$', TestPathList.as_view()),
     url(r'^testversion/(?P<browser>.+)/(?P<test>.+)/(?P<subtest>.+)$', TestVersionForTestPathList.as_view()),
     url(r'^report/$', BotDataReportListView.as_view()),

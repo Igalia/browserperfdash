@@ -14,6 +14,9 @@ class BrowsersForResultsExistListSerializer(serializers.Serializer):
     browser = serializers.CharField(max_length=50)
 
 
+class TestsForResultsExistListSerializer(serializers.Serializer):
+    root_test_id = serializers.CharField(max_length=50)
+
 class BotListSerializer(serializers.ModelSerializer):
     gpuType = serializers.SerializerMethodField()
     cpuArchitecture = serializers.SerializerMethodField()

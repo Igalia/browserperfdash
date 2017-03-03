@@ -32,6 +32,10 @@ app.factory('testFactory', function($resource) {
     return $resource('/dash/test');
 });
 
+app.factory('testForResultsExistFactory', function($resource) {
+    return $resource('/dash/testresultsexist');
+});
+
 app.factory('testPathFactory', function ($resource) {
     return $resource('/dash/testpath/:browser/:root_test');
 });
@@ -104,16 +108,16 @@ app.controller('DeltaController', function($scope, botReportsFactory, browserFac
     $scope.reload();
 });
 
-app.controller('PlotController', function ($scope, browserForResultExistFactory, testFactory, botFactory,
+app.controller('PlotController', function ($scope, browserForResultExistFactory, testForResultsExistFactory, botFactory,
                                            testPathFactory, testVersionOfTestFactory) {
     $scope.browsers = browserForResultExistFactory.query();
-    $scope.tests = testFactory.query();
+    $scope.tests = testForResultsExistFactory.query();
     $scope.bots = botFactory.query();
     $scope.updateSubtests = function () {
         if ( $scope.selectedBrowser != undefined ) {
             $scope.subtests = testPathFactory.query({
                 browser: $scope.selectedBrowser.browser_id,
-                root_test: $scope.selectedTest.id
+                root_test: $scope.selectedTest.root_test_id
             });
         }
     };
@@ -121,7 +125,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         if ( $scope.selectedSubtest != undefined ) {
             $scope.testversion = testVersionOfTestFactory.query({
                 browser: $scope.selectedBrowser.browser_id,
-                root_test: $scope.selectedTest.id,
+                root_test: $scope.selectedTest.root_test_id,
                 subtest: $scope.selectedSubtest.test_path,
             });
         }
