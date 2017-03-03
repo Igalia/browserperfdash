@@ -7,6 +7,7 @@ urlpatterns = [
     url(r'^report_detail_view/$', BotDataReportDetail.as_view()),
     url(r'^bot-report', BotReportView.as_view()),
     url(r'^browser/$', BrowsersList.as_view(), name='browser-list'),
+    url(r'^browserresultsexist/$', BrowsersForResultsExistList.as_view()),
     url(r'^bot/$', BotsList.as_view(), name='bots-list'),
     url(r'^platform/$', PlatformList.as_view(), name='platform-list'),
     url(r'^gpu/$', GPUTypeList.as_view(), name='gputype-list'),

@@ -74,6 +74,11 @@ class BrowsersList(generics.ListAPIView):
     serializer_class = BrowserListSerializer
 
 
+class BrowsersForResultsExistList(generics.ListAPIView):
+    model = BotReportData
+    queryset = BotReportData.objects.distinct('browser')
+    serializer_class = BrowsersForResultsExistListSerializer
+
 class BotsList(generics.ListAPIView):
     model = Bot
     queryset = Bot.objects.filter(enabled=True)
@@ -188,7 +193,7 @@ class BotReportView(APIView):
             test_id = self.request.POST.get('test_id')
             test_version = self.request.POST.get('test_version')
             bot_id = self.request.POST.get('bot_id')
-            json_data = self.request.POST.get('test_data')
+            json_data = self.request.FILES.get('test_data')
         except AttributeError:
             log.error("Got invalid params from the bot: %s"% request.auth)
             return HttpResponseBadRequest("Some params are missing in the request")
@@ -196,7 +201,7 @@ class BotReportView(APIView):
         timestamp = datetime.datetime.fromtimestamp(float(self.request.POST.get('timestamp'))) \
             if self.request.POST.get('timestamp') else None
         try:
-            test_data = json.loads(json_data)
+            test_data = json.load(json_data)
         except AttributeError:
             return HttpResponseBadRequest("Error parsing JSON file from bot: %s "% request.auth)
 

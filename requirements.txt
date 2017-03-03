@@ -6,3 +6,4 @@ coreapi
 django-crispy-forms
 django-guardian
 pytz
+psycopg2

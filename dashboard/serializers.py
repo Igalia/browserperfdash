@@ -2,11 +2,16 @@ from rest_framework import serializers
 from .models import BotReportData, Browser, Bot, Platform, GPUType, CPUArchitecture, Test
 import datetime
 
-# Serializers define the API representation.
+
 class BrowserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Browser
         fields = ('id', 'name')
+
+
+class BrowsersForResultsExistListSerializer(serializers.Serializer):
+    browser_id = serializers.CharField(max_length=50)
+    browser = serializers.CharField(max_length=50)
 
 
 class BotListSerializer(serializers.ModelSerializer):
