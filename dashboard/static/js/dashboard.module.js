@@ -153,9 +153,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             angular.forEach(data, function (value, key) {
                 result = [];
                 $scope.data[0].push(value['mean_value']);
-                var recvdate = new Date(value['timestamp']);
-                $scope.labels.push(recvdate.toDateString());
-                result['originalTimestamps'] = recvdate;
+                $scope.labels.push(value['timestamp'].slice(0,10));
+                result['originalTimestamps'] = value['timestamp'];;
                 result['browser_version'] = value['browser_version'];
                 result['stddev'] = value['stddev'];
                 extrainformations.push(result);
@@ -170,13 +169,13 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 mode: 'single',
                 callbacks: {
                     label: function(tooltipItem, data) {
-                        var label = extrainformations[tooltipItem.index]['originalTimestamps'].toISOString().slice(0,19);
+                        var label = extrainformations[tooltipItem.index]['originalTimestamps'].slice(0,19);
                         var datasetLabel = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
                         return [
                             "Time: " + label,
                             "Browser Version: " + extrainformations[tooltipItem.index]['browser_version'],
                             "Std. Dev: " + extrainformations[tooltipItem.index]['stddev'],
-                            "Value: " + datasetLabel + '%'
+                            "Mean: " + datasetLabel
                         ];
                     }
                 }
