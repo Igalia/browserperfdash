@@ -14,14 +14,14 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <select name="test" class="form-control" ng-model="selectedTest" ng-change="updateSubtests()"
-                                        ng-options="x.root_test_id for x in tests">
-                                </select>
-                            </div>
-                            <div class="form-group">
                                 <select name="bot" class="form-control" ng-model="selectedBot"
                                         ng-options="bot.bot for bot in bots" ng-change="updateSubtests()">
                                     <option value="">--All bots--</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <select name="test" class="form-control" ng-model="selectedTest" ng-change="updateSubtests()"
+                                        ng-options="x.root_test_id for x in tests">
                                 </select>
                             </div>
                             <div class="form-group">
