@@ -197,7 +197,12 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 }],
                 xAxes: [{
                     type: 'linear',
-                    position: 'bottom'
+                    position: 'bottom',
+                    ticks: {
+                        callback: function (value, index, values) {
+                            return moment(parseInt(value)).format('YYYY-MM-DD')
+                        }
+                    }
                 }]
             },
             tooltips: {
@@ -205,19 +210,19 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 mode: 'single',
                 callbacks: {
                     title: function (tooltipItem, data) {
-                        return data.datasets[tooltipItem[0].datasetIndex].label + "@" + $scope.selectedSubtest.test_path;
+                        return $scope.selectedBrowser.browser_id + "@" + data.datasets[tooltipItem[0].datasetIndex].label;
                     },
                     label: function(tooltipItem, data) {
                         currentbot = data.datasets[tooltipItem.datasetIndex].label;
                         var label = extrainformations[currentbot][tooltipItem.xLabel]['timestamp'];
                         var datasetLabel = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
                         return [
+                            "Time: " + moment(parseInt(label)).format('YYYY-MM-DD, kk:mm:ss'),
                             "Test Version: " + extrainformations[currentbot][tooltipItem.xLabel]['test_version'].slice(-7),
-                            "Time: " + moment(parseInt(label)).format('DD-MM-YYYY'),
                             "Browser Version: " + extrainformations[currentbot][tooltipItem.xLabel]['browser_version'],
                             "Std. Dev: " + parseFloat(extrainformations[currentbot][tooltipItem.xLabel]['stddev']).toFixed(3),
+                            "Value: " + parseFloat(datasetLabel.y).toFixed(3) + ' ' +  extrainformations[currentbot][tooltipItem.xLabel]['unit'],
                             "Delta: " + parseFloat(extrainformations[currentbot][tooltipItem.xLabel]['delta']).toFixed(3) + " %",
-                            "Mean: " + parseFloat(datasetLabel.y).toFixed(3) + ' ' +  extrainformations[currentbot][tooltipItem.xLabel]['unit']
                         ];
                     }
                 }

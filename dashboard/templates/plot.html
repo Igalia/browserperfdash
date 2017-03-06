@@ -34,16 +34,8 @@
                                     <option value="">--All Subtest--</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <select name="metric" class="form-control" ng-model="selectedVersion"
-                                        ng-options="ver.test_version for ver in testversion"
-                                        ng-show="selectedBrowser != undefined && selectedTest != undefined &&
-                                        selectedSubtest != undefined">
-                                    <option value="">--All versions--</option>
-                                </select>
-                            </div>
                             <button type="button" class="btn btn-default" id="reload"
-                                    ng-show="selectedBrowser != undefined && selectedTest != undefined && selectedSubtest != undefined && selectedVersion != undefined"
+                                    ng-show="selectedBrowser != undefined && selectedTest != undefined && selectedSubtest != undefined"
                             ng-click="drawGraph()">
                                 <i class="glyphicon glyphicon-arrow-right"></i>
                             </button>
