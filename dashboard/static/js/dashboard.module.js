@@ -120,8 +120,18 @@ app.controller('DeltaController', function($scope, botReportsFactory, browserFac
 app.controller('PlotController', function ($scope, browserForResultExistFactory, testForResultsExistFactory,
                                            botForResultsExistFactory, testPathFactory, testVersionOfTestFactory,
                                            testResultsForVersionFactory) {
-    $scope.browsers = browserForResultExistFactory.query();
-    $scope.tests = testForResultsExistFactory.query();
+    $scope.browsers = browserForResultExistFactory.query({}, function (data) {
+        $scope.selectedBrowser = data[0];
+    });
+    $scope.tests = testForResultsExistFactory.query({}, function (data) {
+        $scope.selectedTest = data[0];
+        $scope.subtests = testPathFactory.query({
+            browser: $scope.selectedBrowser.browser_id,
+            root_test: $scope.selectedTest.root_test_id
+        }, function (data) {
+            $scope.selectedSubtest = data[0];
+        });
+    });
     $scope.bots = botForResultsExistFactory.query();
     $scope.updateSubtests = function () {
         if ( $scope.selectedBrowser != undefined ) {
