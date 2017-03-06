@@ -27,18 +27,19 @@
                             <div class="form-group">
                                 <select name="subtest" class="form-control" ng-model="selectedSubtest"
                                         ng-options="test.test_path for test in subtests" ng-change="updateVersions()">
+                                    <option value="">--Select Subtest--</option>
                                 </select>
                             </div>
                             <button type="button" class="btn btn-default" id="reload"
                                     ng-show="selectedBrowser != undefined && selectedTest != undefined && selectedSubtest != undefined"
-                            ng-click="drawGraph()">
+                                    ng-click="drawGraph()">
                                 <i class="glyphicon glyphicon-arrow-right"></i>
                             </button>
                             <hr>
                             <div class="col-md-6 col-md-offset-3">
-                            <canvas  id="line" class="chart chart-line" chart-data="data"
-                                    chart-labels="labels" chart-series="series" chart-options="options" chart-click="onClick">
-                            </canvas>
+                                <canvas  id="line" class="chart chart-line" chart-data="data"
+                                         chart-labels="labels" chart-series="series" chart-options="options" chart-click="onClick">
+                                </canvas>
                             </div>
                             {% endverbatim %}
                         </div>
