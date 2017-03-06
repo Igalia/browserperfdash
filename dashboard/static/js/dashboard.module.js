@@ -130,6 +130,11 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             root_test: $scope.selectedTest.root_test_id
         }, function (data) {
             $scope.selectedSubtest = data[0];
+            $scope.testversion = testVersionOfTestFactory.query({
+                browser: $scope.selectedBrowser.browser_id,
+                root_test: $scope.selectedTest.root_test_id,
+                subtest: $scope.selectedSubtest.test_path,
+            });
         });
     });
     $scope.bots = botForResultsExistFactory.query();
