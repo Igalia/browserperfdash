@@ -200,7 +200,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     position: 'bottom',
                     ticks: {
                         callback: function (value, index, values) {
-                            return moment(parseInt(value)).format('YYYY-MM-DD')
+                            return moment.unix(parseInt(value)).format('YYYY-MM-DD')
                         }
                     }
                 }]
@@ -217,7 +217,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         var label = extrainformations[currentbot][tooltipItem.xLabel]['timestamp'];
                         var datasetLabel = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
                         return [
-                            "Time: " + moment(parseInt(label)).format('YYYY-MM-DD, kk:mm:ss'),
+                            "Time: " + moment.unix(parseInt(label)).format('YYYY-MM-DD, kk:mm:ss'),
                             "Test Version: " + extrainformations[currentbot][tooltipItem.xLabel]['test_version'].slice(-7),
                             "Browser Version: " + extrainformations[currentbot][tooltipItem.xLabel]['browser_version'],
                             "Std. Dev: " + parseFloat(extrainformations[currentbot][tooltipItem.xLabel]['stddev']).toFixed(3),
