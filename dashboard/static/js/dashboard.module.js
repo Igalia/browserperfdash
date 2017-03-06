@@ -141,6 +141,12 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         }
     };
 
+    $scope.updateOthers = function () {
+        if ( $scope.selectedBrowser && $scope.selectedTest ) {
+            $scope.updateSubtests();
+        }
+    }
+
     $scope.drawGraph = function () {
         $scope.labels = [];
         $scope.data = [];

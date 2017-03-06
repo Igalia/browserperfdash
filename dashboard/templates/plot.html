@@ -9,29 +9,27 @@
                         <div class="row" style="text-align: center">
                             {% verbatim %}
                             <div class="form-group">
-                                <select name="browser" class="form-control" ng-model="selectedBrowser"
+                                <select name="browser" class="form-control" ng-model="selectedBrowser" ng-change="updateOthers()"
                                         ng-options="x.browser for x in browsers">
-                                    <option value="">--All browsers--</option>
+                                    <option value="">--Select Browser--</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <select name="test" class="form-control" ng-model="selectedTest" ng-change="updateSubtests()"
-                                        ng-options="x.root_test_id for x in tests" ng-show="selectedBrowser != undefined">
-                                    <option value="">--All Test--</option>
+                                        ng-options="x.root_test_id for x in tests">
+                                    <option value="">--Select Test--</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <select name="bot" class="form-control" ng-model="selectedBot"
-                                        ng-options="bot.bot for bot in bots" ng-change="updateSubtests()"
-                                        ng-show="selectedBrowser != undefined && selectedTest != undefined">
+                                        ng-options="bot.bot for bot in bots" ng-change="updateSubtests()">
                                     <option value="">--All bots--</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <select name="subtest" class="form-control" ng-model="selectedSubtest"
-                                        ng-options="test.test_path for test in subtests" ng-change="updateVersions()"
-                                        ng-show="selectedBrowser != undefined && selectedTest != undefined">
-                                    <option value="">--All Subtest--</option>
+                                        ng-options="test.test_path for test in subtests" ng-change="updateVersions()">
+                                    <option value="">--Select Subtest--</option>
                                 </select>
                             </div>
                             <button type="button" class="btn btn-default" id="reload"
