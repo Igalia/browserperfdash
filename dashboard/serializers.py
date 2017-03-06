@@ -78,19 +78,25 @@ class TestVersionForTestPathListSerializer(serializers.Serializer):
 
 
 class ResultsForVersionListSerializer(serializers.Serializer):
-    timestamp = serializers.DateTimeField()
+    timestamp = serializers.SerializerMethodField()
     mean_value = serializers.FloatField()
     stddev = serializers.FloatField()
     browser_version = serializers.CharField(max_length=500)
     delta = serializers.FloatField()
     unit = serializers.SerializerMethodField()
     is_better = serializers.SerializerMethodField()
+    bot = serializers.CharField()
+    test_version = serializers.CharField()
 
     def get_unit(self,obj):
         return obj.metric_tested.unit
 
     def get_is_better(self,obj):
         return obj.metric_tested.is_better
+
+    def get_timestamp(self,obj):
+        return obj.timestamp.strftime('%s')
+
 
 class BotResultMinimalSerializer(serializers.ModelSerializer):
 

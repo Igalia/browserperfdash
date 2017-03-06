@@ -15,7 +15,7 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <select name="test" class="form-control" ng-model="selectedTest"
+                                <select name="test" class="form-control" ng-model="selectedTest" ng-change="updateSubtests()"
                                         ng-options="x.root_test_id for x in tests" ng-show="selectedBrowser != undefined">
                                     <option value="">--All Test--</option>
                                 </select>
@@ -30,7 +30,7 @@
                             <div class="form-group">
                                 <select name="subtest" class="form-control" ng-model="selectedSubtest"
                                         ng-options="test.test_path for test in subtests" ng-change="updateVersions()"
-                                        ng-show="selectedBrowser != undefined && selectedTest != undefined && selectedBot != undefined">
+                                        ng-show="selectedBrowser != undefined && selectedTest != undefined">
                                     <option value="">--All Subtest--</option>
                                 </select>
                             </div>
@@ -38,13 +38,12 @@
                                 <select name="metric" class="form-control" ng-model="selectedVersion"
                                         ng-options="ver.test_version for ver in testversion"
                                         ng-show="selectedBrowser != undefined && selectedTest != undefined &&
-                                        selectedBot != undefined && selectedSubtest != undefined">
+                                        selectedSubtest != undefined">
                                     <option value="">--All versions--</option>
                                 </select>
                             </div>
                             <button type="button" class="btn btn-default" id="reload"
-                                    ng-show="selectedBrowser != undefined && selectedTest != undefined &&
-                                        selectedBot != undefined && selectedSubtest != undefined && selectedVersion != undefined"
+                                    ng-show="selectedBrowser != undefined && selectedTest != undefined && selectedSubtest != undefined && selectedVersion != undefined"
                             ng-click="drawGraph()">
                                 <i class="glyphicon glyphicon-arrow-right"></i>
                             </button>

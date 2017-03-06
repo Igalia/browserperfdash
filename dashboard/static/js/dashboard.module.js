@@ -142,10 +142,11 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     };
 
     $scope.drawGraph = function () {
-        $scope.data = [[]];
         $scope.labels = [];
-        var extrainformations = [];
-        $scope.series = [$scope.selectedSubtest.test_path];
+        $scope.data = [];
+        $scope.series = [];
+        var extrainformations = {};
+        var databucket = {};
         var results = testResultsForVersionFactory.query({
             browser: $scope.selectedBrowser.browser_id,
             root_test: $scope.selectedTest.root_test_id,
@@ -153,16 +154,34 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         }, function (data) {
             angular.forEach(data, function (value, key) {
                 result = [];
-                $scope.data[0].push(value['mean_value']);
-                $scope.labels.push(value['timestamp'].slice(0,10));
-                result['originalTimestamps'] = value['timestamp'];;
+                $scope.labels.push(value['timestamp']);
+                result['yvalue'] = value['mean_value'];
+                result['timestamp'] = value['timestamp'];
                 result['browser_version'] = value['browser_version'];
                 result['stddev'] = value['stddev'];
                 result['delta'] = value['delta'];
                 result['unit'] = value['unit'];
-                extrainformations.push(result);
-            })
+                result['test_version'] = value['test_version'];
+                if(!extrainformations[value['bot']]) {
+                    extrainformations[value['bot']] = {};
+                    extrainformations[value['bot']][value['timestamp']] = result;
+                } else {
+
+                }
+                if (!databucket[value['bot']]) {
+                    databucket[value['bot']] = [];
+                    databucket[value['bot']].push({x:value['timestamp'], y:value['mean_value']});
+                } else {
+                    databucket[value['bot']].push({x:value['timestamp'], y:value['mean_value']});
+                }
+            });
+            for (var key in databucket) {
+                $scope.data.push(databucket[key])
+                $scope.series.push(key);
+            }
         });
+
+
         $scope.options = {
             responsive: true,
             legend: {
@@ -175,31 +194,39 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         labelString: $scope.testversion[0]['metrics']['metric'] +
                         ' (' +  ($scope.testversion[0]['metrics']['metric'] == 'up' ? 'up' : 'down') + ' is better)'
                     }
+                }],
+                xAxes: [{
+                    type: 'linear',
+                    position: 'bottom'
                 }]
             },
             tooltips: {
                 enabled: true,
                 mode: 'single',
                 callbacks: {
+                    title: function (tooltipItem, data) {
+                        return data.datasets[tooltipItem[0].datasetIndex].label + "@" + $scope.selectedSubtest.test_path;
+                    },
                     label: function(tooltipItem, data) {
-                        var label = extrainformations[tooltipItem.index]['originalTimestamps'].slice(0,19);
+                        currentbot = data.datasets[tooltipItem.datasetIndex].label;
+                        var label = extrainformations[currentbot][tooltipItem.xLabel]['timestamp'];
                         var datasetLabel = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
                         return [
-                            "Time: " + label,
-                            "Browser Version: " + extrainformations[tooltipItem.index]['browser_version'],
-                            "Std. Dev: " + parseFloat(extrainformations[tooltipItem.index]['stddev']).toFixed(3),
-                            "Delta: " + parseFloat(extrainformations[tooltipItem.index]['delta']).toFixed(3) + " %",
-                            "Mean: " + parseFloat(datasetLabel).toFixed(3) + ' ' +
-                            extrainformations[tooltipItem.index]['unit']
+                            "Test Version: " + extrainformations[currentbot][tooltipItem.xLabel]['test_version'].slice(-7),
+                            "Time: " + moment(parseInt(label)).format('DD-MM-YYYY'),
+                            "Browser Version: " + extrainformations[currentbot][tooltipItem.xLabel]['browser_version'],
+                            "Std. Dev: " + parseFloat(extrainformations[currentbot][tooltipItem.xLabel]['stddev']).toFixed(3),
+                            "Delta: " + parseFloat(extrainformations[currentbot][tooltipItem.xLabel]['delta']).toFixed(3) + " %",
+                            "Mean: " + parseFloat(datasetLabel.y).toFixed(3) + ' ' +  extrainformations[currentbot][tooltipItem.xLabel]['unit']
                         ];
                     }
                 }
             }
         };
-
-        $scope.onClick = function (points, evt) {
-            console.log(points, evt);
-        };
+        //
+        // $scope.onClick = function (points, evt) {
+        //     console.log(points, evt);
+        // };
     };
 
 
