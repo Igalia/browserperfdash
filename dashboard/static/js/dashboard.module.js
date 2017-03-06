@@ -166,7 +166,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     extrainformations[value['bot']] = {};
                     extrainformations[value['bot']][value['timestamp']] = result;
                 } else {
-
+                    extrainformations[value['bot']][value['timestamp']] = result;
                 }
                 if (!databucket[value['bot']]) {
                     databucket[value['bot']] = [];
