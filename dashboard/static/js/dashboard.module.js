@@ -50,7 +50,7 @@ app.factory('testVersionOfTestFactory', function ($resource) {
 });
 
 app.factory('testResultsForVersionFactory', function ($resource) {
-    return $resource('/dash/results_for_version/:browser/:root_test/:subtest');
+    return $resource('/dash/results_for_version/:browser/:root_test/:subtest/:bot');
 });
 
 app.controller('AppController', function($scope, botReportsFactory, browserFactory,
@@ -122,22 +122,23 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                                            testResultsForVersionFactory) {
     $scope.browsers = browserForResultExistFactory.query({}, function (data) {
         $scope.selectedBrowser = data[0];
-    });
-    $scope.tests = testForResultsExistFactory.query({}, function (data) {
-        $scope.selectedTest = data[0];
-        $scope.subtests = testPathFactory.query({
-            browser: $scope.selectedBrowser.browser_id,
-            root_test: $scope.selectedTest.root_test_id
-        }, function (data) {
-            $scope.selectedSubtest = data[0];
-            $scope.testversion = testVersionOfTestFactory.query({
+        $scope.tests = testForResultsExistFactory.query({}, function (data) {
+            $scope.selectedTest = data[0];
+            $scope.subtests = testPathFactory.query({
                 browser: $scope.selectedBrowser.browser_id,
-                root_test: $scope.selectedTest.root_test_id,
-                subtest: $scope.selectedSubtest.test_path,
+                root_test: $scope.selectedTest.root_test_id
+            }, function (data) {
+                $scope.selectedSubtest = data[0];
+                $scope.testversion = testVersionOfTestFactory.query({
+                    browser: $scope.selectedBrowser.browser_id,
+                    root_test: $scope.selectedTest.root_test_id,
+                    subtest: $scope.selectedSubtest.test_path,
+                });
             });
         });
+        $scope.bots = botForResultsExistFactory.query();
     });
-    $scope.bots = botForResultsExistFactory.query();
+
     $scope.updateSubtests = function () {
         if ( $scope.selectedBrowser != undefined ) {
             $scope.subtests = testPathFactory.query({
@@ -160,7 +161,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         if ( $scope.selectedBrowser && $scope.selectedTest ) {
             $scope.updateSubtests();
         }
-    }
+    };
 
     $scope.drawGraph = function () {
         $scope.labels = [];
@@ -172,6 +173,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             browser: $scope.selectedBrowser.browser_id,
             root_test: $scope.selectedTest.root_test_id,
             subtest: $scope.selectedSubtest.test_path,
+            bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
         }, function (data) {
             angular.forEach(data, function (value, key) {
                 result = [];
@@ -249,10 +251,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 }
             }
         };
-        //
-        // $scope.onClick = function (points, evt) {
-        //     console.log(points, evt);
-        // };
     };
 
 
