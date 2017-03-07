@@ -67,6 +67,7 @@ class TestListListSerializer(serializers.ModelSerializer):
 class TestPathListSerializer(serializers.Serializer):
     test_path = serializers.CharField(max_length=500)
     root_test = serializers.CharField(max_length=200)
+    aggregation = serializers.CharField()
 
 
 class TestVersionForTestPathListSerializer(serializers.Serializer):

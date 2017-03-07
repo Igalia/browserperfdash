@@ -202,8 +202,14 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 $scope.data.push(databucket[key])
                 $scope.series.push(key);
             }
+            if ( $scope.selectedSubtest.aggregation != 'None' ) {
+                $scope.datasetOverride = [
+                    {
+                        borderDash: [5,10]
+                    }
+                ]
+            }
         });
-
 
         $scope.options = {
             responsive: true,
@@ -246,6 +252,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                             "Std. Dev: " + parseFloat(extrainformations[currentbot][tooltipItem.xLabel]['stddev']).toFixed(3),
                             "Value: " + parseFloat(datasetLabel.y).toFixed(3) + ' ' +  extrainformations[currentbot][tooltipItem.xLabel]['unit'],
                             "Delta: " + parseFloat(extrainformations[currentbot][tooltipItem.xLabel]['delta']).toFixed(3) + " %",
+                            "Aggregation: " + $scope.selectedSubtest.aggregation,
                         ];
                     }
                 }
