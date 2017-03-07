@@ -167,10 +167,6 @@ class BotDataReportList(TemplateView):
     template_name="allresults.html"
 
 
-class BotDataReportDetail(TemplateView):
-    template_name = "report.html"
-
-
 class GraphPlotView(TemplateView):
     template_name = "plot.html"
 

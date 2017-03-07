@@ -4,7 +4,6 @@ from . import views
 
 urlpatterns = [
     url(r'^report_list/$', BotDataReportList.as_view(), name='all_results'),
-    url(r'^report_detail_view/$', BotDataReportDetail.as_view()),
     url(r'^bot-report', BotReportView.as_view()),
     url(r'^browser/$', BrowsersList.as_view(), name='browser-list'),
     url(r'^browser_results_exist/$', BrowsersForResultsExistList.as_view()),
