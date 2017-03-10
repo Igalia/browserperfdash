@@ -264,7 +264,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
                 // Panning directions. Remove the appropriate direction to disable
                 // Eg. 'y' would only allow panning in the y direction
-                mode: 'x'
+                mode: 'xy'
             },
 
             // Container for zoom options
@@ -274,7 +274,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
                 // Zooming directions. Remove the appropriate direction to disable
                 // Eg. 'y' would only allow zooming in the y direction
-                mode: 'x',
+                mode: 'xy',
             }
 
         };
