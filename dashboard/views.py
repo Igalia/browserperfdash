@@ -55,14 +55,17 @@ class BotDataReportListView(generics.ListAPIView):
 
 class BotDataCompleteListView(generics.ListCreateAPIView):
     model = BotReportData
-    queryset = BotReportData.objects.filter()
+    queryset = BotReportData.objects.all()
     serializer_class = BotDataCompleteSerializer
 
 
 class BotDataReportDetailView(generics.RetrieveAPIView):
     model = BotReportData
-    queryset = BotReportData.objects.filter(aggregation='None')
     serializer_class = BotReportDataSerializer
+    queryset = BotReportData.objects.all()
+
+    def get_object(self):
+        return BotReportData.objects.get(pk=self.kwargs.get('pk'))
 
 
 class BotResultsForTestListView(generics.ListAPIView):

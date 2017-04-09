@@ -94,11 +94,11 @@
                                     <td style="text-align: center">
                                         <span ng-if="data.prev_results.browser_version == undefined" style="float: left">NULL</span>
                                         <span ng-if="data.prev_results.browser_version">
-                                            <a ng-href="dash/report/{{ data.prev_results.id }}" style="float: left">
+                                            <a ng-href="dash/report/detail/{{ data.prev_results.id }}" style="float: left">
                                                 {{ data.prev_results.browser_version }}
                                             </a>
                                         </span> -
-                                        <a ng-href="dash/report/{{ data.id }}" style="float: right">{{ data.browser_version }}</a>
+                                        <a ng-href="dash/report/detail/{{ data.id }}" style="float: right">{{ data.browser_version }}</a>
                                     </td>
                                     <td><span popover-trigger="'mouseenter'" uib-popover-template="botDetailsPopover.templateUrl"
                                               popover-title="bot: {{ data.bot }}">
@@ -214,11 +214,11 @@
                                     <td style="text-align: center">
                                         <span ng-if="data.prev_results.browser_version == undefined" style="float: left">NULL</span>
                                         <span ng-if="data.prev_results.browser_version">
-                                            <a ng-href="dash/report/{{ data.prev_results.id }}" style="float: left">
+                                            <a ng-href="dash/report/detail/{{ data.prev_results.id }}" style="float: left">
                                                 {{ data.prev_results.browser_version }}
                                             </a>
                                         </span> -
-                                        <a ng-href="dash/report/{{ data.id }}" style="float: right">{{ data.browser_version }}</a>
+                                        <a ng-href="dash/report/detail/{{ data.id }}" style="float: right">{{ data.browser_version }}</a>
                                     </td>
                                     <td><span popover-trigger="'mouseenter'" uib-popover-template="botDetailsPopover.templateUrl"
                                               popover-title="bot: {{ data.bot }}">

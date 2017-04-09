@@ -17,9 +17,9 @@ urlpatterns = [
     url(r'^testpath/(?P<browser>.+)/(?P<test>.+)$', TestPathList.as_view()),
     url(r'^test_version/(?P<browser>.+)/(?P<test>.+)/(?P<subtest>.+)$', TestVersionForTestPathList.as_view()),
     url(r'^results_for_version/(?P<browser>.+)/(?P<test>.+)/(?P<subtest>.+)/(?P<bot>.*)$', ResultsForVersionList.as_view()),
+    url(r'^report/detail/(?P<pk>\d+)$', BotDataReportDetailView.as_view()),
+    url(r'^report/test/(?P<pk>\d+)$', BotResultsForTestListView.as_view()),
     url(r'^report/(?P<days_since>.*)$', BotDataReportListView.as_view()),
     url(r'^report_full/$', BotDataCompleteListView.as_view()),
-    url(r'^report/(?P<pk>\d+)$', BotDataReportDetailView.as_view()),
-    url(r'^report/test/(?P<pk>\d+)$', BotResultsForTestListView.as_view()),
     url(r'^graph/$', GraphPlotView.as_view(), name='graph_report')
 ]
