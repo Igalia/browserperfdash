@@ -73,8 +73,13 @@ app.controller('AppController', function($scope, botReportsFactory, browserFacto
             $scope.selectedGPU = $scope.selectedBot.gpuType;
         }
     };
+    if(!$scope.selectedDays) {
+        $scope.selectedDays = 5;
+    }
     $scope.reload = function () {
-        $scope.reports = botReportsFactory.query();
+        $scope.reports = botReportsFactory.query({
+            days_since: $scope.selectedDays
+        });
     };
     $scope.reload();
 });
