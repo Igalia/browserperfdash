@@ -229,6 +229,8 @@ class BotReportView(APIView):
         except AttributeError:
             log.error("Got invalid params from the bot: %s"% request.auth)
             return HttpResponseBadRequest("Some params are missing in the request")
+
+        log.info("Started processing data from bot %s" % (bot_id))
         # The timestamp may/may not be there - hence not checking
         timestamp = datetime.datetime.fromtimestamp(float(self.request.POST.get('timestamp'))) \
             if self.request.POST.get('timestamp') else None
