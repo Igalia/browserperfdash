@@ -13,7 +13,7 @@ import json
 from helpers.benchmark_results import BenchmarkResults
 from django.views.generic import ListView, DetailView
 from .serializers import *
-import datetime
+from datetime import datetime, timedelta
 
 import logging
 
@@ -38,10 +38,19 @@ class BotAuthentication(authentication.BaseAuthentication):
         return (bot, bot_name)
 
 
-class BotDataReportListView(generics.ListCreateAPIView):
+class BotDataReportListView(generics.ListAPIView):
     model = BotReportData
-    queryset = BotReportData.objects.filter(aggregation='None')
     serializer_class = BotReportDataSerializer
+    queryset = BotReportData.objects.filter(aggregation='None')
+
+    def get_queryset(self):
+        try:
+            days_since = int(self.kwargs.get('days_since'))
+        except ValueError:
+            days_since = int(5)
+        requested_time = datetime.utcnow() + timedelta(days=-days_since)
+        queryset = super(BotDataReportListView, self).get_queryset()
+        return queryset.filter(aggregation='None', timestamp__gt=requested_time)
 
 
 class BotDataCompleteListView(generics.ListCreateAPIView):
