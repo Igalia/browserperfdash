@@ -1,7 +1,5 @@
 from rest_framework import serializers
 from .models import BotReportData, Browser, Bot, Platform, GPUType, CPUArchitecture, Test
-import datetime
-
 
 class BrowserListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -111,13 +109,8 @@ class BotReportDataSerializer(serializers.ModelSerializer):
     cpu_arch = serializers.CharField(source='bot.cpuArchitecture', read_only=True)
     platform = serializers.CharField(source='bot.platform', read_only=True)
     bot_enabled = serializers.BooleanField(source='bot.enabled', read_only=True)
-    days_since = serializers.SerializerMethodField()
     prev_results = serializers.SerializerMethodField()
     metric_unit = serializers.SerializerMethodField()
-
-    def get_days_since(self,obj):
-        current_time = datetime.datetime.utcnow()
-        return (current_time - obj.timestamp).days
 
     def get_prev_results(self, obj):
         if obj.prev_result:
@@ -138,7 +131,7 @@ class BotReportDataSerializer(serializers.ModelSerializer):
         model = BotReportData
         fields = ('id', 'bot', 'gpu_type', 'cpu_arch', 'platform', 'browser', 'browser_version',
                   'root_test','test_path', 'test_version', 'metric_unit', 'mean_value', 'stddev',
-                  'days_since' ,'timestamp','delta', 'bot_enabled', 'is_improvement', 'prev_results')
+                  'timestamp','delta', 'bot_enabled', 'is_improvement', 'prev_results')
 
 
 class BotDataCompleteSerializer(serializers.ModelSerializer):
