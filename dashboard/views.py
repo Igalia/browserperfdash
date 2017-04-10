@@ -48,9 +48,26 @@ class BotDataReportListView(generics.ListAPIView):
             days_since = int(self.kwargs.get('days_since'))
         except ValueError:
             days_since = int(5)
+
+        if not self.kwargs.get('platform') or self.kwargs.get('platform') == 'all':
+            platform_obj = Platform.objects.all()
+        elif self.kwargs.get('platform') != 'all':
+            platform_obj = Platform.objects.get(pk=self.kwargs.get('platform'))
+
+        if not self.kwargs.get('cpu') or self.kwargs.get('cpu') == 'all':
+            cpu_obj = CPUArchitecture.objects.all()
+        elif self.kwargs.get('cpu') != 'all':
+            cpu_obj = CPUArchitecture.objects.get(pk=self.kwargs.get('cpu'))
+
+        if not self.kwargs.get('gpu') or self.kwargs.get('gpu') == 'all':
+            gpu_obj = GPUType.objects.all()
+        elif self.kwargs.get('gpu') != 'all':
+            gpu_obj = GPUType.objects.get(pk=self.kwargs.get('gpu'))
+
+        bot = Bot.objects.filter(platform=platform_obj, cpuArchitecture=cpu_obj, gpuType=gpu_obj)
         requested_time = datetime.utcnow() + timedelta(days=-days_since)
         queryset = super(BotDataReportListView, self).get_queryset()
-        return queryset.filter(aggregation='None', timestamp__gt=requested_time)
+        return queryset.filter(aggregation='None', timestamp__gt=requested_time, bot__in=bot)
 
 
 class BotDataCompleteListView(generics.ListCreateAPIView):

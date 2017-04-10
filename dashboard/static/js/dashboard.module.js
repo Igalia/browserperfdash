@@ -2,7 +2,7 @@ app = angular.module('browserperfdash.dashboard.static', ['ngResource','ngAnimat
     'chart.js' ]);
 
 app.factory('botReportsFactory', function($resource) {
-    return $resource('/dash/report/:days_since');
+    return $resource('/dash/report/:days_since/:platform/:cpu/:gpu');
 });
 
 app.factory('browserFactory', function($resource) {
@@ -73,12 +73,16 @@ app.controller('AppController', function($scope, botReportsFactory, browserFacto
             $scope.selectedGPU = $scope.selectedBot.gpuType;
         }
     };
-    if(!$scope.selectedDays) {
-        $scope.selectedDays = 5;
-    }
+    $scope.selectedDays = !$scope.selectedDays ? 5 : $scope.selectedDays;
+    $scope.selectedPlatform = !$scope.selectedPlatform ? 'all' : $scope.selectedPlatform;
+    $scope.selectedCPU = !$scope.selectedCPU ? 'all' : $scope.selectedCPU;
+    $scope.selectedGPU = !$scope.selectedGPU ? 'all' : $scope.selectedGPU;
     $scope.reload = function () {
         $scope.reports = botReportsFactory.query({
-            days_since: $scope.selectedDays
+            days_since: $scope.selectedDays,
+            platform: $scope.selectedPlatform,
+            cpu: $scope.selectedCPU,
+            gpu: $scope.selectedGPU
         });
     };
     $scope.reload();
@@ -116,12 +120,16 @@ app.controller('DeltaController', function($scope, botReportsFactory, browserFac
             $scope.selectedGPU = $scope.selectedBot.gpuType;
         }
     };
-    if(!$scope.selectedDays) {
-        $scope.selectedDays = 5;
-    }
+    $scope.selectedDays = !$scope.selectedDays ? 5 : $scope.selectedDays;
+    $scope.selectedPlatform = !$scope.selectedPlatform ? 'all' : $scope.selectedPlatform;
+    $scope.selectedCPU = !$scope.selectedCPU ? 'all' : $scope.selectedCPU;
+    $scope.selectedGPU = !$scope.selectedGPU ? 'all' : $scope.selectedGPU;
     $scope.reload = function () {
         $scope.reports = botReportsFactory.query({
-            days_since: $scope.selectedDays
+            days_since: $scope.selectedDays,
+            platform: $scope.selectedPlatform,
+            cpu: $scope.selectedCPU,
+            gpu: $scope.selectedGPU
         });
     };
     $scope.reload();

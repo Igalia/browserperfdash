@@ -105,9 +105,6 @@ class BotResultMinimalSerializer(serializers.ModelSerializer):
 
 
 class BotReportDataSerializer(serializers.ModelSerializer):
-    gpu_type = serializers.CharField(source='bot.gpuType', read_only=True)
-    cpu_arch = serializers.CharField(source='bot.cpuArchitecture', read_only=True)
-    platform = serializers.CharField(source='bot.platform', read_only=True)
     bot_enabled = serializers.BooleanField(source='bot.enabled', read_only=True)
     prev_results = serializers.SerializerMethodField()
     metric_unit = serializers.SerializerMethodField()
@@ -129,9 +126,8 @@ class BotReportDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BotReportData
-        fields = ('id', 'bot', 'gpu_type', 'cpu_arch', 'platform', 'browser', 'browser_version',
-                  'root_test','test_path', 'test_version', 'metric_unit', 'mean_value', 'stddev',
-                  'timestamp','delta', 'bot_enabled', 'is_improvement', 'prev_results')
+        fields = ('id', 'bot', 'browser', 'browser_version', 'root_test','test_path', 'test_version', 'metric_unit',
+                  'mean_value', 'stddev', 'timestamp', 'delta', 'bot_enabled', 'is_improvement', 'prev_results')
 
 
 class BotDataCompleteSerializer(serializers.ModelSerializer):

@@ -19,7 +19,10 @@ urlpatterns = [
     url(r'^results_for_version/(?P<browser>.+)/(?P<test>.+)/(?P<subtest>.+)/(?P<bot>.*)$', ResultsForVersionList.as_view()),
     url(r'^report/detail/(?P<pk>\d+)$', BotDataReportDetailView.as_view()),
     url(r'^report/test/(?P<pk>\d+)$', BotResultsForTestListView.as_view()),
-    url(r'^report/(?P<days_since>.*)$', BotDataReportListView.as_view()),
+    url(r'^report/(?P<days_since>\d+)/$', BotDataReportListView.as_view()),
+    url(r'^report/(?P<days_since>\d+)/(?P<platform>\w+)/$', BotDataReportListView.as_view()),
+    url(r'^report/(?P<days_since>\d+)/(?P<platform>\w+)/(?P<gpu>\w+)/$', BotDataReportListView.as_view()),
+    url(r'^report/(?P<days_since>\d+)/(?P<platform>\w+)/(?P<gpu>\w+)/(?P<cpu>\w+)/$', BotDataReportListView.as_view()),
     url(r'^report_full/$', BotDataCompleteListView.as_view()),
     url(r'^graph/$', GraphPlotView.as_view(), name='graph_report')
 ]
