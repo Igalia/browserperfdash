@@ -78,8 +78,7 @@
                         </thead>
                         <tbody>
                         {% verbatim %}
-                        <tr ng-repeat="data in reports | filter: { browser: selectedBrowser.id }
-                        | filter: {bot: selectedBot.name} | filter: {bot_enabled:true}">
+                        <tr ng-repeat="data in reports | filter: { browser: selectedBrowser.id } | filter: {bot: selectedBot.name}">
                             <td>{{ data.bot }}</td>
                             <td>{{ data.browser }}</td>
                             <td>{{ data.browser_version }}</td>

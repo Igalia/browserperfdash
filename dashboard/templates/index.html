@@ -86,8 +86,7 @@
                                 <tbody>
 
                                 <tr ng-repeat="data in reports | filter: {root_test: selectedTest.id} | filter: { browser: selectedBrowser.id }
-                        | filter: {bot: selectedBot.name} | orderBy: '-delta'
-                        | filter: {bot_enabled:true} | filter: {is_improvement: true} | limitTo:listLimit "
+                        | filter: {bot: selectedBot.name} | orderBy: '-delta' | filter: {is_improvement: true} | limitTo:listLimit "
                                     ng-class="(data.test_version==data.prev_results.test_version) ? 'active' : 'danger'"
                                     popover-trigger="mouseenter">
                                     <td>{{ data.delta| number: 1}}%</td>

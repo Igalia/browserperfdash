@@ -105,7 +105,6 @@ class BotResultMinimalSerializer(serializers.ModelSerializer):
 
 
 class BotReportDataSerializer(serializers.ModelSerializer):
-    bot_enabled = serializers.BooleanField(source='bot.enabled', read_only=True)
     prev_results = serializers.SerializerMethodField()
     metric_unit = serializers.SerializerMethodField()
 
@@ -127,7 +126,7 @@ class BotReportDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = BotReportData
         fields = ('id', 'bot', 'browser', 'browser_version', 'root_test','test_path', 'test_version', 'metric_unit',
-                  'mean_value', 'stddev', 'timestamp', 'delta', 'bot_enabled', 'is_improvement', 'prev_results')
+                  'mean_value', 'stddev', 'timestamp', 'delta', 'is_improvement', 'prev_results')
 
 
 class BotDataCompleteSerializer(serializers.ModelSerializer):
