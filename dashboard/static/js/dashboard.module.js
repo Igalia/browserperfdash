@@ -125,11 +125,14 @@ app.controller('DeltaController', function($scope, botReportsFactory, browserFac
     $scope.selectedCPU = !$scope.selectedCPU ? 'all' : $scope.selectedCPU;
     $scope.selectedGPU = !$scope.selectedGPU ? 'all' : $scope.selectedGPU;
     $scope.reload = function () {
+        $scope.loading = true;
         $scope.reports = botReportsFactory.query({
             days_since: $scope.selectedDays,
             platform: $scope.selectedPlatform,
             cpu: $scope.selectedCPU,
             gpu: $scope.selectedGPU
+        }, function () {
+            $scope.loading = false;
         });
     };
     $scope.reload();

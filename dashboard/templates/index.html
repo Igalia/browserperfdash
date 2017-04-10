@@ -63,7 +63,7 @@
                                        data-ng-model="selectedDays" class="form-control" style="width: 65px;" id="selectedDays">
                             </div>
                             <button type="button" class="btn btn-default" ng-click="reload()" id="reload">
-                                <i class="glyphicon glyphicon-refresh"></i></button>
+                                <i class="glyphicon glyphicon-refresh" ng-class="{'glyphicon-refresh-animate': loading}"></i></button>
                         </div>
                         {% endverbatim %}
                     </form>
