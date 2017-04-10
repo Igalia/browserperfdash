@@ -2,7 +2,7 @@ app = angular.module('browserperfdash.dashboard.static', ['ngResource','ngAnimat
     'chart.js' ]);
 
 app.factory('botReportsFactory', function($resource) {
-    return $resource('/dash/report/:days_since/:platform/:cpu/:gpu');
+    return $resource('/dash/report/:days_since/:platform/:gpu/:cpu');
 });
 
 app.factory('browserFactory', function($resource) {
@@ -81,8 +81,8 @@ app.controller('AppController', function($scope, botReportsFactory, browserFacto
         $scope.reports = botReportsFactory.query({
             days_since: $scope.selectedDays,
             platform: $scope.selectedPlatform,
-            cpu: $scope.selectedCPU,
-            gpu: $scope.selectedGPU
+            gpu: $scope.selectedGPU,
+            cpu: $scope.selectedCPU
         });
     };
     $scope.reload();
@@ -129,8 +129,8 @@ app.controller('DeltaController', function($scope, botReportsFactory, browserFac
         $scope.reports = botReportsFactory.query({
             days_since: $scope.selectedDays,
             platform: $scope.selectedPlatform,
-            cpu: $scope.selectedCPU,
-            gpu: $scope.selectedGPU
+            gpu: $scope.selectedGPU,
+            cpu: $scope.selectedCPU
         }, function () {
             $scope.loading = false;
         });
