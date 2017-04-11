@@ -110,18 +110,6 @@
                                            uib-popover-template="testDetailsPopover.templateUrl" popover-title="test details of both revisions (unchanged)"
                                            ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}
                                         </a>
-                                        <script type="text/ng-template" id="test-template.html">
-                                            <table class="table table-condensed table-responsive">
-                                                <tr>
-                                                    <td><strong>test</strong></td>
-                                                    <td>{{ data.root_test }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>version</strong></td>
-                                                    <td>..{{ data.test_version.substr(data.test_version.length - 28) }}</td>
-                                                </tr>
-                                            </table>
-                                        </script>
                                         <a ng-if="data.test_version != data.prev_results.test_version"  popover-title="test: {{ data.root_test  }}"
                                            uib-popover="Warning: The test version changed in between the revisions." popover-trigger="'mouseenter'"
                                            ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}
@@ -133,28 +121,12 @@
                                               popover-title="browser rev: {{ data.prev_results.browser_version }}" style="float: left">
                                             {{ data.prev_results.mean_value | number:2 }} {{ data.metric_unit.unit }}
                                         </span>
-                                        <script type="text/ng-template" id="prev-result-template.html">
-                                            <table class="table table-condensed">
-                                                <tr>
-                                                    <td><strong>Std. dev</strong></td>
-                                                    <td>{{ data.prev_results.stddev | number:3 }}</td>
-                                                </tr>
-                                            </table>
-                                        </script>
                                         <span ng-if="data.prev_results.mean_value == undefined" style="float: left">NULL</span>
                                         <span style="text-align: center">-</span>
                                         <span popover-trigger="'mouseenter'" uib-popover-template="currResultDetailsPopover.templateUrl"
                                               popover-title="browser rev: {{ data.browser_version }}" style="float: right">
                                             {{ data.mean_value | number:2 }} {{ data.metric_unit.unit }}
                                         </span>
-                                        <script type="text/ng-template" id="result-template.html">
-                                            <table class="table table-condensed">
-                                                <tr>
-                                                    <td><strong>Std. dev</strong></td>
-                                                    <td>{{ data.stddev | number:3 }}</td>
-                                                </tr>
-                                            </table>
-                                        </script>
                                     </td>
                                     <td>{{ data.metric_unit.name }}
                                         <i ng-if="data.metric_unit.is_better === 'dw'"class="glyphicon glyphicon-chevron-down"></i>
@@ -211,18 +183,6 @@
                                            uib-popover-template="testDetailsPopover.templateUrl" popover-title="test details of both revisions (unchanged)"
                                            ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}
                                         </a>
-                                        <script type="text/ng-template" id="test-template.html">
-                                            <table class="table table-condensed table-responsive">
-                                                <tr>
-                                                    <td><strong>test</strong></td>
-                                                    <td>{{ data.root_test }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>version</strong></td>
-                                                    <td>..{{ data.test_version.substr(data.test_version.length - 28) }}</td>
-                                                </tr>
-                                            </table>
-                                        </script>
                                         <a ng-if="data.test_version != data.prev_results.test_version"  popover-title="test: {{ data.root_test  }}"
                                            uib-popover="Warning: The test version changed in between the revisions." popover-trigger="'mouseenter'"
                                            ng-href="dash/report/test/{{ data.id }}">{{ data.test_path }}
@@ -235,34 +195,20 @@
                                               popover-title="browser rev: {{ data.prev_results.browser_version }}" style="float: left">
                                             {{ data.prev_results.mean_value | number:2 }} {{ data.metric_unit.unit }}
                                         </span>
-                                        <script type="text/ng-template" id="prev-result-template.html">
-                                            <table class="table table-condensed">
-                                                <tr>
-                                                    <td><strong>Std. dev</strong></td>
-                                                    <td>{{ data.prev_results.stddev | number:3 }}</td>
-                                                </tr>
-                                            </table>
-                                        </script>
                                         <span ng-if="data.prev_results.mean_value == undefined" style="float: left">NULL</span>
                                         <span style="text-align: center">-</span>
                                         <span popover-trigger="'mouseenter'" uib-popover-template="currResultDetailsPopover.templateUrl"
                                               popover-title="browser rev: {{ data.browser_version }}" style="float: right">
                                             {{ data.mean_value | number:2 }} {{ data.metric_unit.unit }}
                                         </span>
-                                        <script type="text/ng-template" id="result-template.html">
-                                            <table class="table table-condensed">
-                                                <tr>
-                                                    <td><strong>Std. dev</strong></td>
-                                                    <td>{{ data.stddev | number:3 }}</td>
-                                                </tr>
-                                            </table>
-                                        </script>
+
                                     </td>
                                     <td>{{ data.metric_unit.name }}
                                         <i ng-if="data.metric_unit.is_better === 'dw'"class="glyphicon glyphicon-chevron-down"></i>
                                         <i ng-if="data.metric_unit.is_better === 'up'"class="glyphicon glyphicon-chevron-up"></i>
                                     </td>
                                 </tr>
+                                <!-- Popopver templates start -->
                                 <script type="text/ng-template" id="bot-template.html">
                                     <table class="table table-condensed">
                                         <tr>
@@ -279,6 +225,35 @@
                                         </tr>
                                     </table>
                                 </script>
+                                <script type="text/ng-template" id="test-template.html">
+                                    <table class="table table-condensed table-responsive">
+                                        <tr>
+                                            <td><strong>test</strong></td>
+                                            <td>{{ data.root_test }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>version</strong></td>
+                                            <td>..{{ data.test_version.substr(data.test_version.length - 28) }}</td>
+                                        </tr>
+                                    </table>
+                                </script>
+                                <script type="text/ng-template" id="prev-result-template.html">
+                                    <table class="table table-condensed">
+                                        <tr>
+                                            <td><strong>Std. dev</strong></td>
+                                            <td>{{ data.prev_results.stddev | number:3 }}</td>
+                                        </tr>
+                                    </table>
+                                </script>
+                                <script type="text/ng-template" id="result-template.html">
+                                    <table class="table table-condensed">
+                                        <tr>
+                                            <td><strong>Std. dev</strong></td>
+                                            <td>{{ data.stddev | number:3 }}</td>
+                                        </tr>
+                                    </table>
+                                </script>
+                                <!-- Popopver templates end-->
                                 {% endverbatim %}
                                 </tbody>
                             </table>
