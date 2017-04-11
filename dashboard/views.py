@@ -201,10 +201,6 @@ class DefaultHomeView(ListView):
         return BotReportData.objects.all()
 
 
-class BotDataReportList(TemplateView):
-    template_name="allresults.html"
-
-
 class GraphPlotView(TemplateView):
     template_name = "plot.html"
 
