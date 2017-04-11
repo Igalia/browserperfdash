@@ -1,7 +1,8 @@
 {% extends "static/base.html" %}
 {% load static %}
 {% block body %}
-    <div class="container-fluid" ng-controller="{% block ng_controller %}DeltaController{% endblock %}">
+    <div class="container-fluid" ng-app="{% block ng_app %}browserperfdash.dashboard.static{% endblock %}"
+         ng-controller="{% block ng_controller %}DeltaController{% endblock %}">
         {% block content %}
             <div class="row">
                 <div class="container-fluid">
@@ -265,5 +266,6 @@
                 </div>
             </div>
         {% endblock content %}
+        <script type="text/javascript" src="{% static 'js/dashboard.module.js' %}"></script>
     </div>
 {% endblock body %}

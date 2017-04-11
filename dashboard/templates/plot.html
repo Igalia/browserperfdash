@@ -1,7 +1,7 @@
 {% extends "static/base.html" %}
 {% load static %}
 {% block body %}
-    <div class="container-fluid" ng-controller="{% block ng_controller %}PlotController{% endblock %}">
+    <div class="container-fluid" ng-app="{% block ng_app %}browserperfdash.plot.static{% endblock %}" ng-controller="{% block ng_controller %}PlotController{% endblock %}">
         {% block content %}
             <div class="row">
                 <div class="container-fluid">
@@ -48,4 +48,10 @@
                 </div>
             </div>
         {% endblock %}
+        <script src="{% static 'js/node_modules/moment/min/moment.min.js' %}"></script>
+        <script src="{% static 'js/node_modules/chart.js/dist/Chart.min.js' %}"></script>
+        <script src="{% static 'js/node_modules/angular-chart.js/dist/angular-chart.min.js' %}"></script>
+        <script src="{% static 'js/node_modules/hammerjs/hammer.min.js' %}"></script>
+        <script src="{% static 'js/node_modules/chartjs-plugin-zoom/chartjs-plugin-zoom.min.js' %}"></script>
+        <script src="{% static 'js/plot.module.js' %}"></script>
 {% endblock body %}
