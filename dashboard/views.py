@@ -109,10 +109,18 @@ class BrowsersForResultsExistList(generics.ListAPIView):
     queryset = BotReportData.objects.distinct('browser')
     serializer_class = BrowsersForResultsExistListSerializer
 
+
 class BotsList(generics.ListAPIView):
     model = Bot
     queryset = Bot.objects.filter(enabled=True)
     serializer_class = BotListSerializer
+
+
+class BotDetailView(generics.RetrieveAPIView):
+    model = Bot
+    queryset = Bot.objects.all()
+    lookup_fields = ('name')
+    serializer_class = BotDetailsListSerializer
 
 
 class BotsForResultsExistList(generics.ListAPIView):

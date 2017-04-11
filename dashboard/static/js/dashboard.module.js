@@ -17,6 +17,10 @@ app.factory('botFactory', function($resource) {
     return $resource('/dash/bot');
 });
 
+app.factory('botDetailsFactory', function ($resource) {
+    return $resource('/dash/bot/detail/:bot');
+});
+
 app.factory('botForResultsExistFactory', function($resource) {
     return $resource('/dash/bot_results_exist');
 });
@@ -90,7 +94,8 @@ app.controller('AppController', function($scope, botReportsFactory, browserFacto
 
 app.controller('DeltaController', function($scope, botReportsFactory, browserFactory,
                                            botFactory, platformFactory, gpuFactory,
-                                           cpuArchFactory, testFactory, $interval, $sce) {
+                                           cpuArchFactory, testFactory, botDetailsFactory,
+                                           $interval, $sce) {
     $scope.browsers = browserFactory.query();
     $scope.bots = botFactory.query();
     $scope.platforms = platformFactory.query();
@@ -133,6 +138,16 @@ app.controller('DeltaController', function($scope, botReportsFactory, browserFac
             cpu: $scope.selectedCPU
         }, function () {
             $scope.loading = false;
+        });
+    };
+    $scope.updateBotPopover = function (botname) {
+        botDetailsFactory.get({
+            bot: botname
+        }, function (data) {
+            $scope.bot_cpu_arch = data.cpuArchitecture;
+            $scope.bot_gpu_type = data.gpuType;
+            $scope.bot_platform = data.platform;
+            $scope.loadedBotData = true;
         });
     };
     $scope.reload();

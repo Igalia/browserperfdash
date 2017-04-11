@@ -33,7 +33,7 @@
                             </div>
                             <div class="form-group">
                                 <select name="platform" class="form-control" ng-model="selectedPlatform" ng-disabled="selectedBot"
-                                ng-change="reload()">
+                                        ng-change="reload()">
                                     <option value="">--All platforms--</option>
                                     <option ng-repeat="x in platforms" value="{{ x.id }}">{{ x.name }}</option>
                                     <option value="{{ selectedBot.platform }}" ng-selected="selectedBot" ng-show="selectedBot">
@@ -101,25 +101,9 @@
                                         <a ng-href="dash/report/detail/{{ data.id }}" style="float: right">{{ data.browser_version }}</a>
                                     </td>
                                     <td><span popover-trigger="'mouseenter'" uib-popover-template="botDetailsPopover.templateUrl"
-                                              popover-title="bot: {{ data.bot }}">
+                                              popover-title="bot: {{ data.bot }}" ng-mouseover="updateBotPopover(data.bot)">
                                         {{ data.bot }}
                                     </span>
-                                        <script type="text/ng-template" id="bot-template.html">
-                                            <table class="table table-condensed">
-                                                <tr>
-                                                    <td><strong>cpu</strong></td>
-                                                    <td>{{ data.cpu_arch }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>gpu</strong></td>
-                                                    <td>{{ data.gpu_type }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>platform</strong></td>
-                                                    <td>{{ data.platform }}</td>
-                                                </tr>
-                                            </table>
-                                        </script>
                                     </td>
                                     <td>
                                         <a ng-if="data.test_version==data.prev_results.test_version" popover-trigger="'mouseenter'"
@@ -221,22 +205,6 @@
                                               popover-title="bot: {{ data.bot }}">
                                             {{ data.bot }}
                                         </span>
-                                        <script type="text/ng-template" id="bot-template.html">
-                                            <table class="table table-condensed table-responsive">
-                                                <tr>
-                                                    <td><strong>cpu</strong></td>
-                                                    <td>{{ data.cpu_arch }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>gpu</strong></td>
-                                                    <td>{{ data.gpu_type }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>platform</strong></td>
-                                                    <td>{{ data.platform }}</td>
-                                                </tr>
-                                            </table>
-                                        </script>
                                     </td>
                                     <td>
                                         <a ng-if="data.test_version==data.prev_results.test_version" popover-trigger="'mouseenter'"
@@ -295,6 +263,22 @@
                                         <i ng-if="data.metric_unit.is_better === 'up'"class="glyphicon glyphicon-chevron-up"></i>
                                     </td>
                                 </tr>
+                                <script type="text/ng-template" id="bot-template.html">
+                                    <table class="table table-condensed">
+                                        <tr>
+                                            <td><strong>cpu</strong></td>
+                                            <td ng-if="loadedBotData">{{ bot_cpu_arch }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>gpu</strong></td>
+                                            <td ng-if="loadedBotData">{{ bot_gpu_type }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>platform</strong></td>
+                                            <td ng-if="loadedBotData">{{ bot_platform }}</td>
+                                        </tr>
+                                    </table>
+                                </script>
                                 {% endverbatim %}
                                 </tbody>
                             </table>

@@ -19,7 +19,27 @@ class TestsForResultsExistListSerializer(serializers.Serializer):
 class BotsForResultsExistListSerializer(serializers.Serializer):
     bot = serializers.CharField(max_length=50)
 
+
 class BotListSerializer(serializers.ModelSerializer):
+    gpuType = serializers.SerializerMethodField()
+    cpuArchitecture = serializers.SerializerMethodField()
+    platform = serializers.SerializerMethodField()
+
+    def get_gpuType(self, obj):
+        return obj.gpuType.name
+
+    def get_cpuArchitecture(self, obj):
+        return obj.cpuArchitecture.name
+
+    def get_platform(self,obj):
+        return obj.platform.name
+
+    class Meta:
+        model = Bot
+        fields = ('name', 'cpuArchitecture', 'gpuType', 'platform')
+
+
+class BotDetailsListSerializer(serializers.ModelSerializer):
     gpuType = serializers.SerializerMethodField()
     cpuArchitecture = serializers.SerializerMethodField()
     platform = serializers.SerializerMethodField()
