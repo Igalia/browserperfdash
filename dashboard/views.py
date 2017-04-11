@@ -79,11 +79,8 @@ class BotDataCompleteListView(generics.ListCreateAPIView):
 
 class BotDataReportDetailView(generics.RetrieveAPIView):
     model = BotReportData
-    serializer_class = BotReportDataSerializer
     queryset = BotReportData.objects.all()
-
-    def get_object(self):
-        return BotReportData.objects.get(pk=self.kwargs.get('pk'))
+    serializer_class = BotReportDataSerializer
 
 
 class BotResultsForTestListView(generics.ListAPIView):
@@ -119,7 +116,6 @@ class BotsList(generics.ListAPIView):
 class BotDetailView(generics.RetrieveAPIView):
     model = Bot
     queryset = Bot.objects.all()
-    lookup_fields = ('name')
     serializer_class = BotDetailsListSerializer
 
 
