@@ -2,8 +2,6 @@ from django.contrib import admin
 from dashboard.models import CPUArchitecture, GPUType, Platform, Bot, Browser, Test, MetricUnit, BotReportData
 from .forms import BotForm
 
-# Register your models here.
-
 
 class CPUArchitectureAdmin(admin.ModelAdmin):
     list_display = ('name', 'enabled')
@@ -37,7 +35,23 @@ admin.site.register(Test, TestAdmin)
 
 
 class MetricUnitAdmin(admin.ModelAdmin):
-    list_display = ('name', 'is_better')
+    change_form_template = 'admin/dashboard/metric_change_form.html'
+    exclude = ['prefix']
+
+    def save_model(self, request, obj, form, change):
+        data = request.POST
+        print(data)
+        prefix_post_data = {}
+        for item in data:
+            if item.startswith('key'):
+                original_key = item.split('key_')[1]
+                modified_key = data[item]
+                original_value = data['value_'+original_key]
+                prefix_post_data[modified_key] = original_value
+
+        obj.prefix = prefix_post_data
+        obj.save()
+
 admin.site.register(MetricUnit, MetricUnitAdmin)
 
 

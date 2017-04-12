@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 import datetime
+from django.contrib.postgres.fields import JSONField
 # Create your models here.
 
 
@@ -90,7 +91,7 @@ class MetricUnit(models.Model):
     name = models.CharField(_('Metric Name'), max_length=50, primary_key=True)
     unit = models.CharField(_('Metric Unit'), max_length=10, blank=True, unique=False)
     description = models.CharField(_('Metric Description'), max_length=150, blank=True, unique=False)
-    prefix = models.CharField(_('Metric Prefix'), max_length=50, blank=True, unique=False)
+    prefix = JSONField()
     is_better = models.CharField(_('Is Better'), max_length=2, choices=IS_BETTER_CHOICES, default='dw')
 
     def __unicode__(self):
