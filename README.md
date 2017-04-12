@@ -51,7 +51,11 @@ Collect all the static files for fast serving
 python manage.py collectstatic
 ```
 
-Create `browserperfdash/local_settings.py` with local configurations (if any)
+Create `browserperfdash/local_settings.py` with local configurations
+```bash
+mv docs/local-settings.py browserperfdash/local_settings.py
+```
+
 
 ## Run server
 ```bash
