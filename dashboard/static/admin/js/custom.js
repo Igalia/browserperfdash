@@ -18,7 +18,6 @@
 
         var removeLink = document.createElement("a");
         removeLink.setAttribute("class","deletelink");
-        removeLink.setAttribute("onclick", 'removeRow(this)');
 
         var removeText = document.createTextNode("remove");
         removeLink.appendChild(removeText);
