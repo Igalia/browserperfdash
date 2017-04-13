@@ -40,7 +40,6 @@ class MetricUnitAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         data = request.POST
-        print(data)
         prefix_post_data = {}
         for item in data:
             if item.startswith('key'):
