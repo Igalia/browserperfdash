@@ -125,7 +125,7 @@ class BotReportData(models.Model):
     test_path = models.CharField(_('Test Path'), max_length=500, blank=True, unique=False)
     test_version = models.CharField(_('Test Version'), max_length=500, blank=True, unique=False)
     aggregation = models.CharField(_('Aggregation'), max_length=50, choices=AGGREGATION_CHOICES, default='na')
-    metric_tested = models.ForeignKey(MetricUnit, blank=False, null=False)
+    metric_unit = models.ForeignKey(MetricUnit, blank=False, null=False)
     mean_value = models.FloatField(_('Mean Value'),null=True, blank=True)
     stddev = models.FloatField(_('Standard Deviation'),null=True, blank=True)
     delta = models.FloatField(_('Delta Field'), null=True, blank=True, default=0.00)

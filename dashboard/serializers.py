@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BotReportData, Browser, Bot, Platform, GPUType, CPUArchitecture, Test
+from .models import BotReportData, Browser, Bot, Platform, GPUType, CPUArchitecture, Test, MetricUnit
 
 class BrowserListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -124,9 +124,15 @@ class BotResultMinimalSerializer(serializers.ModelSerializer):
         fields = ('id', 'test_version')
 
 
+class MetricUnitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MetricUnit
+        fields = ('name', 'unit', 'prefix', 'is_better')
+
+
 class BotReportDataSerializer(serializers.ModelSerializer):
     prev_results = serializers.SerializerMethodField()
-    metric_unit = serializers.SerializerMethodField()
+    metric_unit = MetricUnitSerializer()
 
     def get_prev_results(self, obj):
         if obj.prev_result:
@@ -139,9 +145,6 @@ class BotReportDataSerializer(serializers.ModelSerializer):
                     }
         else:
             return None
-
-    def get_metric_unit(self, obj):
-        return { "name": obj.metric_tested.name, "unit": obj.metric_tested.unit, "is_better": obj.metric_tested.is_better }
 
     class Meta:
         model = BotReportData

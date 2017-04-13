@@ -55,7 +55,7 @@ admin.site.register(MetricUnit, MetricUnitAdmin)
 
 
 class BotReportDataAdmin(admin.ModelAdmin):
-    list_display = ('bot', 'browser', 'browser_version', 'test_path', 'timestamp', 'metric_tested','mean_value',
+    list_display = ('bot', 'browser', 'browser_version', 'test_path', 'timestamp', 'metric_unit','mean_value',
                     'is_improvement')
     readonly_fields = ('timestamp',)
 admin.site.register(BotReportData, BotReportDataAdmin)
