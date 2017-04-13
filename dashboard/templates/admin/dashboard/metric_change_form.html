@@ -88,12 +88,12 @@
                                 <tr>
                                     <td><input value="{{ mykey }}" id="id_{{ mykey }}" name="key_{{ mykey }}" class="vTextField"/> </td>
                                     <td><input value="{{ myvalue }}" id="id_value_{{ mykey }}" name="value_{{ mykey }}" type="number" class="vTextField"/></td>
-                                    <td><p class="deletelink-box"> <a class="deletelink" onclick="removeRow(this);">remove</a> </p></td>
+                                    <td><p class="deletelink-box"> <a class="deletelink" onclick="removeRow(this)">remove</a> </p></td>
                                 </tr>
                             {% endfor %}
                             </tbody>
                         </table>
-                        <p class="addlink-box"><a class="addlink" onclick="addRow();">Add row</a></p>
+                        <p class="addlink-box"><a class="addlink" id="addrowlink">Add row</a></p>
                     </fieldset>
 
                 {% endfor %}
@@ -127,6 +127,7 @@
         </div>
     </form></div>
     <script type="text/javascript">
+        document.getElementById('addrowlink').addEventListener("click", addRow);
         function removeRow(n) {
             var tr = n.parentNode.parentNode.parentNode;
             var table = document.getElementById('metrics_table_body');
