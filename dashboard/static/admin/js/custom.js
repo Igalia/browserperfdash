@@ -29,8 +29,12 @@
         currentCell.appendChild(valueBox);
         currentCell = currentRow.insertCell(-1);
         currentCell.appendChild(removeLinkContainer);
+
+        $('.deletelink').click(function () {
+            $(this).closest("tr").remove();
+        })
     });
-    $('.deletelink').click(function () {
+    $('.deletelink-box').click(function () {
         $(this).closest("tr").remove();
     })
 
