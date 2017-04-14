@@ -108,10 +108,10 @@ AGGREGATION_CHOICES = (
 
 class BotReportDataManger(models.Manager):
     def create_report(self, bot, browser, browser_version, root_test, test_path, test_version, aggregation,
-                      metric_tested, mean_value, stddev, delta, is_improvement,prev_result,timestamp=None):
+                      metric_unit, mean_value, stddev, delta, is_improvement,prev_result,timestamp=None):
         bot_report_data = self.create(bot=bot, browser=browser, browser_version=browser_version, root_test=root_test,
                                       test_path=test_path, test_version=test_version, aggregation=aggregation,
-                                      metric_tested=metric_tested, mean_value=mean_value, stddev=stddev, delta=delta,
+                                      metric_unit=metric_unit, mean_value=mean_value, stddev=stddev, delta=delta,
                                       is_improvement=is_improvement, prev_result=prev_result, timestamp=timestamp)
         return bot_report_data
 

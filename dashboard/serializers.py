@@ -93,7 +93,7 @@ class TestVersionForTestPathListSerializer(serializers.Serializer):
     metrics = serializers.SerializerMethodField()
 
     def get_metrics(self,obj):
-        return { 'metric': obj.metric_tested.name, 'is_better': obj.metric_tested.is_better }
+        return { 'metric': obj.metric_unit.name, 'is_better': obj.metric_unit.is_better }
 
 
 class ResultsForVersionListSerializer(serializers.Serializer):
@@ -108,10 +108,10 @@ class ResultsForVersionListSerializer(serializers.Serializer):
     test_version = serializers.CharField()
 
     def get_unit(self,obj):
-        return obj.metric_tested.unit
+        return obj.metric_unit.unit
 
     def get_is_better(self,obj):
-        return obj.metric_tested.is_better
+        return obj.metric_unit.is_better
 
     def get_timestamp(self,obj):
         return obj.timestamp.strftime('%s')
@@ -156,7 +156,7 @@ class BotDataCompleteSerializer(serializers.ModelSerializer):
     metric_unit = serializers.SerializerMethodField()
 
     def get_metric_unit(self, obj):
-        return { "name": obj.metric_tested.name, "unit": obj.metric_tested.unit, "is_better": obj.metric_tested.is_better }
+        return { "name": obj.metric_unit.name, "unit": obj.metric_unit.unit, "is_better": obj.metric_unit.is_better }
 
 
     class Meta:

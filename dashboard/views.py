@@ -318,7 +318,7 @@ class BotReportView(APIView):
             report = BotReportData.objects.create_report(bot=bot, browser=browser, browser_version=browser_version,
                                                          root_test=root_test, test_path=raw_path,
                                                          test_version=test_version, aggregation=aggregation,
-                                                         metric_tested= current_metric, mean_value=mean_value,
+                                                         metric_unit=current_metric, mean_value=mean_value,
                                                          stddev=stddev,delta=delta,is_improvement=is_improvement,
                                                          prev_result=prev_result, timestamp=timestamp)
             if not report:
