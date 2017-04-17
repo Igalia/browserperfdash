@@ -315,7 +315,7 @@ class BotReportView(APIView):
                     modified_prefix = self.calculate_prefix(current_metric.prefix, mean_value, curr_string="",
                                                         original_prefix=current_metric.unit)
                 else:
-                    modified_prefix = format(mean_value, '.2f') + " " + current_metric.unit
+                    modified_prefix = str(mean_value) + " " + current_metric.unit
             except MetricUnit.DoesNotExist:
                 log.error("Got wrong Metric %s for bot: %s, browser: %s, browser_version: %s, root_test: %s,"
                           " test_description: %s" % (metric_name, bot_id, browser_id, browser_version, test_id, raw_path)
