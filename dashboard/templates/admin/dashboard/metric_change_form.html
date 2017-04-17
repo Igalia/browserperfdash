@@ -84,12 +84,12 @@
                             <td><b>Number of Metric units</b></td>
                             </thead>
                             <tbody id="metrics_table_body">
-                            {%  for mykey, myvalue in original.prefix.items %}
-                                <tr>
-                                    <td><input value="{{ mykey }}" id="id_{{ mykey }}" name="key_{{ mykey }}" class="vTextField"/> </td>
-                                    <td><input value="{{ myvalue }}" id="id_value_{{ mykey }}" name="value_{{ mykey }}" type="number" class="vTextField"/></td>
-                                    <td><p class="deletelink-box"> <a class="deletelink">remove</a> </p></td>
-                                </tr>
+                            {% for prefix in original.prefix %}
+                                    <tr>
+                                        <td><input value="{{ prefix.symbol }}" id="id_{{ prefix.symbol }}" name="key_{{ prefix.symbol }}" class="vTextField"/> </td>
+                                        <td><input value="{{ prefix.unit }}" id="id_value_{{ prefix.symbol }}" name="value_{{ prefix.symbol }}" type="number" class="vTextField"/></td>
+                                        <td><p class="deletelink-box"> <a class="deletelink">remove</a> </p></td>
+                                    </tr>
                             {% endfor %}
                             </tbody>
                         </table>

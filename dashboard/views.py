@@ -218,6 +218,26 @@ class BotReportView(APIView):
         return metric.split(':')[1]
 
     @classmethod
+    def calculate_prefix(cls, munits, mean_value, curr_string, original_prefix):
+        for index, prefix in enumerate(munits):
+            if len(munits) == 1:
+                if mean_value > prefix['unit']:
+                    mean_value = mean_value / prefix['unit']
+                curr_string += format(mean_value, '.2f') + " " + original_prefix
+                return curr_string
+
+            munits = munits[index + 1:]
+            factor = mean_value / prefix['unit']
+
+            if factor >= 1:
+                # divisible, should add it to string
+                mean_value = factor % 1 * prefix['unit']
+                curr_string += str(int(factor)) + " " + prefix['symbol'] + " "
+
+            return cls.calculate_prefix(munits, mean_value, curr_string, original_prefix)
+
+
+    @classmethod
     def process_delta_and_improvement(cls, browser, root_test, test_path, mean_value, current_metric):
         delta = 0.0
         # We take in the previous result (if exists)
@@ -291,6 +311,8 @@ class BotReportView(APIView):
 
             try:
                 current_metric = MetricUnit.objects.get(pk=metric_name)
+                modified_prefix = self.calculate_prefix(current_metric.prefix, mean_value, curr_string="",
+                                                        original_prefix=current_metric.unit)
             except MetricUnit.DoesNotExist:
                 log.error("Got wrong Metric %s for bot: %s, browser: %s, browser_version: %s, root_test: %s,"
                           " test_description: %s" % (metric_name, bot_id, browser_id, browser_version, test_id, raw_path)
@@ -318,9 +340,10 @@ class BotReportView(APIView):
             report = BotReportData.objects.create_report(bot=bot, browser=browser, browser_version=browser_version,
                                                          root_test=root_test, test_path=raw_path,
                                                          test_version=test_version, aggregation=aggregation,
-                                                         metric_unit=current_metric, mean_value=mean_value,
-                                                         stddev=stddev,delta=delta,is_improvement=is_improvement,
-                                                         prev_result=prev_result, timestamp=timestamp)
+                                                         metric_unit=current_metric, metric_unit_prefixed=modified_prefix,
+                                                         mean_value=mean_value, stddev=stddev,delta=delta,
+                                                         is_improvement=is_improvement, prev_result=prev_result,
+                                                         timestamp=timestamp)
             if not report:
                 log.error("Failed inserting data for bot: %s, browser: %s, browser_version: %s, root_test: %s, "
                           "test_description: %s" % (bot_id, browser_id, browser_version, test_id,raw_path)

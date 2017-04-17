@@ -89,7 +89,7 @@
                                 <tr ng-repeat="data in reports | filter: {root_test: selectedTest.id} | filter: { browser: selectedBrowser.id }
                         | filter: {bot: selectedBot.name} | orderBy: '-delta' | filter: {is_improvement: true} | limitTo:listLimit "
                                     ng-class="(data.test_version==data.prev_results.test_version) ? 'active' : 'danger'"
-                                    ng-init="prefix = populateMetrics(this.data)" popover-trigger="mouseenter">
+                                    popover-trigger="mouseenter">
                                     <td>{{ data.delta| number: 1}}%</td>
                                     <td>{{ data.browser }}</td>
                                     <td style="text-align: center">
@@ -162,7 +162,7 @@
                                 <tbody>
                                 <tr ng-repeat="data in reports | filter: {root_test:selectedTest.id} | filter: { browser: selectedBrowser.id }
                                             | filter: {bot: selectedBot.name} | filter: {is_improvement: false} | orderBy: '-delta' | limitTo:listLimit"
-                                    ng-class="(data.test_version==data.prev_results.test_version) ? 'active' : 'danger'" ng-init="prefix = populateMetrics(this.data)">
+                                    ng-class="(data.test_version==data.prev_results.test_version) ? 'active' : 'danger'">
                                     <td>{{ data.delta| number:1}}%</td>
                                     <td>{{ data.browser }}</td>
                                     <td style="text-align: center">
@@ -245,8 +245,8 @@
                                             <td>{{ data.prev_results.stddev | number:3 }}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Prefix</strong></td>
-                                            <td>{{ prefix.prev_mean }}</td>
+                                            <td><strong>Prefixed version</strong></td>
+                                            <td>{{ data.prev_results.metric_unit_prefixed }}</td>
                                         </tr>
                                     </table>
                                 </script>
@@ -257,8 +257,8 @@
                                             <td>{{ data.stddev | number:3 }}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Prefix</strong></td>
-                                            <td>{{ prefix.mean }}</td>
+                                            <td><strong>Prefixed version</strong></td>
+                                            <td>{{ data.metric_unit_prefixed }}</td>
                                         </tr>
                                     </table>
                                 </script>

@@ -1,6 +1,7 @@
 from django.contrib import admin
 from dashboard.models import CPUArchitecture, GPUType, Platform, Bot, Browser, Test, MetricUnit, BotReportData
 from .forms import BotForm
+import json
 
 
 class CPUArchitectureAdmin(admin.ModelAdmin):
@@ -40,15 +41,18 @@ class MetricUnitAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         data = request.POST
-        prefix_post_data = {}
+        prefix_post_data = []
         for item in data:
+            prefix = {}
             if item.startswith('key'):
                 original_key = item.split('key_')[1]
                 modified_key = data[item]
                 original_value = data['value_'+original_key]
-                prefix_post_data[modified_key] = original_value
+                prefix['symbol'] = modified_key
+                prefix['unit'] = float(original_value)
+                prefix_post_data.append(prefix)
 
-        obj.prefix = prefix_post_data
+        obj.prefix = sorted(prefix_post_data, key=lambda k: k['unit'], reverse=True)
         obj.save()
 
 admin.site.register(MetricUnit, MetricUnitAdmin)

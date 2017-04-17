@@ -142,6 +142,7 @@ class BotReportDataSerializer(serializers.ModelSerializer):
                     "timestamp": obj.prev_result.timestamp,
                     "browser_version": obj.prev_result.browser_version,
                     "stddev": obj.prev_result.stddev,
+                    "metric_unit_prefixed": obj.prev_result.metric_unit_prefixed
                     }
         else:
             return None
@@ -149,7 +150,7 @@ class BotReportDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = BotReportData
         fields = ('id', 'bot', 'browser', 'browser_version', 'root_test','test_path', 'test_version', 'metric_unit',
-                  'mean_value', 'stddev', 'timestamp', 'delta', 'is_improvement', 'prev_results')
+                  'metric_unit_prefixed', 'mean_value', 'stddev', 'timestamp', 'delta', 'is_improvement', 'prev_results')
 
 
 class BotDataCompleteSerializer(serializers.ModelSerializer):
