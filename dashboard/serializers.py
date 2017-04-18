@@ -127,7 +127,7 @@ class BotResultMinimalSerializer(serializers.ModelSerializer):
 class MetricUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = MetricUnit
-        fields = ('name', 'unit', 'prefix', 'is_better')
+        fields = ('name', 'unit', 'is_better')
 
 
 class BotReportDataSerializer(serializers.ModelSerializer):
