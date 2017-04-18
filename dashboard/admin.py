@@ -39,6 +39,25 @@ class MetricUnitAdmin(admin.ModelAdmin):
     change_form_template = 'admin/dashboard/metric_change_form.html'
     exclude = ['prefix']
 
+    @classmethod
+    def calculate_prefix(cls, munits, mean_value, curr_string, original_prefix):
+        for index, prefix in enumerate(munits):
+            if len(munits) == 1:
+                if mean_value > prefix['unit']:
+                    mean_value = mean_value / prefix['unit']
+                curr_string += format(mean_value, '.2f') + " " + original_prefix
+                return curr_string
+
+            munits = munits[index + 1:]
+            factor = mean_value / prefix['unit']
+
+            if factor >= 1:
+                # divisible, should add it to string
+                mean_value = factor % 1 * prefix['unit']
+                curr_string += str(int(factor)) + " " + prefix['symbol'] + " "
+
+            return cls.calculate_prefix(munits, mean_value, curr_string, original_prefix)
+
     def save_model(self, request, obj, form, change):
         data = request.POST
         prefix_post_data = []
@@ -52,7 +71,17 @@ class MetricUnitAdmin(admin.ModelAdmin):
                 prefix['unit'] = float(original_value)
                 prefix_post_data.append(prefix)
 
-        obj.prefix = sorted(prefix_post_data, key=lambda k: k['unit'], reverse=True)
+        updated_prefix = sorted(prefix_post_data, key=lambda k: k['unit'], reverse=True)
+        if updated_prefix != obj.prefix:
+            obj.prefix = updated_prefix
+            # We need to update prefix of affected objects
+            affected_data = BotReportData.objects.filter(metric_unit=obj)
+            for object in affected_data:
+                updated_obj_prefix = self.calculate_prefix(munits=updated_prefix, mean_value=object.mean_value,
+                                                           curr_string="", original_prefix=obj.unit)
+                object.metric_unit_prefixed = updated_obj_prefix
+                object.save()
+
         obj.save()
 
 admin.site.register(MetricUnit, MetricUnitAdmin)
