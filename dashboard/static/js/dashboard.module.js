@@ -46,7 +46,7 @@ app.factory('testFactory', function($resource) {
 app.controller('DeltaController', function($scope, botReportsImprovementFactory, botReportsRegressionFactory,
                                            browserFactory, botFactory, platformFactory, gpuFactory,
                                            cpuArchFactory, testFactory, botDetailsFactory,
-                                           $interval, $sce) {
+                                           $interval, $sce, $filter) {
     $scope.browsers = browserFactory.query();
     $scope.bots = botFactory.query();
     $scope.platforms = platformFactory.query();
@@ -71,32 +71,32 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
             $scope.selectedCPU = '';
             $scope.selectedGPU = '';
         } else {
-            $scope.selectedPlatform = $scope.selectedBot.platform;
-            $scope.selectedCPU = $scope.selectedBot.cpuArchitecture;
-            $scope.selectedGPU = $scope.selectedBot.gpuType;
+            $scope.selectedPlatform = $filter('filter')($scope.platforms, {'id': $scope.selectedBot.platform})[0];
+            $scope.selectedCPU = $filter('filter')($scope.cpus, {'id': $scope.selectedBot.cpuArchitecture})[0];
+            $scope.selectedGPU = $filter('filter')($scope.gpus, {'id': $scope.selectedBot.gpuType})[0];
         }
     };
     $scope.selectedDays = !$scope.selectedDays ? 5 : $scope.selectedDays;
-    $scope.selectedPlatform = !$scope.selectedPlatform ? 'all' : $scope.selectedPlatform;
-    $scope.selectedCPU = !$scope.selectedCPU ? 'all' : $scope.selectedCPU;
-    $scope.selectedGPU = !$scope.selectedGPU ? 'all' : $scope.selectedGPU;
     $scope.reload = function () {
         $scope.selectedBrowserId = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id;
+        $scope.selectedPlatformId = !$scope.selectedPlatform ? 'all' : $scope.selectedPlatform.id;
+        $scope.selectedCPUId = !$scope.selectedCPU ? 'all' : $scope.selectedCPU.id;
+        $scope.selectedGPUId = !$scope.selectedGPU ? 'all' : $scope.selectedGPU.id;
         $scope.loading = true;
         $scope.improvement_reports = botReportsImprovementFactory.query({
             days_since: $scope.selectedDays,
-            platform: $scope.selectedPlatform,
-            gpu: $scope.selectedGPU,
-            cpu: $scope.selectedCPU,
+            platform: $scope.selectedPlatformId,
+            gpu: $scope.selectedGPUId,
+            cpu: $scope.selectedCPUId,
             browser: $scope.selectedBrowserId
         }, function () {
             $scope.loading_improvements = false;
         });
         $scope.regression_reports = botReportsRegressionFactory.query({
             days_since: $scope.selectedDays,
-            platform: $scope.selectedPlatform,
-            gpu: $scope.selectedGPU,
-            cpu: $scope.selectedCPU,
+            platform: $scope.selectedPlatformId,
+            gpu: $scope.selectedGPUId,
+            cpu: $scope.selectedCPUId,
             browser: $scope.selectedBrowserId
         }, function () {
             $scope.loading_regressions = false;

@@ -20,23 +20,32 @@ class BotsForResultsExistListSerializer(serializers.Serializer):
     bot = serializers.CharField(max_length=50)
 
 
+class PlatformListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Platform
+        fields = ('id', 'name')
+
+
+class GPUTypeListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GPUType
+        fields = ('id', 'name')
+
+
+class CPUArchitectureListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CPUArchitecture
+        fields = ('id', 'name')
+
+
 class BotListSerializer(serializers.ModelSerializer):
-    gpuType = serializers.SerializerMethodField()
-    cpuArchitecture = serializers.SerializerMethodField()
-    platform = serializers.SerializerMethodField()
-
-    def get_gpuType(self, obj):
-        return obj.gpuType.name
-
-    def get_cpuArchitecture(self, obj):
-        return obj.cpuArchitecture.name
-
-    def get_platform(self,obj):
-        return obj.platform.name
+    gpuType = GPUTypeListSerializer
+    cpuArchitecture = CPUArchitectureListSerializer
+    platform = PlatformListSerializer
 
     class Meta:
         model = Bot
-        fields = ('name', 'cpuArchitecture', 'gpuType', 'platform')
+        fields = ('name', 'gpuType', 'cpuArchitecture', 'platform')
 
 
 class BotDetailsListSerializer(serializers.ModelSerializer):
@@ -56,24 +65,6 @@ class BotDetailsListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bot
         fields = ('name', 'cpuArchitecture', 'gpuType', 'platform')
-
-
-class PlatformListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Platform
-        fields = ('id', 'name')
-
-
-class GPUTypeListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GPUType
-        fields = ('id', 'name')
-
-
-class CPUArchitectureListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CPUArchitecture
-        fields = ('id', 'name')
 
 
 class TestListListSerializer(serializers.ModelSerializer):
