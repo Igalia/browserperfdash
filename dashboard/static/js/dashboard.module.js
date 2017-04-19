@@ -80,15 +80,15 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
     $scope.selectedPlatform = !$scope.selectedPlatform ? 'all' : $scope.selectedPlatform;
     $scope.selectedCPU = !$scope.selectedCPU ? 'all' : $scope.selectedCPU;
     $scope.selectedGPU = !$scope.selectedGPU ? 'all' : $scope.selectedGPU;
-    $scope.selectedBrowser = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser;
     $scope.reload = function () {
+        $scope.selectedBrowserId = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id;
         $scope.loading = true;
         $scope.improvement_reports = botReportsImprovementFactory.query({
             days_since: $scope.selectedDays,
             platform: $scope.selectedPlatform,
             gpu: $scope.selectedGPU,
             cpu: $scope.selectedCPU,
-            browser: $scope.selectedBrowser.id
+            browser: $scope.selectedBrowserId
         }, function () {
             $scope.loading_improvements = false;
         });
@@ -97,7 +97,7 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
             platform: $scope.selectedPlatform,
             gpu: $scope.selectedGPU,
             cpu: $scope.selectedCPU,
-            browser: $scope.selectedBrowser.id
+            browser: $scope.selectedBrowserId
         }, function () {
             $scope.loading_regressions = false;
         });
