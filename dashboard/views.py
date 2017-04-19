@@ -60,12 +60,17 @@ class BotDataReportImprovementListView(generics.ListAPIView):
         elif self.kwargs.get('gpu') != 'all':
             gpu_obj = GPUType.objects.filter(pk=self.kwargs.get('gpu'))
 
+        if not self.kwargs.get('browser') or self.kwargs.get('browser') == 'all':
+            browser_obj = Browser.objects.all()
+        elif self.kwargs.get('browser') != 'all':
+            browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
+
         bot = Bot.objects.filter(platform__in=platform_obj, cpuArchitecture__in=cpu_obj, gpuType__in=gpu_obj,
                                  enabled=True)
         requested_time = datetime.utcnow() + timedelta(days=-days_since)
         queryset = super(BotDataReportImprovementListView, self).get_queryset()
         return queryset.filter(aggregation='None', timestamp__gt=requested_time,
-                               bot__in=bot, is_improvement=True).order_by('-delta')[:30]
+                               bot__in=bot, browser__in=browser_obj, is_improvement=True).order_by('-delta')[:30]
 
 
 class BotDataReportRegressionListView(generics.ListAPIView):
@@ -94,12 +99,17 @@ class BotDataReportRegressionListView(generics.ListAPIView):
         elif self.kwargs.get('gpu') != 'all':
             gpu_obj = GPUType.objects.filter(pk=self.kwargs.get('gpu'))
 
+        if not self.kwargs.get('browser') or self.kwargs.get('browser') == 'all':
+            browser_obj = Browser.objects.all()
+        elif self.kwargs.get('browser') != 'all':
+            browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
+
         bot = Bot.objects.filter(platform__in=platform_obj, cpuArchitecture__in=cpu_obj, gpuType__in=gpu_obj,
                                  enabled=True)
         requested_time = datetime.utcnow() + timedelta(days=-days_since)
         queryset = super(BotDataReportRegressionListView, self).get_queryset()
         return queryset.filter(aggregation='None', timestamp__gt=requested_time,
-                               bot__in=bot, is_improvement=False).order_by('-delta')[:30]
+                               bot__in=bot, browser__in=browser_obj, is_improvement=False).order_by('-delta')[:30]
 
 class BotDataCompleteListView(generics.ListCreateAPIView):
     model = BotReportData
@@ -201,7 +211,7 @@ class TestVersionForTestPathList(generics.ListAPIView):
         browser = Browser.objects.filter(pk=self.kwargs.get('browser'))
         test = Test.objects.filter(pk=self.kwargs.get('test'))
         test_path = self.kwargs.get('subtest')
-        return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path).\
+        return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path). \
             distinct('test_version')
 
 
@@ -343,7 +353,7 @@ class BotReportView(APIView):
                 current_metric = MetricUnit.objects.get(pk=metric_name)
                 if len(current_metric.prefix) > 0:
                     modified_prefix = self.calculate_prefix(current_metric.prefix, mean_value, curr_string="",
-                                                        original_prefix=current_metric.unit)
+                                                            original_prefix=current_metric.unit)
                 else:
                     modified_prefix = str(mean_value) + " " + current_metric.unit
             except MetricUnit.DoesNotExist:

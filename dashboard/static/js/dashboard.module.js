@@ -7,11 +7,11 @@
 app = angular.module('browserperfdash.dashboard.static', ['ngResource','ngAnimate', 'ngSanitize', 'ui.bootstrap']);
 
 app.factory('botReportsImprovementFactory', function($resource) {
-    return $resource('/dash/report/improvement/:days_since/:platform/:gpu/:cpu');
+    return $resource('/dash/report/improvement/:days_since/:platform/:gpu/:cpu/:browser');
 });
 
 app.factory('botReportsRegressionFactory', function($resource) {
-    return $resource('/dash/report/regression/:days_since/:platform/:gpu/:cpu');
+    return $resource('/dash/report/regression/:days_since/:platform/:gpu/:cpu/:browser');
 });
 
 app.factory('browserFactory', function($resource) {
@@ -80,13 +80,15 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
     $scope.selectedPlatform = !$scope.selectedPlatform ? 'all' : $scope.selectedPlatform;
     $scope.selectedCPU = !$scope.selectedCPU ? 'all' : $scope.selectedCPU;
     $scope.selectedGPU = !$scope.selectedGPU ? 'all' : $scope.selectedGPU;
+    $scope.selectedBrowser = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser;
     $scope.reload = function () {
         $scope.loading = true;
         $scope.improvement_reports = botReportsImprovementFactory.query({
             days_since: $scope.selectedDays,
             platform: $scope.selectedPlatform,
             gpu: $scope.selectedGPU,
-            cpu: $scope.selectedCPU
+            cpu: $scope.selectedCPU,
+            browser: $scope.selectedBrowser.id
         }, function () {
             $scope.loading_improvements = false;
         });
@@ -94,7 +96,8 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
             days_since: $scope.selectedDays,
             platform: $scope.selectedPlatform,
             gpu: $scope.selectedGPU,
-            cpu: $scope.selectedCPU
+            cpu: $scope.selectedCPU,
+            browser: $scope.selectedBrowser.id
         }, function () {
             $scope.loading_regressions = false;
         });
