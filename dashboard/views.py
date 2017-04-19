@@ -1,17 +1,13 @@
-from django.shortcuts import render
-from django.shortcuts import redirect
 from django.views.generic import TemplateView
-from django.http import Http404
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
+from django.http import HttpResponse, HttpResponseBadRequest
 from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import authentication, permissions
 from rest_framework import generics
 from dashboard.models import *
 from rest_framework import exceptions
 import json
 from helpers.benchmark_results import BenchmarkResults
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView
 from .serializers import *
 from datetime import datetime, timedelta
 
@@ -104,40 +100,6 @@ class BotDataReportRegressionListView(generics.ListAPIView):
         queryset = super(BotDataReportRegressionListView, self).get_queryset()
         return queryset.filter(aggregation='None', timestamp__gt=requested_time,
                                bot__in=bot, is_improvement=False).order_by('-delta')[:30]
-
-
-class BotDataReportListView(generics.ListAPIView):
-    model = BotReportData
-    serializer_class = BotReportDataSerializer
-    queryset = BotReportData.objects.filter(aggregation='None')
-
-    def get_queryset(self):
-        try:
-            days_since = int(self.kwargs.get('days_since'))
-        except ValueError:
-            days_since = int(5)
-
-        if not self.kwargs.get('platform') or self.kwargs.get('platform') == 'all':
-            platform_obj = Platform.objects.all()
-        elif self.kwargs.get('platform') != 'all':
-            platform_obj = Platform.objects.filter(pk=self.kwargs.get('platform'))
-
-        if not self.kwargs.get('cpu') or self.kwargs.get('cpu') == 'all':
-            cpu_obj = CPUArchitecture.objects.all()
-        elif self.kwargs.get('cpu') != 'all':
-            cpu_obj = CPUArchitecture.objects.filter(pk=self.kwargs.get('cpu'))
-
-        if not self.kwargs.get('gpu') or self.kwargs.get('gpu') == 'all':
-            gpu_obj = GPUType.objects.all()
-        elif self.kwargs.get('gpu') != 'all':
-            gpu_obj = GPUType.objects.filter(pk=self.kwargs.get('gpu'))
-
-        bot = Bot.objects.filter(platform__in=platform_obj, cpuArchitecture__in=cpu_obj, gpuType__in=gpu_obj,
-                                 enabled=True)
-        requested_time = datetime.utcnow() + timedelta(days=-days_since)
-        queryset = super(BotDataReportListView, self).get_queryset()
-        return queryset.filter(aggregation='None', timestamp__gt=requested_time, bot__in=bot)
-
 
 class BotDataCompleteListView(generics.ListCreateAPIView):
     model = BotReportData

@@ -1,8 +1,6 @@
 from django.contrib import admin
 from dashboard.models import CPUArchitecture, GPUType, Platform, Bot, Browser, Test, MetricUnit, BotReportData
 from .forms import BotForm
-import json
-
 
 class CPUArchitectureAdmin(admin.ModelAdmin):
     list_display = ('name', 'enabled')

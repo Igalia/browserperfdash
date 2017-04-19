@@ -6,10 +6,6 @@
 
 app = angular.module('browserperfdash.dashboard.static', ['ngResource','ngAnimate', 'ngSanitize', 'ui.bootstrap']);
 
-app.factory('botReportsFactory', function($resource) {
-    return $resource('/dash/report/:days_since/:platform/:gpu/:cpu');
-});
-
 app.factory('botReportsImprovementFactory', function($resource) {
     return $resource('/dash/report/improvement/:days_since/:platform/:gpu/:cpu');
 });
