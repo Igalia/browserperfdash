@@ -38,6 +38,74 @@ class BotAuthentication(authentication.BaseAuthentication):
         return (bot, bot_name)
 
 
+class BotDataReportImprovementListView(generics.ListAPIView):
+    model = BotReportData
+    serializer_class = BotReportDataSerializer
+    queryset = BotReportData.objects.filter(aggregation='None')
+
+    def get_queryset(self):
+        try:
+            days_since = int(self.kwargs.get('days_since'))
+        except ValueError:
+            days_since = int(5)
+
+        if not self.kwargs.get('platform') or self.kwargs.get('platform') == 'all':
+            platform_obj = Platform.objects.all()
+        elif self.kwargs.get('platform') != 'all':
+            platform_obj = Platform.objects.filter(pk=self.kwargs.get('platform'))
+
+        if not self.kwargs.get('cpu') or self.kwargs.get('cpu') == 'all':
+            cpu_obj = CPUArchitecture.objects.all()
+        elif self.kwargs.get('cpu') != 'all':
+            cpu_obj = CPUArchitecture.objects.filter(pk=self.kwargs.get('cpu'))
+
+        if not self.kwargs.get('gpu') or self.kwargs.get('gpu') == 'all':
+            gpu_obj = GPUType.objects.all()
+        elif self.kwargs.get('gpu') != 'all':
+            gpu_obj = GPUType.objects.filter(pk=self.kwargs.get('gpu'))
+
+        bot = Bot.objects.filter(platform__in=platform_obj, cpuArchitecture__in=cpu_obj, gpuType__in=gpu_obj,
+                                 enabled=True)
+        requested_time = datetime.utcnow() + timedelta(days=-days_since)
+        queryset = super(BotDataReportImprovementListView, self).get_queryset()
+        return queryset.filter(aggregation='None', timestamp__gt=requested_time,
+                               bot__in=bot, is_improvement=True).order_by('-delta')[:30]
+
+
+class BotDataReportRegressionListView(generics.ListAPIView):
+    model = BotReportData
+    serializer_class = BotReportDataSerializer
+    queryset = BotReportData.objects.filter(aggregation='None')
+
+    def get_queryset(self):
+        try:
+            days_since = int(self.kwargs.get('days_since'))
+        except ValueError:
+            days_since = int(5)
+
+        if not self.kwargs.get('platform') or self.kwargs.get('platform') == 'all':
+            platform_obj = Platform.objects.all()
+        elif self.kwargs.get('platform') != 'all':
+            platform_obj = Platform.objects.filter(pk=self.kwargs.get('platform'))
+
+        if not self.kwargs.get('cpu') or self.kwargs.get('cpu') == 'all':
+            cpu_obj = CPUArchitecture.objects.all()
+        elif self.kwargs.get('cpu') != 'all':
+            cpu_obj = CPUArchitecture.objects.filter(pk=self.kwargs.get('cpu'))
+
+        if not self.kwargs.get('gpu') or self.kwargs.get('gpu') == 'all':
+            gpu_obj = GPUType.objects.all()
+        elif self.kwargs.get('gpu') != 'all':
+            gpu_obj = GPUType.objects.filter(pk=self.kwargs.get('gpu'))
+
+        bot = Bot.objects.filter(platform__in=platform_obj, cpuArchitecture__in=cpu_obj, gpuType__in=gpu_obj,
+                                 enabled=True)
+        requested_time = datetime.utcnow() + timedelta(days=-days_since)
+        queryset = super(BotDataReportRegressionListView, self).get_queryset()
+        return queryset.filter(aggregation='None', timestamp__gt=requested_time,
+                               bot__in=bot, is_improvement=False).order_by('-delta')[:30]
+
+
 class BotDataReportListView(generics.ListAPIView):
     model = BotReportData
     serializer_class = BotReportDataSerializer

@@ -10,6 +10,14 @@ app.factory('botReportsFactory', function($resource) {
     return $resource('/dash/report/:days_since/:platform/:gpu/:cpu');
 });
 
+app.factory('botReportsImprovementFactory', function($resource) {
+    return $resource('/dash/report/improvement/:days_since/:platform/:gpu/:cpu');
+});
+
+app.factory('botReportsRegressionFactory', function($resource) {
+    return $resource('/dash/report/regression/:days_since/:platform/:gpu/:cpu');
+});
+
 app.factory('browserFactory', function($resource) {
     return $resource('/dash/browser');
 });
@@ -39,8 +47,8 @@ app.factory('testFactory', function($resource) {
 });
 
 
-app.controller('DeltaController', function($scope, botReportsFactory, browserFactory,
-                                           botFactory, platformFactory, gpuFactory,
+app.controller('DeltaController', function($scope, botReportsImprovementFactory, botReportsRegressionFactory,
+                                           browserFactory, botFactory, platformFactory, gpuFactory,
                                            cpuArchFactory, testFactory, botDetailsFactory,
                                            $interval, $sce) {
     $scope.browsers = browserFactory.query();
@@ -78,14 +86,25 @@ app.controller('DeltaController', function($scope, botReportsFactory, browserFac
     $scope.selectedGPU = !$scope.selectedGPU ? 'all' : $scope.selectedGPU;
     $scope.reload = function () {
         $scope.loading = true;
-        $scope.reports = botReportsFactory.query({
+        $scope.improvement_reports = botReportsImprovementFactory.query({
             days_since: $scope.selectedDays,
             platform: $scope.selectedPlatform,
             gpu: $scope.selectedGPU,
             cpu: $scope.selectedCPU
         }, function () {
-            $scope.loading = false;
+            $scope.loading_improvements = false;
         });
+        $scope.regression_reports = botReportsRegressionFactory.query({
+            days_since: $scope.selectedDays,
+            platform: $scope.selectedPlatform,
+            gpu: $scope.selectedGPU,
+            cpu: $scope.selectedCPU
+        }, function () {
+            $scope.loading_regressions = false;
+        });
+        if (!$scope.loading_improvements && !$scope.loading_regressions) {
+            $scope.loading = false;
+        }
     };
     $scope.updateBotPopover = function (botname) {
         botDetailsFactory.get({
