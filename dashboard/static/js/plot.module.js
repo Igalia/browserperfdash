@@ -83,7 +83,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
         }, function (data) {
             angular.forEach(data, function (value) {
-                datum.push([value['timestamp'], value['mean_value']]);
+                datum.push([value['timestamp']*1000, value['mean_value']]);
             });
             var mid = datum[parseInt(datum.length/2)][0];
             var end = datum[datum.length-1][0];
