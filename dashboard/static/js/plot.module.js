@@ -92,10 +92,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     mode: "time",
                     tickLength: 5,
                     timeformat: "%H:%M:%S",
-                },
-                selection: {
-                    mode: "x"
-                },
+                }
             };
             var plot = $.plot("#placeholder", [datum], options);
             var rangeselectionCallback = function(o){
