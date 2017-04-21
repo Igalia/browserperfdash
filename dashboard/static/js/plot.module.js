@@ -3,8 +3,7 @@
  *
  * Created by tthomas@igalia.com on 11/4/17.
  */
-app = angular.module('browserperfdash.plot.static', ['ngResource','ngAnimate', 'ngSanitize', 'ui.bootstrap',
-    'chart.js' ]);
+app = angular.module('browserperfdash.plot.static', ['ngResource','ngAnimate', 'ngSanitize', 'ui.bootstrap', 'angular-flot' ]);
 
 app.factory('browserForResultExistFactory', function ($resource) {
     return $resource('/dash/browser_results_exist');
@@ -32,7 +31,7 @@ app.factory('testResultsForVersionFactory', function ($resource) {
 
 app.controller('PlotController', function ($scope, browserForResultExistFactory, testForResultsExistFactory,
                                            botForResultsExistFactory, testPathFactory, testVersionOfTestFactory,
-                                           testResultsForVersionFactory) {
+                                           testResultsForVersionFactory){
     $scope.browsers = browserForResultExistFactory.query({}, function (data) {
         $scope.selectedBrowser = data[0];
         $scope.tests = testForResultsExistFactory.query({}, function (data) {
@@ -75,111 +74,89 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             $scope.updateSubtests();
         }
     };
-
     $scope.drawGraph = function () {
-        $scope.labels = [];
-        $scope.data = [];
-        $scope.series = [];
-        var extrainformations = {};
-        var databucket = {};
+        var datum = [];
         var results = testResultsForVersionFactory.query({
             browser: $scope.selectedBrowser.browser_id,
             root_test: $scope.selectedTest.root_test_id,
             subtest: $scope.selectedSubtest.test_path,
             bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
         }, function (data) {
-            angular.forEach(data, function (value, key) {
-                result = [];
-                $scope.labels.push(value['timestamp']);
-                result['yvalue'] = value['mean_value'];
-                result['timestamp'] = value['timestamp'];
-                result['browser_version'] = value['browser_version'];
-                result['stddev'] = value['stddev'];
-                result['delta'] = value['delta'];
-                result['unit'] = value['unit'];
-                result['test_version'] = value['test_version'];
-                if(!extrainformations[value['bot']]) {
-                    extrainformations[value['bot']] = {};
-                    extrainformations[value['bot']][value['timestamp']] = result;
-                } else {
-                    extrainformations[value['bot']][value['timestamp']] = result;
-                }
-                if (!databucket[value['bot']]) {
-                    databucket[value['bot']] = [];
-                    databucket[value['bot']].push({x:value['timestamp'], y:value['mean_value']});
-                } else {
-                    databucket[value['bot']].push({x:value['timestamp'], y:value['mean_value']});
+            angular.forEach(data, function (value) {
+                datum.push([value['timestamp'], value['mean_value']]);
+            });
+            var mid = datum[parseInt(datum.length/2)][0];
+            var end = datum[datum.length-1][0];
+            var options = {
+                xaxis: {
+                    mode: "time",
+                    tickLength: 5,
+                    timeformat: "%H:%M:%S",
+                },
+                selection: {
+                    mode: "x"
+                },
+            };
+            var plot = $.plot("#placeholder", [datum], options);
+            var rangeselectionCallback = function(o){
+                var xaxis = plot.getAxes().xaxis;
+                xaxis.options.min = o.start;
+                xaxis.options.max = o.end;
+                plot.setupGrid();
+                plot.draw();
+            }
+            var overview = $.plot("#overview", [datum], {
+                series: {
+                    lines: {
+                        show: true,
+                        lineWidth: 1
+                    },
+                    shadowSize: 0
+                },
+                xaxis: {
+                    ticks: 10,
+                    mode: "time",
+                    timeformat: "%Y-%m-%d",
+                    zoomRange: [0.1, 10],
+                    panRange: [-10, 10]
+                },
+                yaxis: {
+                    ticks: [],
+                    min: 0,
+                    autoscaleMargin: 0.1
+                },
+                grid: {
+                    color: "#666",
+                    backgroundColor: { colors: ["#ddd", "#fff"]}
+                },
+                rangeselection:{
+                    color: "#mar",
+                    start: mid,
+                    end: end,
+                    enabled: true,
+                    callback: rangeselectionCallback
                 }
             });
-            for (var key in databucket) {
-                $scope.data.push(databucket[key])
-                $scope.series.push(key);
-            }
-            if ( $scope.selectedSubtest.aggregation != 'None' ) {
-                $scope.datasetOverride = [
-                    {
-                        borderDash: [5,10]
-                    }
-                ]
-            }
-        });
 
-        $scope.options = {
-            responsive: true,
-            legend: {
-                display: true,
-            },
-            scales: {
-                yAxes: [{
-                    scaleLabel: {
-                        display: true,
-                        labelString: $scope.testversion[0]['metrics']['metric'] +
-                        ' (' +  ($scope.testversion[0]['metrics']['metric'] == 'up' ? 'up' : 'down') + ' is better)'
-                    }
-                }],
-                xAxes: [{
-                    type: 'linear',
-                    position: 'bottom',
-                    ticks: {
-                        callback: function (value, index, values) {
-                            return moment.unix(parseInt(value)).format('YYYY-MM-DD')
-                        }
-                    }
-                }]
-            },
-            tooltips: {
-                enabled: true,
-                mode: 'single',
-                callbacks: {
-                    title: function (tooltipItem, data) {
-                        return $scope.selectedBrowser.browser_id + "@" + data.datasets[tooltipItem[0].datasetIndex].label;
-                    },
-                    label: function(tooltipItem, data) {
-                        currentbot = data.datasets[tooltipItem.datasetIndex].label;
-                        var label = extrainformations[currentbot][tooltipItem.xLabel]['timestamp'];
-                        var datasetLabel = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
-                        return [
-                            "Time: " + moment.unix(parseInt(label)).format('YYYY-MM-DD, HH:mm:ss'),
-                            "Test Version: " + extrainformations[currentbot][tooltipItem.xLabel]['test_version'].slice(-7),
-                            "Browser Version: " + extrainformations[currentbot][tooltipItem.xLabel]['browser_version'],
-                            "Std. Dev: " + parseFloat(extrainformations[currentbot][tooltipItem.xLabel]['stddev']).toFixed(3),
-                            "Value: " + parseFloat(datasetLabel.y).toFixed(3) + ' ' +  extrainformations[currentbot][tooltipItem.xLabel]['unit'],
-                            "Delta: " + parseFloat(extrainformations[currentbot][tooltipItem.xLabel]['delta']).toFixed(3) + " %",
-                            "Aggregation: " + $scope.selectedSubtest.aggregation,
-                        ];
-                    }
-                }
-            },
-            pan: {
-                enabled: true,
-                mode: 'xy'
-            },
-            zoom: {
-                enabled: true,
-                mode: 'xy',
-            }
-        };
-    };
+            $("#placeholder").bind("plotselected", function (event, ranges) {
+                // do the zooming
+                $.each(plot.getXAxes(), function(_, axis) {
+                    var opts = axis.options;
+                    opts.min = ranges.xaxis.from;
+                    opts.max = ranges.xaxis.to;
+                });
+                plot.setupGrid();
+                plot.draw();
+                plot.clearSelection();
+                // don't fire event on the overview to prevent eternal loop
+                overview.setSelection(ranges, true);
+            });
+            $("#overview").bind("plotselected", function (event, ranges) {
+                plot.setSelection(ranges);
+            });
+
+        });
+    }
 });
 
 
