@@ -85,6 +85,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             subtest: $scope.selectedSubtest.test_path,
             bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
         }, function (data) {
+            $scope.currentBrowser = $scope.selectedBrowser.browser_id;
+            $scope.currentSubtestPath = $scope.selectedSubtest.test_path;
             extraToolTipInfo = {};
             var placeholder = $("#placeholder");
             var overview_placeholder = $("#overview");
@@ -175,7 +177,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 if(item) {
                     var x = item.datapoint[0], y = item.datapoint[1];
                     var date = new Date(x);
-                    $("#tooltip").html( $scope.selectedBrowser.browser_id + "@<i>" + $scope.selectedSubtest.test_path + "</i><br>"
+                    $("#tooltip").html( $scope.currentBrowser + "@<i>" + $scope.currentSubtestPath + "</i><br>"
                         + "<b>Time</b>: " +  date.toISOString().split('T')[0] + ", " + date.toISOString().split('T')[1].substring(0,8)+ "<br>"
                         + "<b>Test Version</b>: " + extraToolTipInfo[x]['test_version'].slice(-7) + "<br>"
                         + "<b>Browser Version</b>: " + extraToolTipInfo[x]['browser_version'] + "<br>"
