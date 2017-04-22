@@ -33,6 +33,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                                            botForResultsExistFactory, testPathFactory, testVersionOfTestFactory,
                                            testResultsForVersionFactory){
     $scope.loaded = false;
+    $scope.loading = false;
     $scope.browsers = browserForResultExistFactory.query({}, function (data) {
         $scope.selectedBrowser = data[0];
         $scope.tests = testForResultsExistFactory.query({}, function (data) {
@@ -76,6 +77,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         }
     };
     $scope.drawGraph = function () {
+        $scope.loading = true;
         var datum = [];
         var extraToolTipInfo = {};
         var results = testResultsForVersionFactory.query({
@@ -84,8 +86,10 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             subtest: $scope.selectedSubtest.test_path,
             bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
         }, function (data) {
+            var placeholder = $("#placeholder");
+            var overview = $("#overview");
             angular.forEach(data, function (value) {
-                tooltipData = {}
+                tooltipData = {};
                 jqueryTimestamp = value['timestamp']*1000;
                 datum.push([jqueryTimestamp, value['mean_value']]);
                 tooltipData['yvalue'] = value['mean_value'];
@@ -112,7 +116,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     clickable: true
                 }
             };
-            var placeholder = $("#placeholder");
+            placeholder.show();
             var plot = $.plot(placeholder, [datum], options);
             var rangeselectionCallback = function(o){
                 var xaxis = plot.getAxes().xaxis;
@@ -121,7 +125,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 plot.setupGrid();
                 plot.draw();
             };
-            var overview = $.plot("#overview", [datum], {
+            var overview = $.plot(overview, [datum], {
                 series: {
                     lines: {
                         show: true,
@@ -205,9 +209,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
             $("main-container").resizable();
             $("sub-container").resizable();
-
+            $scope.loading = false;
             $scope.loaded = true;
-
         });
     }
 });
