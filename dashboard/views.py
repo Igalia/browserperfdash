@@ -226,7 +226,7 @@ class ResultsForVersionList(generics.ListAPIView):
             bot = Bot.objects.get(pk=self.kwargs.get('bot'))
             return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path, bot=bot)
         except Bot.DoesNotExist:
-            return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path)
+            return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path).order_by('timestamp')
 
 
 
