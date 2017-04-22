@@ -79,15 +79,15 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     $scope.drawGraph = function () {
         $scope.loading = true;
         var datum = [];
-        var extraToolTipInfo = {};
         var results = testResultsForVersionFactory.query({
             browser: $scope.selectedBrowser.browser_id,
             root_test: $scope.selectedTest.root_test_id,
             subtest: $scope.selectedSubtest.test_path,
             bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
         }, function (data) {
+            extraToolTipInfo = {};
             var placeholder = $("#placeholder");
-            var overview = $("#overview");
+            var overview_placeholder = $("#overview");
             angular.forEach(data, function (value) {
                 tooltipData = {};
                 jqueryTimestamp = value['timestamp']*1000;
@@ -113,7 +113,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 },
                 yaxis: {
                     axisLabel : $scope.testversion[0]['metrics']['metric'] + ' (' +
-                        ($scope.testversion[0]['metrics']['metric'] == 'up' ? 'up' : 'down') + ' is better)',
+                    ($scope.testversion[0]['metrics']['metric'] == 'up' ? 'up' : 'down') + ' is better)',
                     position: 'left',
                 },
                 grid: {
@@ -130,7 +130,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 plot.setupGrid();
                 plot.draw();
             };
-            var overview = $.plot(overview, [datum], {
+            var overview = $.plot(overview_placeholder, [datum], {
                 series: {
                     lines: {
                         show: true,
@@ -168,7 +168,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 border: "1px solid #fdd",
                 padding: "2px",
                 "background-color": "#fee",
-                opacity: 0.80
+                opacity: 0.95
             }).appendTo("body");
 
             placeholder.bind("plothover", function (event, pos, item) {
@@ -208,7 +208,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 // don't fire event on the overview to prevent eternal loop
                 overview.setSelection(ranges, true);
             });
-            $("#overview").bind("plotselected", function (event, ranges) {
+            overview_placeholder.bind("plotselected", function (event, ranges) {
                 plot.setSelection(ranges);
             });
 
