@@ -85,11 +85,15 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             subtest: $scope.selectedSubtest.test_path,
             bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
         }, function (data) {
+            // Need to update tooltips, etc
             $scope.currentBrowser = $scope.selectedBrowser.browser_id;
             $scope.currentSubtestPath = $scope.selectedSubtest.test_path;
+
             extraToolTipInfo = {};
+
             var placeholder = $("#placeholder");
             var overview_placeholder = $("#overview");
+
             angular.forEach(data, function (value) {
                 tooltipData = {};
                 jqueryTimestamp = value['timestamp']*1000;
@@ -102,9 +106,11 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 tooltipData['test_version'] = value['test_version'];
                 extraToolTipInfo[jqueryTimestamp] = tooltipData;
             });
+
+            // Will need it for selection on overview chart
             var mid = datum[parseInt(datum.length/2)][0];
             var end = datum[datum.length-1][0];
-            var options = {
+            var plot = $.plot(placeholder, [datum], {
                 xaxis: {
                     mode: "time",
                     tickLength: 5,
@@ -122,16 +128,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     hoverable: true,
                     clickable: true
                 },
-            };
-            placeholder.show();
-            var plot = $.plot(placeholder, [datum], options);
-            var rangeselectionCallback = function(o){
-                var xaxis = plot.getAxes().xaxis;
-                xaxis.options.min = o.start;
-                xaxis.options.max = o.end;
-                plot.setupGrid();
-                plot.draw();
-            };
+            });
             var overview = $.plot(overview_placeholder, [datum], {
                 series: {
                     lines: {
@@ -161,7 +158,13 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     start: mid,
                     end: end,
                     enabled: true,
-                    callback: rangeselectionCallback
+                    callback: function(o){
+                        var xaxis = plot.getAxes().xaxis;
+                        xaxis.options.min = o.start;
+                        xaxis.options.max = o.end;
+                        plot.setupGrid();
+                        plot.draw();
+                    }
                 }
             });
             $("<div id='tooltip'></div>").css({
