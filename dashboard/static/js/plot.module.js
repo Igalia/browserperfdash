@@ -111,10 +111,15 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 crosshair: {
                     mode: "x,y"
                 },
+                yaxis: {
+                    axisLabel : $scope.testversion[0]['metrics']['metric'] + ' (' +
+                        ($scope.testversion[0]['metrics']['metric'] == 'up' ? 'up' : 'down') + ' is better)',
+                    position: 'left',
+                },
                 grid: {
                     hoverable: true,
                     clickable: true
-                }
+                },
             };
             placeholder.show();
             var plot = $.plot(placeholder, [datum], options);
@@ -143,7 +148,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 yaxis: {
                     ticks: [],
                     min: 0,
-                    autoscaleMargin: 0.1
+                    autoscaleMargin: 0.1,
                 },
                 grid: {
                     color: "#666",
