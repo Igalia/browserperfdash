@@ -46,24 +46,26 @@
                                 <i class="glyphicon glyphicon-arrow-right"></i>
                             </button>
                             <hr>
-                            <div class="col-md-9">
-                            <div class="row">
-                                <div id="main-container" style="height: 240px;">
-                                    <div id="placeholder" class="chart-placeholder"></div>
-                                </div>
-                                <div id="sub-container" style="height:60px;">
-                                    <div id="overview" class="chart-placeholder"></div>
-                                </div>
-                            </div>
-                            </div>
-                            <div class="col-md-3" ng-show="loaded">
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h3 class="panel-title">{{ selectedTest.root_test_id }}</h3>
+                            <div class="container-fluid">
+                                <div class="col-md-9">
+                                    <div class="row">
+                                        <div id="main-container" style="height: 240px;">
+                                            <div id="placeholder" class="chart-placeholder"></div>
+                                        </div>
+                                        <div id="sub-container" style="height:60px;">
+                                            <div id="overview" class="chart-placeholder"></div>
+                                        </div>
                                     </div>
-                                    <div class="panel-body">
-                                        Subtest: {{ selectedSubtest.test_path }} <br>
-                                        Browser: {{ selectedBrowser.browser }}
+                                </div>
+                                <div class="col-md-3" ng-show="loaded">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">{{ selectedTest.root_test_id }}</h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            Subtest: {{ selectedSubtest.test_path }} <br>
+                                            Browser: {{ selectedBrowser.browser }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
