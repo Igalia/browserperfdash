@@ -77,6 +77,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     };
     $scope.drawGraph = function () {
         var datum = [];
+        var extraToolTipInfo = {};
         var results = testResultsForVersionFactory.query({
             browser: $scope.selectedBrowser.browser_id,
             root_test: $scope.selectedTest.root_test_id,
@@ -84,7 +85,16 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
         }, function (data) {
             angular.forEach(data, function (value) {
-                datum.push([value['timestamp']*1000, value['mean_value']]);
+                tooltipData = {}
+                jqueryTimestamp = value['timestamp']*1000;
+                datum.push([jqueryTimestamp, value['mean_value']]);
+                tooltipData['yvalue'] = value['mean_value'];
+                tooltipData['browser_version'] = value['browser_version'];
+                tooltipData['stddev'] = value['stddev'];
+                tooltipData['delta'] = value['delta'];
+                tooltipData['unit'] = value['unit'];
+                tooltipData['test_version'] = value['test_version'];
+                extraToolTipInfo[jqueryTimestamp] = tooltipData;
             });
             var mid = datum[parseInt(datum.length/2)][0];
             var end = datum[datum.length-1][0];
@@ -98,10 +108,12 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     mode: "x,y"
                 },
                 grid: {
-                    hoverable: true
+                    hoverable: true,
+                    clickable: true
                 }
             };
-            var plot = $.plot("#placeholder", [datum], options);
+            var placeholder = $("#placeholder");
+            var plot = $.plot(placeholder, [datum], options);
             var rangeselectionCallback = function(o){
                 var xaxis = plot.getAxes().xaxis;
                 xaxis.options.min = o.start;
@@ -141,8 +153,40 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     callback: rangeselectionCallback
                 }
             });
+            $("<div id='tooltip'></div>").css({
+                position: "absolute",
+                display: "none",
+                border: "1px solid #fdd",
+                padding: "2px",
+                "background-color": "#fee",
+                opacity: 0.80
+            }).appendTo("body");
 
-            $("#placeholder").bind("plotselected", function (event, ranges) {
+            placeholder.bind("plothover", function (event, pos, item) {
+                if(item) {
+                    var x = item.datapoint[0], y = item.datapoint[1];
+                    var date = new Date(x);
+                    $("#tooltip").html( $scope.selectedBrowser.browser_id + "@<i>" + $scope.selectedSubtest.test_path + "</i><br>"
+                        + "<b>Time</b>: " +  date.toISOString().split('T')[0] + ", " + date.toISOString().split('T')[1].substring(0,8)+ "<br>"
+                        + "<b>Test Version</b>: " + extraToolTipInfo[x]['test_version'].slice(-7) + "<br>"
+                        + "<b>Browser Version</b>: " + extraToolTipInfo[x]['browser_version'] + "<br>"
+                        + "<b>Std. Dev</b>: " + parseFloat(extraToolTipInfo[x]['stddev']).toFixed(3) + "<br>"
+                        + "<b>Value</b>: " +  parseFloat(y).toFixed(3) + " " + extraToolTipInfo[x]['unit'] + "<br>"
+                        + "<b>Delta</b> :" +  parseFloat(extraToolTipInfo[x]['delta']).toFixed(3) + "<br>"
+                        + "<b>Aggregation </b> :" + $scope.selectedSubtest.aggregation + "<br>")
+                        .css({top: item.pageY+5, left: item.pageX+5})
+                        .fadeIn(200);
+                } else {
+                    $("#tooltip").hide();
+                }
+            });
+            placeholder.bind("plotclick", function (event, pos, item) {
+                if (item) {
+                    plot.highlight(item.series, item.datapoint);
+                }
+            });
+
+            placeholder.bind("plotselected", function (event, ranges) {
                 // do the zooming
                 $.each(plot.getXAxes(), function(_, axis) {
                     var opts = axis.options;
