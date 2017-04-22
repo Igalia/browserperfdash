@@ -93,6 +93,12 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     mode: "time",
                     tickLength: 5,
                     timeformat: "%H:%M:%S",
+                },
+                crosshair: {
+                    mode: "x,y"
+                },
+                grid: {
+                    hoverable: true
                 }
             };
             var plot = $.plot("#placeholder", [datum], options);
