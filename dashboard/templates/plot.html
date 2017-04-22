@@ -9,6 +9,7 @@
             line-height: 1.2em;
         }
     </style>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/jquery-ui.min.css' %}"> </link>
     <div class="container-fluid" ng-app="{% block ng_app %}browserperfdash.plot.static{% endblock %}" ng-controller="{% block ng_controller %}PlotController{% endblock %}">
         {% block content %}
             <div class="row">
@@ -45,24 +46,42 @@
                                 <i class="glyphicon glyphicon-arrow-right"></i>
                             </button>
                             <hr>
-                            <div class="col-md-6 col-md-offset-3" style="height: 400px;">
-                                <div id="placeholder" class="chart-placeholder"></div>
+                            <div class="col-md-9">
+                            <div class="row">
+                                <div id="main-container" style="height: 240px;">
+                                    <div id="placeholder" class="chart-placeholder"></div>
+                                </div>
+                                <div id="sub-container" style="height:60px;">
+                                    <div id="overview" class="chart-placeholder"></div>
+                                </div>
                             </div>
-                            <div class="col-md-6 col-md-offset-2" style="height:100px; width: 70%;">
-                                <div id="overview" class="chart-placeholder"></div>
                             </div>
+                            <div class="col-md-3" ng-show="loaded">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">{{ selectedTest.root_test_id }}</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        Subtest: {{ selectedSubtest.test_path }} <br>
+                                        Browser: {{ selectedBrowser.browser }}
+                                    </div>
+                                </div>
+                            </div>
+
+
                             {% endverbatim %}
                         </div>
                     </form>
                 </div>
             </div>
         {% endblock %}
-        <script src="{% static 'js/jquery.flot.min.js' %}"></script>
+        <script language="javascript" type="text/javascript" src="{% static 'js/jquery-ui.min.js' %}"></script>
+        <script language="javascript" type="text/javascript" src="{% static 'js/jquery.flot.min.js' %}"></script>
         <script language="javascript" type="text/javascript" src="{% static 'js/jquery.flot.time.js' %}"></script>
         <script language="javascript" type="text/javascript" src="{% static 'js/jquery.flot.selection.js' %}"></script>
         <script language="javascript" type="text/javascript" src="{% static 'js/jquery.flot.resize.min.js' %}"></script>
         <script language="javascript" type="text/javascript" src="{% static 'js/jquery.flot.navigate.min.js' %}"></script>
         <script language="javascript" type="text/javascript" src="{% static 'js/jquery.flot.rangeselection.js' %}"></script>
-        <script src="{% static 'js/node_modules/angular-flot/angular-flot.js' %}"></script>
+        <script language="javascript" type="text/javascript" src="{% static 'js/node_modules/angular-flot/angular-flot.js' %}"></script>
         <script src="{% static 'js/plot.module.js' %}"></script>
 {% endblock body %}

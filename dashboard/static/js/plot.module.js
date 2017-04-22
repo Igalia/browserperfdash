@@ -32,6 +32,7 @@ app.factory('testResultsForVersionFactory', function ($resource) {
 app.controller('PlotController', function ($scope, browserForResultExistFactory, testForResultsExistFactory,
                                            botForResultsExistFactory, testPathFactory, testVersionOfTestFactory,
                                            testResultsForVersionFactory){
+    $scope.loaded = false;
     $scope.browsers = browserForResultExistFactory.query({}, function (data) {
         $scope.selectedBrowser = data[0];
         $scope.tests = testForResultsExistFactory.query({}, function (data) {
@@ -101,7 +102,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 xaxis.options.max = o.end;
                 plot.setupGrid();
                 plot.draw();
-            }
+            };
             var overview = $.plot("#overview", [datum], {
                 series: {
                     lines: {
@@ -152,8 +153,12 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 plot.setSelection(ranges);
             });
 
+            $("main-container").resizable();
+            $("sub-container").resizable();
+
+            $scope.loaded = true;
+
         });
     }
 });
-
 
