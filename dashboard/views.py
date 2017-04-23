@@ -204,19 +204,17 @@ class TestPathList(generics.ListAPIView):
         return BotReportData.objects.filter(browser=browser, root_test=test).distinct('test_path')
 
 
-class TestVersionForTestPathList(generics.ListAPIView):
-    serializer_class = TestVersionForTestPathListSerializer
+class MetricsForTestList(generics.ListAPIView):
+    serializer_class = MetricsForTestListSerializer
 
     def get_queryset(self):
-        browser = Browser.objects.filter(pk=self.kwargs.get('browser'))
         test = Test.objects.filter(pk=self.kwargs.get('test'))
         test_path = self.kwargs.get('subtest')
-        return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path). \
-            distinct('test_version')
+        return BotReportData.objects.filter(root_test=test, test_path=test_path)[:1]
 
 
-class ResultsForVersionList(generics.ListAPIView):
-    serializer_class = ResultsForVersionListSerializer
+class ResultsForSubtestList(generics.ListAPIView):
+    serializer_class = ResultsForSubtestListSerializer
 
     def get_queryset(self):
         browser = Browser.objects.get(pk=self.kwargs.get('browser'))
@@ -224,7 +222,8 @@ class ResultsForVersionList(generics.ListAPIView):
         test_path = self.kwargs.get('subtest')
         try:
             bot = Bot.objects.get(pk=self.kwargs.get('bot'))
-            return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path, bot=bot)
+            return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path, bot=bot)\
+                .order_by('timestamp')
         except Bot.DoesNotExist:
             return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path).order_by('timestamp')
 

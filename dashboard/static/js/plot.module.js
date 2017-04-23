@@ -21,17 +21,17 @@ app.factory('testPathFactory', function ($resource) {
     return $resource('/dash/testpath/:browser/:root_test');
 });
 
-app.factory('testVersionOfTestFactory', function ($resource) {
-    return $resource('/dash/test_version/:browser/:root_test/:subtest');
+app.factory('testMetricsOfTestAndSubtestFactory', function ($resource) {
+    return $resource('/dash/test_metrics/:root_test/:subtest');
 });
 
-app.factory('testResultsForVersionFactory', function ($resource) {
-    return $resource('/dash/results_for_version/:browser/:root_test/:subtest/:bot');
+app.factory('testResultsForTestAndSubtestFactory', function ($resource) {
+    return $resource('/dash/results_for_subtest/:browser/:root_test/:subtest/:bot');
 });
 
 app.controller('PlotController', function ($scope, browserForResultExistFactory, testForResultsExistFactory,
-                                           botForResultsExistFactory, testPathFactory, testVersionOfTestFactory,
-                                           testResultsForVersionFactory){
+                                           botForResultsExistFactory, testPathFactory, testMetricsOfTestAndSubtestFactory,
+                                           testResultsForTestAndSubtestFactory){
     $scope.loaded = false;
     $scope.loading = false;
     $scope.browsers = browserForResultExistFactory.query({}, function (data) {
@@ -43,8 +43,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 root_test: $scope.selectedTest.root_test_id
             }, function (data) {
                 $scope.selectedSubtest = data[0];
-                $scope.testversion = testVersionOfTestFactory.query({
-                    browser: $scope.selectedBrowser.browser_id,
+                $scope.testMetrics = testMetricsOfTestAndSubtestFactory.query({
                     root_test: $scope.selectedTest.root_test_id,
                     subtest: $scope.selectedSubtest.test_path,
                 });
@@ -61,17 +60,11 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             });
         }
     };
-    $scope.updateVersions = function () {
-        if ( $scope.selectedSubtest != undefined ) {
-            $scope.testversion = testVersionOfTestFactory.query({
-                browser: $scope.selectedBrowser.browser_id,
-                root_test: $scope.selectedTest.root_test_id,
-                subtest: $scope.selectedSubtest.test_path,
-            });
-        }
-    };
 
     $scope.updateOthers = function () {
+        if ( $scope.selectedBrowser ) {
+
+        }
         if ( $scope.selectedBrowser && $scope.selectedTest ) {
             $scope.updateSubtests();
         }
@@ -79,7 +72,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     $scope.drawGraph = function () {
         $scope.loading = true;
         var datum = [];
-        var results = testResultsForVersionFactory.query({
+        var results = testResultsForTestAndSubtestFactory.query({
             browser: $scope.selectedBrowser.browser_id,
             root_test: $scope.selectedTest.root_test_id,
             subtest: $scope.selectedSubtest.test_path,
@@ -102,7 +95,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 tooltipData['browser_version'] = value['browser_version'];
                 tooltipData['stddev'] = value['stddev'];
                 tooltipData['delta'] = value['delta'];
-                tooltipData['unit'] = value['unit'];
+                tooltipData['unit'] = value['metric_unit']['unit'];
                 tooltipData['test_version'] = value['test_version'];
                 extraToolTipInfo[jqueryTimestamp] = tooltipData;
             });
@@ -120,8 +113,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     mode: "x,y"
                 },
                 yaxis: {
-                    axisLabel : $scope.testversion[0]['metrics']['metric'] + ' (' +
-                    ($scope.testversion[0]['metrics']['metric'] == 'up' ? 'up' : 'down') + ' is better)',
+                    axisLabel : $scope.testMetrics[0]['metric_unit']['name'] + ' (' +
+                    ($scope.testMetrics[0]['metric_unit']['is_better'] == 'up' ? 'up' : 'down') + ' is better)',
                     position: 'left',
                 },
                 grid: {

@@ -28,7 +28,7 @@
                             <div class="form-group">
                                 <select name="subtest" class="form-control" ng-model="selectedSubtest"
                                         ng-options="test.test_path + (test.aggregation == 'None' ? '': ' [aggregation: ' + test.aggregation + ']')
-                                        for test in subtests" ng-change="updateVersions()">
+                                        for test in subtests">
                                     <option value="">--Select Subtest--</option>
                                 </select>
                             </div>

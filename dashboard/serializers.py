@@ -79,30 +79,25 @@ class TestPathListSerializer(serializers.Serializer):
     aggregation = serializers.CharField()
 
 
-class TestVersionForTestPathListSerializer(serializers.Serializer):
-    test_version = serializers.CharField(max_length=500)
-    metrics = serializers.SerializerMethodField()
-
-    def get_metrics(self,obj):
-        return { 'metric': obj.metric_unit.name, 'is_better': obj.metric_unit.is_better }
+class MetricUnitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MetricUnit
+        fields = ('name', 'unit', 'is_better')
 
 
-class ResultsForVersionListSerializer(serializers.Serializer):
+class MetricsForTestListSerializer(serializers.Serializer):
+    metric_unit = MetricUnitSerializer()
+
+
+class ResultsForSubtestListSerializer(serializers.Serializer):
     timestamp = serializers.SerializerMethodField()
     mean_value = serializers.FloatField()
     stddev = serializers.FloatField()
     browser_version = serializers.CharField(max_length=500)
     delta = serializers.FloatField()
-    unit = serializers.SerializerMethodField()
-    is_better = serializers.SerializerMethodField()
+    metric_unit = MetricUnitSerializer()
     bot = serializers.CharField()
     test_version = serializers.CharField()
-
-    def get_unit(self,obj):
-        return obj.metric_unit.unit
-
-    def get_is_better(self,obj):
-        return obj.metric_unit.is_better
 
     def get_timestamp(self,obj):
         return obj.timestamp.strftime('%s')
@@ -113,12 +108,6 @@ class BotResultMinimalSerializer(serializers.ModelSerializer):
     class Meta:
         model = BotReportData
         fields = ('id', 'test_version')
-
-
-class MetricUnitSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MetricUnit
-        fields = ('name', 'unit', 'is_better')
 
 
 class BotReportDataSerializer(serializers.ModelSerializer):
