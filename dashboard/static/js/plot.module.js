@@ -95,7 +95,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 tooltipData['browser_version'] = value['browser_version'];
                 tooltipData['stddev'] = value['stddev'];
                 tooltipData['delta'] = value['delta'];
-                tooltipData['unit'] = value['metric_unit']['unit'];
                 tooltipData['test_version'] = value['test_version'];
                 extraToolTipInfo[jqueryTimestamp] = tooltipData;
             });
@@ -178,7 +177,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         + "<b>Test Version</b>: " + extraToolTipInfo[x]['test_version'].slice(-7) + "<br>"
                         + "<b>Browser Version</b>: " + extraToolTipInfo[x]['browser_version'] + "<br>"
                         + "<b>Std. Dev</b>: " + parseFloat(extraToolTipInfo[x]['stddev']).toFixed(3) + "<br>"
-                        + "<b>Value</b>: " +  parseFloat(y).toFixed(3) + " " + extraToolTipInfo[x]['unit'] + "<br>"
+                        + "<b>Value</b>: " +  parseFloat(y).toFixed(3) + " " + $scope.testMetrics[0]['metric_unit']['unit'] + "<br>"
                         + "<b>Delta</b> :" +  parseFloat(extraToolTipInfo[x]['delta']).toFixed(3) + "<br>"
                         + "<b>Aggregation </b> :" + $scope.selectedSubtest.aggregation + "<br>")
                         .css({top: item.pageY+5, left: item.pageX+5})

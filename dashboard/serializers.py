@@ -95,7 +95,6 @@ class ResultsForSubtestListSerializer(serializers.Serializer):
     stddev = serializers.FloatField()
     browser_version = serializers.CharField(max_length=500)
     delta = serializers.FloatField()
-    metric_unit = MetricUnitSerializer()
     bot = serializers.CharField()
     test_version = serializers.CharField()
 
