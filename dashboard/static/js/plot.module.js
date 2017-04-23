@@ -35,15 +35,13 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     $scope.loaded = false;
     $scope.loading = false;
     $scope.updateSubtests = function () {
-        if ( $scope.selectedBrowser != undefined ) {
-            $scope.selectedTest = !$scope.selectedTest ? $scope.tests[0] : $scope.selectedTest;
-            $scope.subtests = testPathFactory.query({
-                browser: $scope.selectedBrowser.browser_id,
-                root_test: $scope.selectedTest.root_test.id
-            }, function (data) {
-                $scope.selectedSubtest = data[0];
-            });
-        }
+        $scope.selectedTest = !$scope.selectedTest ? $scope.tests[0] : $scope.selectedTest;
+        $scope.subtests = testPathFactory.query({
+            browser: $scope.selectedBrowser.browser_id,
+            root_test: $scope.selectedTest.root_test.id
+        }, function (data) {
+            $scope.selectedSubtest = data[0];
+        });
     };
     var updateTestsAndSubtestsOnBrowserChange = function () {
         $scope.tests = testsForBrowserAndBotFactory.query({
@@ -64,8 +62,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     $scope.updateOthers = function () {
         if ( $scope.selectedBrowser ) {
             updateTestsAndSubtestsOnBrowserChange();
-        }
-        if ( $scope.selectedBrowser && $scope.selectedTest ) {
+        } else if ( $scope.selectedBrowser && $scope.selectedTest ) {
             $scope.updateSubtests();
         }
     };
