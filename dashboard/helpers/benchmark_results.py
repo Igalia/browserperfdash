@@ -45,6 +45,7 @@ class BenchmarkResults(object):
         'BrowserMemoryPeak': 'B',
     }
     SI_prefixes = ['n', 'u', 'm', '', 'K', 'M', 'G', 'T', 'P', 'E']
+    db_character_separator = '\\' # This is '\' but escaped
 
     _results = None
 
@@ -83,18 +84,19 @@ class BenchmarkResults(object):
     """
     The method below returns a list of dictionaries, with the following format:
 
-    [{'name': SpeedometerExample, 'metric': Score:None, 'value': 142.0, 'stdev': 0.00704225352113}
-    {'name': SpeedometerExample, 'metric': Time:Total, 'value': 674.22, 'stdev': 0.098284410446}
-    {'name': SpeedometerExample:AngularJS-TodoMVC, 'metric': Time:Total, 'value': 674.22, 'stdev': 0.098284410446}
-    {'name': SpeedometerExample:AngularJS-TodoMVC:Adding100Items, 'metric': Time:Total, 'value': 217.81, 'stdev': 0.0290934151339}
-    {'name': SpeedometerExample:AngularJS-TodoMVC:Adding100Items:Async, 'metric': Time:None, 'value': 11.25, 'stdev': 0.173561103909}
-    {'name': SpeedometerExample:AngularJS-TodoMVC:Adding100Items:Sync, 'metric': Time:None, 'value': 206.56, 'stdev': 0.0294749686776}
-    {'name': SpeedometerExample:AngularJS-TodoMVC:Adding200Items, 'metric': Time:Total, 'value': 456.41, 'stdev': 0.136262489719}
-    {'name': SpeedometerExample:AngularJS-TodoMVC:Adding200Items:Async, 'metric': Time:None, 'value': 27.25, 'stdev': 0.395773479085}
-    {'name': SpeedometerExample:AngularJS-TodoMVC:Adding200Items:Sync, 'metric': Time:None, 'value': 429.16, 'stdev': 0.122973388375}]
+    [{'name': SpeedometerExample, 'metric': Score\None, 'value': 142.0, 'stdev': 0.00704225352113}
+    {'name': SpeedometerExample, 'metric': Time\Total, 'value': 674.22, 'stdev': 0.098284410446}
+    {'name': SpeedometerExample\AngularJS-TodoMVC, 'metric': Time:Total, 'value': 674.22, 'stdev': 0.098284410446}
+    {'name': SpeedometerExample\AngularJS-TodoMVC\Adding100Items, 'metric': Time\Total, 'value': 217.81, 'stdev': 0.0290934151339}
+    {'name': SpeedometerExample\AngularJS-TodoMVC\Adding100Items, 'metric': Time\Total, 'value': 217.81, 'stdev': 0.0290934151339}
+    {'name': SpeedometerExample\AngularJS-TodoMVC\Adding100Items\Async, 'metric': Time\None, 'value': 11.25, 'stdev': 0.173561103909}
+    {'name': SpeedometerExample\AngularJS-TodoMVC\Adding100Items\Sync, 'metric': Time\None, 'value': 206.56, 'stdev': 0.0294749686776}
+    {'name': SpeedometerExample\AngularJS-TodoMVC\Adding200Items, 'metric': Time\Total, 'value': 456.41, 'stdev': 0.136262489719}
+    {'name': SpeedometerExample\AngularJS-TodoMVC\Adding200Items\Async, 'metric': Time\None, 'value': 27.25, 'stdev': 0.395773479085}
+    {'name': SpeedometerExample\AngularJS-TodoMVC\Adding200Items\Sync, 'metric': Time\None, 'value': 429.16, 'stdev': 0.122973388375}]
 
     The Value of the metric field indicates the metric and the aggregator.
-    It uses the character ":" as separator, so it contains metric:aggregator
+    It uses the character "\" as separator, so it contains metric:aggregator
     If aggregator is "None" then it means its a real value (not aggregated).
 
     """
@@ -102,12 +104,12 @@ class BenchmarkResults(object):
     @classmethod
     def _generate_db_entries(cls, tests, test_table, skip_aggregated=False, parent=None):
         for test_name in sorted(tests.keys()):
-            if ':' in test_name:
-                raise ValueError('Test %s contains a ":" in the name. This is Forbidden' %(test_name))
+            if cls.db_character_separator in test_name:
+                raise ValueError('Test %s contains a "%s" in the name. This is Forbidden' %(test_name, cls.db_character_separator))
             if parent is None:
                 test_path = test_name
             else:
-                test_path = '%s:%s' %(parent,test_name)
+                test_path = '%s%s%s' %(parent, cls.db_character_separator, test_name)
 
             for unit in sorted(tests[test_name]['metrics'].keys()):
                 for aggregator in tests[test_name]['metrics'][unit].keys():
@@ -116,7 +118,7 @@ class BenchmarkResults(object):
                             continue
                     values = cls._format_values(unit, tests[test_name]['metrics'][unit][aggregator]['current'], db_format=True)
                     test_table.append({'name': test_path,
-                                       'metric': '%s:%s' %(unit,aggregator),
+                                       'metric': '%s%s%s' %(unit, cls.db_character_separator, aggregator),
                                        'value': values['value'],
                                        'stdev': values['stdev'],
                                        'unit': values['unit'],

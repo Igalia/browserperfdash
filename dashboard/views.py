@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 import logging
 
 log = logging.getLogger(__name__)
-
+db_character_separator = '\\'
 
 class BotAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
@@ -260,11 +260,11 @@ class BotReportView(APIView):
 
     @classmethod
     def extract_metric(cls, metric):
-        return metric.split(':')[0]
+        return metric.split(db_character_separator)[0]
 
     @classmethod
     def extract_aggregation(cls, metric):
-        return metric.split(':')[1]
+        return metric.split(db_character_separator)[1]
 
     @classmethod
     def calculate_prefix(cls, munits, mean_value, curr_string, original_prefix):
