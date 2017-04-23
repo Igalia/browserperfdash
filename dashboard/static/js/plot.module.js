@@ -13,8 +13,8 @@ app.factory('botForResultsExistFactory', function($resource) {
     return $resource('/dash/bot_results_exist');
 });
 
-app.factory('testForResultsExistFactory', function($resource) {
-    return $resource('/dash/test_results_exist');
+app.factory('testsForBrowserAndBotFactory', function ($resource) {
+    return $resource('/dash/tests_for_browser_bot/:browser/:bot');
 });
 
 app.factory('testPathFactory', function ($resource) {
@@ -29,37 +29,40 @@ app.factory('testResultsForTestAndSubtestFactory', function ($resource) {
     return $resource('/dash/results_for_subtest/:browser/:root_test/:subtest/:bot');
 });
 
-app.controller('PlotController', function ($scope, browserForResultExistFactory, testForResultsExistFactory,
-                                           botForResultsExistFactory, testPathFactory, testMetricsOfTestAndSubtestFactory,
-                                           testResultsForTestAndSubtestFactory){
+app.controller('PlotController', function ($scope, browserForResultExistFactory, botForResultsExistFactory, testPathFactory,
+                                           testMetricsOfTestAndSubtestFactory, testResultsForTestAndSubtestFactory,
+                                           testsForBrowserAndBotFactory, $filter){
     $scope.loaded = false;
     $scope.loading = false;
-    $scope.browsers = browserForResultExistFactory.query({}, function (data) {
-        $scope.selectedBrowser = data[0];
-        $scope.tests = testForResultsExistFactory.query({}, function (data) {
-            $scope.selectedTest = data[0];
-            $scope.subtests = testPathFactory.query({
-                browser: $scope.selectedBrowser.browser_id,
-                root_test: $scope.selectedTest.root_test_id
-            }, function (data) {
-                $scope.selectedSubtest = data[0];
-            });
-        });
-        $scope.bots = botForResultsExistFactory.query();
-    });
-
     $scope.updateSubtests = function () {
         if ( $scope.selectedBrowser != undefined ) {
             $scope.subtests = testPathFactory.query({
                 browser: $scope.selectedBrowser.browser_id,
-                root_test: $scope.selectedTest.root_test_id
+                root_test: $scope.selectedTest.root_test.id
+            }, function (data) {
+                $scope.selectedSubtest = data[0];
             });
         }
     };
+    var updateTestsAndSubtestsOnBrowserChange = function () {
+        $scope.tests = testsForBrowserAndBotFactory.query({
+            browser: $scope.selectedBrowser.browser_id,
+            bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
+        }, function (data) {
+            $scope.selectedTest = $scope.tests[0];
+            $scope.updateSubtests();
+        });
+    };
+
+    $scope.browsers = browserForResultExistFactory.query({}, function (data) {
+        $scope.selectedBrowser = data[0];
+        updateTestsAndSubtestsOnBrowserChange();
+        $scope.bots = botForResultsExistFactory.query();
+    });
 
     $scope.updateOthers = function () {
         if ( $scope.selectedBrowser ) {
-
+            updateTestsAndSubtestsOnBrowserChange();
         }
         if ( $scope.selectedBrowser && $scope.selectedTest ) {
             $scope.updateSubtests();
@@ -67,14 +70,14 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     };
     $scope.drawGraph = function () {
         $scope.testMetrics = testMetricsOfTestAndSubtestFactory.query({
-            root_test: $scope.selectedTest.root_test_id,
+            root_test: $scope.selectedTest.root_test.id,
             subtest: $scope.selectedSubtest.test_path,
         });
         $scope.loading = true;
         var datum = [];
         var results = testResultsForTestAndSubtestFactory.query({
             browser: $scope.selectedBrowser.browser_id,
-            root_test: $scope.selectedTest.root_test_id,
+            root_test: $scope.selectedTest.root_test.id,
             subtest: $scope.selectedSubtest.test_path,
             bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
         }, function (data) {

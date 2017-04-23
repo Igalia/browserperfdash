@@ -12,10 +12,6 @@ class BrowsersForResultsExistListSerializer(serializers.Serializer):
     browser = serializers.CharField(max_length=50)
 
 
-class TestsForResultsExistListSerializer(serializers.Serializer):
-    root_test_id = serializers.CharField(max_length=50)
-
-
 class BotsForResultsExistListSerializer(serializers.Serializer):
     bot = serializers.CharField(max_length=50)
 
@@ -70,7 +66,7 @@ class BotDetailsListSerializer(serializers.ModelSerializer):
 class TestListListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Test
-        fields = ('id', 'description')
+        fields = ('id',)
 
 
 class TestPathListSerializer(serializers.Serializer):
@@ -87,6 +83,10 @@ class MetricUnitSerializer(serializers.ModelSerializer):
 
 class MetricsForTestListSerializer(serializers.Serializer):
     metric_unit = MetricUnitSerializer()
+
+
+class TestsForBrowserBottListSerializer(serializers.Serializer):
+    root_test = TestListListSerializer()
 
 
 class ResultsForSubtestListSerializer(serializers.Serializer):
