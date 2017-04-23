@@ -56,7 +56,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             browser: $scope.selectedBrowser.browser_id,
             bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
         }, function (data) {
-            console.log(data.length);
             if(data.length === 0) {
                 $scope.selectedTest = [];
                 $scope.selectedSubtest = [];
