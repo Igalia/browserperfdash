@@ -93,6 +93,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             $scope.disableBrowser = true;
             $scope.disableTest = true;
             $scope.disableSubtest = true;
+            return;
         }
         $scope.selectedBrowser =  $scope.browsers[0];
         $scope.onBrowserChange($scope.selectedBrowser);
