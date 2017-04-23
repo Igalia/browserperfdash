@@ -38,6 +38,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     $scope.disableTest = false;
     $scope.disableBrowser = false;
     $scope.disableBot = false;
+    $scope.buttonHide = false;
 
     $scope.onBrowserChange = function (selectedBrowser) {
         //Update tests
@@ -93,6 +94,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             $scope.disableBrowser = true;
             $scope.disableTest = true;
             $scope.disableSubtest = true;
+            $scope.buttonHide = true;
             return;
         }
         $scope.selectedBrowser =  $scope.browsers[0];

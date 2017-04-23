@@ -32,7 +32,7 @@
                                     <option value="">--Select Subtest--</option>
                                 </select>
                             </div>
-                            <button type="button" class="btn btn-default" id="reload"
+                            <button type="button" class="btn btn-default" id="reload" ng-hide="buttonHide"
                                     ng-show="selectedBrowser != undefined && selectedTest != undefined && selectedSubtest != undefined"
                                     ng-click="drawGraph()">
                                 <i class="glyphicon glyphicon-arrow-right"></i>
