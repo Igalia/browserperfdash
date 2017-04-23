@@ -36,6 +36,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     $scope.loading = false;
     $scope.disableSubtest = false;
     $scope.disableTest = false;
+    $scope.disableBrowser = false;
+    $scope.disableBot = false;
 
     $scope.onBrowserChange = function (selectedBrowser) {
         //Update tests
@@ -82,6 +84,16 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     };
 
     $scope.browsers = browserForResultExistFactory.query({}, function (data) {
+        if(data.length === 0) {
+            $scope.selectedTest = [];
+            $scope.selectedSubtest = [];
+            $scope.selectedBrowser = [];
+            $scope.selectedBot = [];
+            $scope.disableBot = true;
+            $scope.disableBrowser = true;
+            $scope.disableTest = true;
+            $scope.disableSubtest = true;
+        }
         $scope.selectedBrowser =  $scope.browsers[0];
         $scope.onBrowserChange($scope.selectedBrowser);
     });
