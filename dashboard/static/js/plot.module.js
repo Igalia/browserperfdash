@@ -49,7 +49,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             browser: $scope.selectedBrowser.browser_id,
             bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
         }, function (data) {
-            $scope.selectedTest = $scope.tests[0];
+            $scope.selectedTest = data[0];
             $scope.updateSubtests();
         });
     };
