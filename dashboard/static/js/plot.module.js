@@ -36,6 +36,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     $scope.loading = false;
     $scope.updateSubtests = function () {
         if ( $scope.selectedBrowser != undefined ) {
+            $scope.selectedTest = !$scope.selectedTest ? $scope.tests[0] : $scope.selectedTest;
             $scope.subtests = testPathFactory.query({
                 browser: $scope.selectedBrowser.browser_id,
                 root_test: $scope.selectedTest.root_test.id
