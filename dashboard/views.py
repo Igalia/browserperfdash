@@ -341,7 +341,7 @@ class BotReportView(APIView):
             log.error("Got invalid browser %s from bot: %s" % (browser_id, bot_id))
             return HttpResponseBadRequest("The browser does not exist")
         try:
-            root_test = Test.objects.get(pk__iexact=test_id)
+            root_test = Test.objects.get(pk=test_id)
         except Test.DoesNotExist:
             log.error("Got invalid root test: %s from bot: %s for browser: %s, browser_version: %s" %
                       (test_id, bot_id, browser_id, browser_version))
