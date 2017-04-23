@@ -69,7 +69,13 @@ class MetricUnitAdmin(admin.ModelAdmin):
                 prefix['unit'] = float(original_value)
                 prefix_post_data.append(prefix)
 
-        updated_prefix = sorted(prefix_post_data, key=lambda k: k['unit'], reverse=True)
+        if not prefix_post_data:
+            emptyprefixdict = dict()
+            emptyprefixdict["unit"] = 1.0
+            emptyprefixdict["symbol"] = obj.unit
+            updated_prefix = [emptyprefixdict]
+        else:
+            updated_prefix = sorted(prefix_post_data, key=lambda k: k['unit'], reverse=True)
         if updated_prefix != obj.prefix:
             obj.prefix = updated_prefix
             # We need to update prefix of affected objects
