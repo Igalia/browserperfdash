@@ -10,23 +10,23 @@
                         <div class="row" style="text-align: center">
                             {% verbatim %}
                             <div class="form-group">
-                                <select name="browser" class="form-control" ng-model="selectedBrowser" ng-change="updateOthers()"
-                                        ng-options="x.browser for x in browsers">
+                                <select name="browser" class="form-control" ng-model="selectedBrowser"
+                                        ng-options="x.browser for x in browsers" ng-change="onBrowserChange(x.browser)">
                                 </select>
                             </div>
                             <div class="form-group">
                                 <select name="bot" class="form-control" ng-model="selectedBot"
-                                        ng-options="bot.bot for bot in bots" ng-change="updateSubtests()">
+                                        ng-options="bot.bot for bot in bots" ng-change="onBotsChange()">
                                     <option value="">--All bots--</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <select name="test" class="form-control" ng-model="selectedTest" ng-change="updateSubtests()"
+                                <select name="test" class="form-control" ng-disabled="disableTest" ng-model="selectedTest" ng-change="onTestsChange()"
                                         ng-options="x.root_test.id for x in tests">
                                 </select>
                             </div>
                             <div class="form-group">
-                                <select name="subtest" class="form-control" ng-model="selectedSubtest"
+                                <select name="subtest" class="form-control" ng-disabled="disableSubtest" ng-model="selectedSubtest"
                                         ng-options="test.test_path + (test.aggregation == 'None' ? '': ' [aggregation: ' + test.aggregation + ']')
                                         for test in subtests">
                                     <option value="">--Select Subtest--</option>

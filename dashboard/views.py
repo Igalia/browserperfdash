@@ -160,9 +160,11 @@ class BotDetailView(generics.RetrieveAPIView):
 
 
 class BotsForResultsExistList(generics.ListAPIView):
-    model = BotReportData
-    queryset = BotReportData.objects.distinct('bot')
     serializer_class = BotsForResultsExistListSerializer
+
+    def get_queryset(self):
+        browser = Browser.objects.filter(pk=self.kwargs.get('browser'))
+        return BotReportData.objects.filter(browser=browser).distinct('bot')
 
 
 class PlatformList(generics.ListAPIView):
@@ -214,7 +216,7 @@ class TestsForBrowserBottList(generics.ListAPIView):
         browser = Browser.objects.get(pk=self.kwargs.get('browser'))
         try:
             bot = Bot.objects.get(pk=self.kwargs.get('bot'))
-            return BotReportData.objects.filter(browser=browser, bot=bot).only('root_test')
+            return BotReportData.objects.filter(browser=browser, bot=bot).distinct('root_test')
         except Bot.DoesNotExist:
             return BotReportData.objects.filter(browser=browser).distinct('root_test')
 

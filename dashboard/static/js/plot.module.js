@@ -10,7 +10,7 @@ app.factory('browserForResultExistFactory', function ($resource) {
 });
 
 app.factory('botForResultsExistFactory', function($resource) {
-    return $resource('/dash/bot_results_exist');
+    return $resource('/dash/bot_results_exist/:browser');
 });
 
 app.factory('testsForBrowserAndBotFactory', function ($resource) {
@@ -34,38 +34,59 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                                            testsForBrowserAndBotFactory, $filter){
     $scope.loaded = false;
     $scope.loading = false;
-    $scope.updateSubtests = function () {
-        $scope.selectedTest = !$scope.selectedTest ? $scope.tests[0] : $scope.selectedTest;
-        $scope.subtests = testPathFactory.query({
-            browser: $scope.selectedBrowser.browser_id,
-            root_test: $scope.selectedTest.root_test.id
-        }, function (data) {
-            $scope.selectedSubtest = data[0];
+    $scope.disableSubtest = false;
+    $scope.disableTest = false;
+
+    $scope.onBrowserChange = function (selectedBrowser) {
+        //Update tests
+        $scope.tests = testsForBrowserAndBotFactory.query({
+            browser: !selectedBrowser ? $scope.selectedBrowser.browser_id : selectedBrowser.browser_id,
+            bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
+        }, function () {
+            $scope.selectedTest = $scope.tests[0];
+            $scope.onTestsChange();
+            $scope.bots = botForResultsExistFactory.query({
+                browser: $scope.selectedBrowser.browser_id
+            });
         });
     };
-    var updateTestsAndSubtestsOnBrowserChange = function () {
+
+    $scope.onBotsChange = function () {
         $scope.tests = testsForBrowserAndBotFactory.query({
             browser: $scope.selectedBrowser.browser_id,
             bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
         }, function (data) {
-            $scope.selectedTest = data[0];
-            $scope.updateSubtests();
+            console.log(data.length);
+            if(data.length === 0) {
+                $scope.selectedTest = [];
+                $scope.selectedSubtest = [];
+                $scope.disableTest = true;
+                $scope.disableSubtest = true;
+            } else {
+                $scope.disableTest = false;
+                $scope.disableSubtest = false;
+                $scope.selectedTest = $scope.tests[0];
+            }
+        });
+    };
+
+    $scope.onTestsChange = function () {
+        if(!$scope.selectedTest) {
+            return;
+        }
+        $scope.subtests = testPathFactory.query({
+            browser: $scope.selectedBrowser.browser_id,
+            root_test: $scope.selectedTest.root_test.id
+        }, function (data) {
+            $scope.selectedSubtest = $scope.subtests[0];
         });
     };
 
     $scope.browsers = browserForResultExistFactory.query({}, function (data) {
-        $scope.selectedBrowser = data[0];
-        updateTestsAndSubtestsOnBrowserChange();
-        $scope.bots = botForResultsExistFactory.query();
+        $scope.selectedBrowser =  $scope.browsers[0];
+        $scope.onBrowserChange($scope.selectedBrowser);
     });
 
-    $scope.updateOthers = function () {
-        if ( $scope.selectedBrowser ) {
-            updateTestsAndSubtestsOnBrowserChange();
-        } else if ( $scope.selectedBrowser && $scope.selectedTest ) {
-            $scope.updateSubtests();
-        }
-    };
     $scope.drawGraph = function () {
         $scope.testMetrics = testMetricsOfTestAndSubtestFactory.query({
             root_test: $scope.selectedTest.root_test.id,
