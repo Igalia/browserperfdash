@@ -84,6 +84,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         });
     };
 
+
     $scope.browsers = browserForResultExistFactory.query({}, function (data) {
         if(data.length === 0) {
             $scope.selectedTest = [];
@@ -100,28 +101,65 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         $scope.selectedBrowser =  $scope.browsers[0];
         $scope.onBrowserChange($scope.selectedBrowser);
     });
+    var graphCounter = 0;
+    var extraToolTipInfo = new Array(new Array());
+    $scope.drawnTestsDetails = new Array(new Array());
 
     $scope.drawGraph = function () {
+        // Need to update tooltips, etc
+        $scope.currentBrowser = $scope.selectedBrowser.browser_id;
+        $scope.currentSubtestPath = $scope.selectedSubtest.test_path;
+
+        $scope.drawnTestsDetails[graphCounter] = {};
+        testDetails = {}
+        testDetails['root_test'] = $scope.selectedTest.root_test.id;
+        testDetails['sub_test'] = $scope.currentSubtestPath;
+        testDetails['browser'] = $scope.currentBrowser;
+        $scope.drawnTestsDetails[graphCounter] = testDetails;
+
+        if(graphCounter > 0) {
+            var subcontainer = $('<div>').addClass("sub-container").append(
+                $('<div>').addClass("overview")
+            );
+            var maincontainer = $('<div>').addClass("main-container").append(
+                $('<div>').addClass("placeholder").attr('id', graphCounter)
+            );
+            var newRow = $('<div>').addClass('row').append(
+                $('<div>').addClass('col-md-9').append(
+                    $('<div>').addClass("row").append(
+                        maincontainer, subcontainer
+                    )
+                ),
+                $('<div>').addClass('col-md-3').attr('ng-show', 'loaded').append(
+                    "<div class='panel panel-default'>" +
+                    "<div class='panel-heading'><h3 class='panel-title' id="+ graphCounter + ">" +
+                    "Test: "+ $scope.selectedTest.root_test.id + "</h3></div>" +
+                    "<div class='panel-body' id="+ graphCounter + ">" +
+                    "Subtest: "+ $scope.currentSubtestPath + "<br>" +
+                    "Browser: "+ $scope.currentBrowser + "</div></div>"
+                )
+            ).css('padding-top', '10px');
+            var topRow = $('div#plot_area>.row:first');
+            topRow.before(newRow);
+        }
+
+        var placeholder = $("div.placeholder:first");
+        var overview_placeholder = $("div.overview:first");
+
         $scope.testMetrics = testMetricsOfTestAndSubtestFactory.query({
             root_test: $scope.selectedTest.root_test.id,
             subtest: $scope.selectedSubtest.test_path,
         });
         $scope.loading = true;
         var datum = [];
+
         var results = testResultsForTestAndSubtestFactory.query({
             browser: $scope.selectedBrowser.browser_id,
             root_test: $scope.selectedTest.root_test.id,
             subtest: $scope.selectedSubtest.test_path,
             bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
         }, function (data) {
-            // Need to update tooltips, etc
-            $scope.currentBrowser = $scope.selectedBrowser.browser_id;
-            $scope.currentSubtestPath = $scope.selectedSubtest.test_path;
-
-            extraToolTipInfo = {};
-
-            var placeholder = $("#placeholder");
-            var overview_placeholder = $("#overview");
+            extraToolTipInfo[graphCounter] = {};
 
             angular.forEach(data, function (value) {
                 tooltipData = {};
@@ -132,7 +170,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 tooltipData['stddev'] = value['stddev'];
                 tooltipData['delta'] = value['delta'];
                 tooltipData['test_version'] = value['test_version'];
-                extraToolTipInfo[jqueryTimestamp] = tooltipData;
+                extraToolTipInfo[graphCounter][jqueryTimestamp] = tooltipData;
             });
 
             // Will need it for selection on overview chart
@@ -208,13 +246,14 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 if(item) {
                     var x = item.datapoint[0], y = item.datapoint[1];
                     var date = new Date(x);
+                    var currentPlot = +placeholder.attr('id');
                     $("#tooltip").html( $scope.currentBrowser + "@<i>" + $scope.currentSubtestPath + "</i><br>"
                         + "<b>Time</b>: " +  date.toISOString().split('T')[0] + ", " + date.toISOString().split('T')[1].substring(0,8)+ "<br>"
-                        + "<b>Test Version</b>: " + extraToolTipInfo[x]['test_version'].slice(-7) + "<br>"
-                        + "<b>Browser Version</b>: " + extraToolTipInfo[x]['browser_version'] + "<br>"
-                        + "<b>Std. Dev</b>: " + parseFloat(extraToolTipInfo[x]['stddev']).toFixed(3) + "<br>"
+                        + "<b>Test Version</b>: " + extraToolTipInfo[currentPlot][x]['test_version'].slice(-7) + "<br>"
+                        + "<b>Browser Version</b>: " + extraToolTipInfo[currentPlot][x]['browser_version'] + "<br>"
+                        + "<b>Std. Dev</b>: " + parseFloat(extraToolTipInfo[currentPlot][x]['stddev']).toFixed(3) + "<br>"
                         + "<b>Value</b>: " +  parseFloat(y).toFixed(3) + " " + $scope.testMetrics[0]['metric_unit']['unit'] + "<br>"
-                        + "<b>Delta</b> :" +  parseFloat(extraToolTipInfo[x]['delta']).toFixed(3) + "<br>"
+                        + "<b>Delta</b> :" +  parseFloat(extraToolTipInfo[currentPlot][x]['delta']).toFixed(3) + "<br>"
                         + "<b>Aggregation </b> :" + $scope.selectedSubtest.aggregation + "<br>")
                         .css({top: item.pageY+5, left: item.pageX+5})
                         .fadeIn(200);
@@ -245,10 +284,11 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 plot.setSelection(ranges);
             });
 
-            $("main-container").resizable();
-            $("sub-container").resizable();
+            $(".main-container").resizable();
+            $(".sub-container").resizable();
             $scope.loading = false;
             $scope.loaded = true;
+            graphCounter++;
         });
     }
 });

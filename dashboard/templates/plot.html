@@ -4,71 +4,67 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/jquery-ui.min.css' %}"> </link>
     <div class="container-fluid" ng-app="{% block ng_app %}browserperfdash.plot.static{% endblock %}" ng-controller="{% block ng_controller %}PlotController{% endblock %}">
         {% block content %}
-            <div class="row">
-                <div class="container-fluid">
-                    <form class="form-inline">
-                        <div class="row" style="text-align: center">
-                            {% verbatim %}
-                            <div class="form-group">
-                                <select name="browser" class="form-control" ng-model="selectedBrowser" ng-disabled="disableBrowser"
-                                        ng-options="x.browser for x in browsers" ng-change="onBrowserChange(x.browser)">
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <select name="bot" class="form-control" ng-model="selectedBot" ng-disabled="disableBot"
-                                        ng-options="bot.bot for bot in bots" ng-change="onBotsChange()">
-                                    <option value="">--All bots--</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <select name="test" class="form-control" ng-disabled="disableTest" ng-model="selectedTest" ng-change="onTestsChange()"
-                                        ng-options="x.root_test.id for x in tests">
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <select name="subtest" class="form-control" ng-disabled="disableSubtest" ng-model="selectedSubtest"
-                                        ng-options="test.test_path + (test.aggregation == 'None' ? '': ' [aggregation: ' + test.aggregation + ']')
+            <form class="form-inline">
+                <div class="row" style="text-align: center">
+                    {% verbatim %}
+                    <div class="form-group">
+                        <select name="browser" class="form-control" ng-model="selectedBrowser" ng-disabled="disableBrowser"
+                                ng-options="x.browser for x in browsers" ng-change="onBrowserChange(x.browser)">
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="bot" class="form-control" ng-model="selectedBot" ng-disabled="disableBot"
+                                ng-options="bot.bot for bot in bots" ng-change="onBotsChange()">
+                            <option value="">--All bots--</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="test" class="form-control" ng-disabled="disableTest" ng-model="selectedTest" ng-change="onTestsChange()"
+                                ng-options="x.root_test.id for x in tests">
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="subtest" class="form-control" ng-disabled="disableSubtest" ng-model="selectedSubtest"
+                                ng-options="test.test_path + (test.aggregation == 'None' ? '': ' [aggregation: ' + test.aggregation + ']')
                                         for test in subtests">
-                                    <option value="">--Select Subtest--</option>
-                                </select>
-                            </div>
-                            <button type="button" class="btn btn-default" id="reload" ng-hide="buttonHide"
-                                    ng-show="selectedBrowser != undefined && selectedTest != undefined && selectedSubtest != undefined"
-                                    ng-click="drawGraph()">
-                                <i class="glyphicon glyphicon-arrow-right"></i>
-                            </button>
-                            <hr>
-                            <div class="container-fluid">
-                                <div class="loader_parent" ng-show="loading">
-                                    <div class="loader"></div>
-                                </div>
-                                <div class="col-md-9">
-                                    <div class="row">
-                                        <div id="main-container" style="height: 240px;">
-                                            <div id="placeholder" class="chart-placeholder"></div>
-                                        </div>
-                                        <div id="sub-container" style="height:60px;">
-                                            <div id="overview" class="chart-placeholder"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3" ng-show="loaded">
-                                    <div class="panel panel-default">
-                                        <div class="panel-heading">
-                                            <h3 class="panel-title">Test: {{ selectedTest.root_test_id }}</h3>
-                                        </div>
-                                        <div class="panel-body">
-                                            Subtest: {{ currentSubtestPath }} <br>
-                                            Browser: {{ currentBrowser }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endverbatim %}
+                            <option value="">--Select Subtest--</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-default" id="reload" ng-hide="buttonHide"
+                            ng-show="selectedBrowser != undefined && selectedTest != undefined && selectedSubtest != undefined"
+                            ng-click="drawGraph()">
+                        <i class="glyphicon glyphicon-arrow-right"></i>
+                    </button>
+                    <hr>
+                </div>
+            </form>
+            <div class="container-fluid" id="plot_area">
+                <div class="loader_parent" ng-show="loading">
+                    <div class="loader"></div>
+                </div>
+                <div class="row" style="padding-top: 10px">
+                    <div class="col-md-9">
+                        <div class="main-container">
+                            <div class="placeholder" id="0"></div>
                         </div>
-                    </form>
+                        <div class="sub-container">
+                            <div class="overview"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3" ng-show="loaded">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title" id="0">Test: {{ drawnTestsDetails[0]['root_test'] }}</h3>
+                            </div>
+                            <div class="panel-body" id="0">
+                                Subtest: {{ drawnTestsDetails[0]['sub_test'] }} <br>
+                                Browser: {{ drawnTestsDetails[0]['browser'] }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+            {% endverbatim %}
         {% endblock %}
         <script language="javascript" type="text/javascript" src="{% static 'js/jquery-ui.min.js' %}"></script>
         <script language="javascript" type="text/javascript" src="{% static 'js/flot/jquery.flot.min.js' %}"></script>
