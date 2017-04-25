@@ -126,9 +126,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             );
             var newRow = $('<div>').addClass('row').append(
                 $('<div>').addClass('col-md-9').append(
-                    $('<div>').addClass("row").append(
-                        maincontainer, subcontainer
-                    )
+                    maincontainer, subcontainer
                 ),
                 $('<div>').addClass('col-md-3').attr('ng-show', 'loaded').append(
                     "<div class='panel panel-default'>" +
