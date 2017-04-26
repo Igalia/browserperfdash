@@ -301,9 +301,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             overview_placeholder.bind("plotselected", function (event, ranges) {
                 plot.setSelection(ranges);
             });
-
-            $(".main-container").resizable();
-            $(".sub-container").resizable();
             $scope.loading = false;
             $scope.loaded = true;
             graphCounter++;
