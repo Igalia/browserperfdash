@@ -42,23 +42,34 @@
                 <div class="loader_parent" ng-show="loading">
                     <div class="loader"></div>
                 </div>
-                <div class="row" style="padding-top: 10px">
-                    <div class="col-md-9">
-                        <div class="main-container">
-                            <div class="placeholder" id="0"></div>
-                        </div>
-                        <div class="sub-container">
-                            <div class="overview"></div>
-                        </div>
+                <div class="dummy">
+                    <div class="row" style="text-align: center" ng-show="loaded">
+                    <span>
+                        <b>{{ drawnTestsDetails[0]['bot'] }}</b>@
+                        {{ drawnTestsDetails[0]['browser'] }}/{{ drawnTestsDetails[0]['root_test'] }}/{{ drawnTestsDetails[0]['sub_test'] }}
+                    </span>
+                        <button type="button" class="close" aria-label="Close">
+                            <span aria-hidden="true" class="close_button">&times;</span>
+                        </button>
                     </div>
-                    <div class="col-md-3" ng-show="loaded">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h3 class="panel-title" id="0">Test: {{ drawnTestsDetails[0]['root_test'] }}</h3>
+                    <div class="row" style="padding-top: 10px">
+                        <div class="col-md-9">
+                            <div class="main-container">
+                                <div class="placeholder" id="0"></div>
                             </div>
-                            <div class="panel-body" id="0">
-                                Subtest: {{ drawnTestsDetails[0]['sub_test'] }} <br>
-                                Browser: {{ drawnTestsDetails[0]['browser'] }}
+                            <div class="sub-container">
+                                <div class="overview"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3" ng-show="loaded">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title" id="0">Test: {{ drawnTestsDetails[0]['root_test'] }}</h3>
+                                </div>
+                                <div class="panel-body" id="0">
+                                    Subtest: {{ drawnTestsDetails[0]['sub_test'] }} <br>
+                                    Browser: {{ drawnTestsDetails[0]['browser'] }}
+                                </div>
                             </div>
                         </div>
                     </div>

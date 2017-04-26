@@ -110,40 +110,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         $scope.currentBrowser = $scope.selectedBrowser.browser_id;
         $scope.currentSubtestPath = $scope.selectedSubtest.test_path;
 
-        $scope.drawnTestsDetails[graphCounter] = {};
-        testDetails = {}
-        testDetails['root_test'] = $scope.selectedTest.root_test.id;
-        testDetails['sub_test'] = $scope.currentSubtestPath;
-        testDetails['browser'] = $scope.currentBrowser;
-        $scope.drawnTestsDetails[graphCounter] = testDetails;
-
-        if(graphCounter > 0) {
-            var subcontainer = $('<div>').addClass("sub-container").append(
-                $('<div>').addClass("overview")
-            );
-            var maincontainer = $('<div>').addClass("main-container").append(
-                $('<div>').addClass("placeholder").attr('id', graphCounter)
-            );
-            var newRow = $('<div>').addClass('row').append(
-                $('<div>').addClass('col-md-9').append(
-                    maincontainer, subcontainer
-                ),
-                $('<div>').addClass('col-md-3').attr('ng-show', 'loaded').append(
-                    "<div class='panel panel-default'>" +
-                    "<div class='panel-heading'><h3 class='panel-title' id="+ graphCounter + ">" +
-                    "Test: "+ $scope.selectedTest.root_test.id + "</h3></div>" +
-                    "<div class='panel-body' id="+ graphCounter + ">" +
-                    "Subtest: "+ $scope.currentSubtestPath + "<br>" +
-                    "Browser: "+ $scope.currentBrowser + "</div></div>"
-                )
-            ).css('padding-top', '10px');
-            var topRow = $('div#plot_area>.row:first');
-            topRow.before(newRow);
-        }
-
-        var placeholder = $("div.placeholder:first");
-        var overview_placeholder = $("div.overview:first");
-
         $scope.testMetrics = testMetricsOfTestAndSubtestFactory.query({
             root_test: $scope.selectedTest.root_test.id,
             subtest: $scope.selectedSubtest.test_path,
@@ -160,6 +126,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             extraToolTipInfo[graphCounter] = {};
 
             angular.forEach(data, function (value) {
+                $scope.currentBot = !$scope.currentBot ? value['bot'] : $scope.currentBot;
                 tooltipData = {};
                 jqueryTimestamp = value['timestamp']*1000;
                 datum.push([jqueryTimestamp, value['mean_value']]);
@@ -170,6 +137,59 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 tooltipData['test_version'] = value['test_version'];
                 extraToolTipInfo[graphCounter][jqueryTimestamp] = tooltipData;
             });
+
+            $scope.drawnTestsDetails[graphCounter] = {};
+            testDetails = {}
+            testDetails['root_test'] = $scope.selectedTest.root_test.id;
+            testDetails['sub_test'] = $scope.currentSubtestPath;
+            testDetails['browser'] = $scope.currentBrowser;
+            testDetails['bot'] = $scope.currentBot;
+            $scope.drawnTestsDetails[graphCounter] = testDetails;
+
+
+            if(graphCounter > 0) {
+                var subcontainer = $('<div>').addClass("sub-container").append(
+                    $('<div>').addClass("overview")
+                );
+                var maincontainer = $('<div>').addClass("main-container").append(
+                    $('<div>').addClass("placeholder").attr('id', graphCounter)
+                );
+                var newRow = $('<div>').addClass('row').append(
+                    $('<div>').addClass('col-md-9').append(
+                        maincontainer, subcontainer
+                    ),
+                    $('<div>').addClass('col-md-3').attr('ng-show', 'loaded').append(
+                        "<div class='panel panel-default'>" +
+                        "<div class='panel-heading'><h3 class='panel-title' id="+ graphCounter + ">" +
+                        "Test: "+ $scope.selectedTest.root_test.id + "</h3></div>" +
+                        "<div class='panel-body' id="+ graphCounter + ">" +
+                        "Subtest: "+ $scope.currentSubtestPath + "<br>" +
+                        "Browser: "+ $scope.currentBrowser + "</div></div>"
+                    )
+                ).css('padding-top', '10px');
+                var infoRow =  $('<div>').addClass('row').append(
+                    "<span><b>" + $scope.drawnTestsDetails[graphCounter]['bot'] + "" +
+                    "</b>@" + $scope.drawnTestsDetails[graphCounter]['browser'] + "/" +
+                    $scope.drawnTestsDetails[graphCounter]['root_test'] + "/" +
+                    $scope.drawnTestsDetails[graphCounter]['sub_test'] + "</span>" +
+                    "<button type='button' class='close' aria-label='Close'><span aria-hidden='true' " +
+                    "class='close_button'>&times;</span></button>"
+                ).css('text-align', 'center').attr('ng-show', 'loaded');
+
+                var dummyrow = $('<div>').addClass('dummy').append(infoRow, newRow);
+
+                var topRow = $('div#plot_area>.dummy:first');
+                if (!topRow.length) {
+                    //Looks like the first plot was deleted. Need to manually create a div here to add
+                    //things to
+                    $('div.loader_parent').after(dummyrow);
+                } else {
+                    topRow.before(dummyrow);
+                }
+            }
+
+            var placeholder = $("div.placeholder:first");
+            var overview_placeholder = $("div.overview:first");
 
             // Will need it for selection on overview chart
             var mid = datum[parseInt(datum.length/2)][0];
@@ -288,6 +308,12 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             $scope.loaded = true;
             graphCounter++;
         });
-    }
+    };
+    // Some JQuery stuff - to handle close button clicks
+    $(document).on('click','.close_button',function(){
+        $(this).parent().parent().parent().remove();
+    });
+
+
 });
 
