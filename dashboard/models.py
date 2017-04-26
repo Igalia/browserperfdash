@@ -145,3 +145,6 @@ class BotReportData(models.Model):
     def __unicode__(self):
         return self.bot.name + ":" + str(self.browser) + ":" + self.test_version + ":" +\
                self.test_path + ":" + str(self.mean_value)
+
+    class Meta:
+        unique_together = ('bot', 'browser', 'browser_version', 'root_test', 'test_path', 'test_version', )
