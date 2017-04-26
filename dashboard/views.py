@@ -10,7 +10,7 @@ from helpers.benchmark_results import BenchmarkResults
 from django.views.generic import ListView
 from .serializers import *
 from datetime import datetime, timedelta
-
+import urllib
 import logging
 
 log = logging.getLogger(__name__)
@@ -205,7 +205,7 @@ class MetricsForTestList(generics.ListAPIView):
 
     def get_queryset(self):
         test = Test.objects.filter(pk=self.kwargs.get('test'))
-        test_path = self.kwargs.get('subtest')
+        test_path = urllib.unquote(self.kwargs.get('subtest')).decode('utf8')
         return BotReportData.objects.filter(root_test=test, test_path=test_path)[:1]
 
 
@@ -227,7 +227,7 @@ class ResultsForSubtestList(generics.ListAPIView):
     def get_queryset(self):
         browser = Browser.objects.get(pk=self.kwargs.get('browser'))
         test = Test.objects.get(pk=self.kwargs.get('test'))
-        test_path = self.kwargs.get('subtest')
+        test_path = urllib.unquote(self.kwargs.get('subtest')).decode('utf8')
         if self.kwargs.get('bot') == 'all':
             return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path).order_by(
                 'timestamp')

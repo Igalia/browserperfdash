@@ -112,7 +112,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
         $scope.testMetrics = testMetricsOfTestAndSubtestFactory.query({
             root_test: $scope.selectedTest.root_test.id,
-            subtest: $scope.selectedSubtest.test_path,
+            subtest: encodeURIComponent($scope.selectedSubtest.test_path),
         });
         $scope.loading = true;
         var datum = [];
@@ -121,7 +121,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             browser: $scope.selectedBrowser.browser_id,
             root_test: $scope.selectedTest.root_test.id,
             bot: !$scope.selectedBot ? 'all' : $scope.selectedBot.bot,
-            subtest: $scope.selectedSubtest.test_path,
+            subtest: encodeURIComponent($scope.selectedSubtest.test_path),
         }, function (data) {
             extraToolTipInfo[graphCounter] = {};
 
