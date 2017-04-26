@@ -221,8 +221,6 @@ class TestsForBrowserBottList(generics.ListAPIView):
             return BotReportData.objects.filter(browser=browser).distinct('root_test')
 
 
-
-
 class ResultsForSubtestList(generics.ListAPIView):
     serializer_class = ResultsForSubtestListSerializer
 
@@ -230,13 +228,13 @@ class ResultsForSubtestList(generics.ListAPIView):
         browser = Browser.objects.get(pk=self.kwargs.get('browser'))
         test = Test.objects.get(pk=self.kwargs.get('test'))
         test_path = self.kwargs.get('subtest')
-        try:
+        if self.kwargs.get('bot') == 'all':
+            return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path).order_by(
+                'timestamp')
+        else:
             bot = Bot.objects.get(pk=self.kwargs.get('bot'))
             return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path, bot=bot) \
                 .order_by('timestamp')
-        except Bot.DoesNotExist:
-            return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path).order_by('timestamp')
-
 
 
 class DefaultHomeView(ListView):

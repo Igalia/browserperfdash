@@ -26,7 +26,7 @@ app.factory('testMetricsOfTestAndSubtestFactory', function ($resource) {
 });
 
 app.factory('testResultsForTestAndSubtestFactory', function ($resource) {
-    return $resource('/dash/results_for_subtest/:browser/:root_test/:subtest/:bot');
+    return $resource('/dash/results_for_subtest/:browser/:root_test/:bot/:subtest/');
 });
 
 app.controller('PlotController', function ($scope, browserForResultExistFactory, botForResultsExistFactory, testPathFactory,
@@ -120,8 +120,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         var results = testResultsForTestAndSubtestFactory.query({
             browser: $scope.selectedBrowser.browser_id,
             root_test: $scope.selectedTest.root_test.id,
+            bot: !$scope.selectedBot ? 'all' : $scope.selectedBot.bot,
             subtest: $scope.selectedSubtest.test_path,
-            bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
         }, function (data) {
             extraToolTipInfo[graphCounter] = {};
 
@@ -146,7 +146,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             testDetails['bot'] = $scope.currentBot;
             $scope.drawnTestsDetails[graphCounter] = testDetails;
 
-
             if(graphCounter > 0) {
                 var subcontainer = $('<div>').addClass("sub-container").append(
                     $('<div>').addClass("overview")
@@ -154,6 +153,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 var maincontainer = $('<div>').addClass("main-container").append(
                     $('<div>').addClass("placeholder").attr('id', graphCounter)
                 );
+
                 var newRow = $('<div>').addClass('row').append(
                     $('<div>').addClass('col-md-9').append(
                         maincontainer, subcontainer
