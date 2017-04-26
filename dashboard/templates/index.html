@@ -11,18 +11,18 @@
                             {% verbatim %}
                             <div class="form-group">
                                 <label for="days">Show</label>
-                                <input type="number" ng-init="listLimit=10" min="1" max="30"  name="listLimit"
-                                       data-ng-model="listLimit" class="form-control" style="width: 65px;" id="listLimit">
+                                <input type="number" ng-init="listLimit=10" min="0" max="1000"  name="listLimit"
+                                       ng-model="listLimit" class="form-control" style="width: 65px;" id="listLimit" ng-change="reload()">
                             </div>
                             <div class="form-group">
                                 <select name="browser" class="form-control" ng-model="selectedBrowser"
-                                        ng-options="x.name for x in browsers">
+                                        ng-options="x.browser for x in browsers" ng-change="reload()">
                                     <option value="">--All browsers--</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <select name="test" class="form-control" ng-model="selectedTest"
-                                        ng-options="x.id for x in tests">
+                                        ng-options="x.id for x in tests" ng-change="reload()">
                                     <option value="">--All tests--</option>
                                 </select>
                             </div>
@@ -78,7 +78,8 @@
                                 </thead>
                                 <tbody>
 
-                                <tr ng-repeat="data in improvement_reports | filter: {root_test: selectedTest.id} | filter: {bot: selectedBot.name} | orderBy: '-delta' | filter: {is_improvement: true} | limitTo:listLimit "
+                                <tr ng-repeat="data in improvement_reports | filter: {root_test: selectedTest.id}
+                                | filter: {bot: selectedBot.name} | orderBy: '-delta' | filter: {is_improvement: true}"
                                     ng-class="(data.test_version==data.prev_results.test_version) ? 'active' : 'danger'"
                                     popover-trigger="mouseenter">
                                     <td>{{ data.delta| number: 1}}%</td>
@@ -151,7 +152,8 @@
                                 <td>Metric</td>
                                 </thead>
                                 <tbody>
-                                <tr ng-repeat="data in regression_reports | filter: {root_test:selectedTest.id} | filter: {bot: selectedBot.name} | filter: {is_improvement: false} | orderBy: '-delta' | limitTo:listLimit"
+                                <tr ng-repeat="data in regression_reports | filter: {root_test:selectedTest.id} |
+                                 filter: {bot: selectedBot.name} | filter: {is_improvement: false} | orderBy: '-delta'"
                                     ng-class="(data.test_version==data.prev_results.test_version) ? 'active' : 'danger'">
                                     <td>{{ data.delta| number:1}}%</td>
                                     <td>{{ data.browser }}</td>

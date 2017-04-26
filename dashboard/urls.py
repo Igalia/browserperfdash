@@ -4,7 +4,6 @@ from . import views
 
 urlpatterns = [
     url(r'^bot-report', BotReportView.as_view()),
-    url(r'^browser/$', BrowsersList.as_view(), name='browser-list'),
     url(r'^browser_results_exist/$', BrowsersForResultsExistList.as_view()),
     url(r'^bot/$', BotsList.as_view(), name='bots-list'),
     url(r'^bot/detail/(?P<pk>\w+)$', BotDetailView.as_view()),
@@ -20,21 +19,11 @@ urlpatterns = [
         ResultsForSubtestList.as_view()),
     url(r'^report/detail/(?P<pk>\d+)$', BotDataReportDetailView.as_view()),
     url(r'^report/test/(?P<pk>\d+)$', BotResultsForTestListView.as_view()),
-    url(r'^report/improvement/(?P<days_since>\d+)/$', BotDataReportImprovementListView.as_view()),
-    url(r'^report/improvement/(?P<days_since>\d+)/(?P<platform>[-\w]+)/$', BotDataReportImprovementListView.as_view()),
-    url(r'^report/improvement/(?P<days_since>\d+)/(?P<platform>[-\w]+)/(?P<gpu>[-\w]+)/$',
+    url(r'^report/improvement/(?P<days_since>\d+)/(?P<platform>[-\w]+)/(?P<gpu>[-\w]+)/'
+        r'(?P<cpu>[-\w]+)/(?P<browser>[-\w]+)/(?P<test>[-\w]+)/(?P<bot>[-\w]+)/(?P<limit>\d+)/$',
         BotDataReportImprovementListView.as_view()),
-    url(r'^report/improvement/(?P<days_since>\d+)/(?P<platform>[-\w]+)/(?P<gpu>[-\w]+)/(?P<cpu>[-\w]+)/$',
-        BotDataReportImprovementListView.as_view()),
-    url(r'^report/improvement/(?P<days_since>\d+)/(?P<platform>[-\w]+)/(?P<gpu>[-\w]+)/(?P<cpu>[-\w]+)/(?P<browser>[-\w]+)/$',
-        BotDataReportImprovementListView.as_view()),
-    url(r'^report/regression/(?P<days_since>\d+)/$', BotDataReportRegressionListView.as_view()),
-    url(r'^report/regression/(?P<days_since>\d+)/(?P<platform>[-\w]+)/$', BotDataReportRegressionListView.as_view()),
-    url(r'^report/regression/(?P<days_since>\d+)/(?P<platform>[-\w]+)/(?P<gpu>[-\w]+)/$',
-        BotDataReportRegressionListView.as_view()),
-    url(r'^report/regression/(?P<days_since>\d+)/(?P<platform>[-\w]+)/(?P<gpu>[-\w]+)/(?P<cpu>[-\w]+)/$',
-        BotDataReportRegressionListView.as_view()),
-    url(r'^report/regression/(?P<days_since>\d+)/(?P<platform>[-\w]+)/(?P<gpu>[-\w]+)/(?P<cpu>[-\w]+)/(?P<browser>[-\w]+)/$',
+    url(r'^report/regression/(?P<days_since>\d+)/(?P<platform>[-\w]+)/(?P<gpu>[-\w]+)/'
+        r'(?P<cpu>[-\w]+)/(?P<browser>[-\w]+)/(?P<test>[-\w]+)/(?P<bot>[-\w]+)/(?P<limit>\d+)/$',
         BotDataReportRegressionListView.as_view()),
     url(r'^report_full/$', BotDataCompleteListView.as_view()),
     url(r'^graph/$', GraphPlotView.as_view(), name='graph_report')

@@ -45,32 +45,43 @@ class BotDataReportImprovementListView(generics.ListAPIView):
         except ValueError:
             days_since = int(5)
 
-        if not self.kwargs.get('platform') or self.kwargs.get('platform') == 'all':
+        if self.kwargs.get('platform') == 'all':
             platform_obj = Platform.objects.all()
-        elif self.kwargs.get('platform') != 'all':
+        else:
             platform_obj = Platform.objects.filter(pk=self.kwargs.get('platform'))
 
-        if not self.kwargs.get('cpu') or self.kwargs.get('cpu') == 'all':
+        if self.kwargs.get('cpu') == 'all':
             cpu_obj = CPUArchitecture.objects.all()
-        elif self.kwargs.get('cpu') != 'all':
+        else:
             cpu_obj = CPUArchitecture.objects.filter(pk=self.kwargs.get('cpu'))
 
-        if not self.kwargs.get('gpu') or self.kwargs.get('gpu') == 'all':
+        if self.kwargs.get('gpu') == 'all':
             gpu_obj = GPUType.objects.all()
-        elif self.kwargs.get('gpu') != 'all':
+        else:
             gpu_obj = GPUType.objects.filter(pk=self.kwargs.get('gpu'))
 
-        if not self.kwargs.get('browser') or self.kwargs.get('browser') == 'all':
+        if self.kwargs.get('browser') == 'all':
             browser_obj = Browser.objects.all()
-        elif self.kwargs.get('browser') != 'all':
+        else:
             browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
 
-        bot = Bot.objects.filter(platform__in=platform_obj, cpuArchitecture__in=cpu_obj, gpuType__in=gpu_obj,
-                                 enabled=True)
+        if self.kwargs.get('test') == 'all':
+            root_test = Test.objects.all()
+        else:
+            root_test = Test.objects.filter(pk=self.kwargs.get('test'))
+
+        if self.kwargs.get('bot') == 'all':
+            bot_obj = Bot.objects.all()
+        else:
+            bot_obj = Bot.objects.filter(pk=self.kwargs.get('bot'))
+
+        limit = self.kwargs.get('limit')
+        bot = bot_obj.filter(platform__in=platform_obj, cpuArchitecture__in=cpu_obj, gpuType__in=gpu_obj,
+                             enabled=True)
         requested_time = datetime.utcnow() + timedelta(days=-days_since)
         queryset = super(BotDataReportImprovementListView, self).get_queryset()
-        return queryset.filter(aggregation='None', timestamp__gt=requested_time,
-                               bot__in=bot, browser__in=browser_obj, is_improvement=True).order_by('-delta')[:30]
+        return queryset.filter(aggregation='None', timestamp__gt=requested_time, root_test__in=root_test,
+                               bot__in=bot, browser__in=browser_obj, is_improvement=True).order_by('-delta')[:limit]
 
 
 class BotDataReportRegressionListView(generics.ListAPIView):
@@ -84,32 +95,43 @@ class BotDataReportRegressionListView(generics.ListAPIView):
         except ValueError:
             days_since = int(5)
 
-        if not self.kwargs.get('platform') or self.kwargs.get('platform') == 'all':
+        if self.kwargs.get('platform') == 'all':
             platform_obj = Platform.objects.all()
-        elif self.kwargs.get('platform') != 'all':
+        else:
             platform_obj = Platform.objects.filter(pk=self.kwargs.get('platform'))
 
-        if not self.kwargs.get('cpu') or self.kwargs.get('cpu') == 'all':
+        if self.kwargs.get('cpu') == 'all':
             cpu_obj = CPUArchitecture.objects.all()
-        elif self.kwargs.get('cpu') != 'all':
+        else:
             cpu_obj = CPUArchitecture.objects.filter(pk=self.kwargs.get('cpu'))
 
-        if not self.kwargs.get('gpu') or self.kwargs.get('gpu') == 'all':
+        if self.kwargs.get('gpu') == 'all':
             gpu_obj = GPUType.objects.all()
-        elif self.kwargs.get('gpu') != 'all':
+        else:
             gpu_obj = GPUType.objects.filter(pk=self.kwargs.get('gpu'))
 
-        if not self.kwargs.get('browser') or self.kwargs.get('browser') == 'all':
+        if self.kwargs.get('browser') == 'all':
             browser_obj = Browser.objects.all()
-        elif self.kwargs.get('browser') != 'all':
+        else:
             browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
 
-        bot = Bot.objects.filter(platform__in=platform_obj, cpuArchitecture__in=cpu_obj, gpuType__in=gpu_obj,
+        if self.kwargs.get('test') == 'all':
+            root_test = Test.objects.all()
+        else:
+            root_test = Test.objects.filter(pk=self.kwargs.get('test'))
+
+        if self.kwargs.get('bot') == 'all':
+            bot_obj = Bot.objects.all()
+        else:
+            bot_obj = Bot.objects.filter(pk=self.kwargs.get('bot'))
+
+        limit = self.kwargs.get('limit')
+        bot = bot_obj.filter(platform__in=platform_obj, cpuArchitecture__in=cpu_obj, gpuType__in=gpu_obj,
                                  enabled=True)
         requested_time = datetime.utcnow() + timedelta(days=-days_since)
         queryset = super(BotDataReportRegressionListView, self).get_queryset()
-        return queryset.filter(aggregation='None', timestamp__gt=requested_time,
-                               bot__in=bot, browser__in=browser_obj, is_improvement=False).order_by('-delta')[:30]
+        return queryset.filter(aggregation='None', timestamp__gt=requested_time, root_test__in=root_test,
+                               bot__in=bot, browser__in=browser_obj, is_improvement=False).order_by('-delta')[:limit]
 
 class BotDataCompleteListView(generics.ListCreateAPIView):
     model = BotReportData
@@ -135,12 +157,6 @@ class BotResultsForTestListView(generics.ListAPIView):
                                aggregation=obj.aggregation, bot=obj.bot)
 
 
-class BrowsersList(generics.ListAPIView):
-    model = Browser
-    queryset = Browser.objects.filter(enabled=True)
-    serializer_class = BrowserListSerializer
-
-
 class BrowsersForResultsExistList(generics.ListAPIView):
     model = BotReportData
     queryset = BotReportData.objects.distinct('browser')
@@ -163,8 +179,11 @@ class BotsForResultsExistList(generics.ListAPIView):
     serializer_class = BotsForResultsExistListSerializer
 
     def get_queryset(self):
-        browser = Browser.objects.filter(pk=self.kwargs.get('browser'))
-        return BotReportData.objects.filter(browser=browser).distinct('bot')
+        if self.kwargs.get('browser') == 'all':
+            browser_obj = Browser.objects.all()
+        else:
+            browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
+        return BotReportData.objects.filter(browser__in=browser_obj).distinct('bot')
 
 
 class PlatformList(generics.ListAPIView):

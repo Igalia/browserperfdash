@@ -7,15 +7,15 @@
 app = angular.module('browserperfdash.dashboard.static', ['ngResource','ngAnimate', 'ngSanitize', 'ui.bootstrap']);
 
 app.factory('botReportsImprovementFactory', function($resource) {
-    return $resource('/dash/report/improvement/:days_since/:platform/:gpu/:cpu/:browser');
+    return $resource('/dash/report/improvement/:days_since/:platform/:gpu/:cpu/:browser/:test/:bot/:limit');
 });
 
 app.factory('botReportsRegressionFactory', function($resource) {
-    return $resource('/dash/report/regression/:days_since/:platform/:gpu/:cpu/:browser');
+    return $resource('/dash/report/regression/:days_since/:platform/:gpu/:cpu/:browser/:test/:bot/:limit');
 });
 
 app.factory('browserFactory', function($resource) {
-    return $resource('/dash/browser');
+    return $resource('/dash/browser_results_exist');
 });
 
 app.factory('botFactory', function($resource) {
@@ -75,20 +75,27 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
             $scope.selectedCPU = $filter('filter')($scope.cpus, {'id': $scope.selectedBot.cpuArchitecture})[0];
             $scope.selectedGPU = $filter('filter')($scope.gpus, {'id': $scope.selectedBot.gpuType})[0];
         }
+        $scope.reload();
     };
-    $scope.selectedDays = !$scope.selectedDays ? 5 : $scope.selectedDays;
     $scope.reload = function () {
-        $scope.selectedBrowserId = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id;
+        $scope.selectedDays = !$scope.selectedDays ? 5 : $scope.selectedDays;
+        $scope.listLimit = !$scope.listLimit? 10 : $scope.listLimit;
+        $scope.selectedBrowserId = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id;
         $scope.selectedPlatformId = !$scope.selectedPlatform ? 'all' : $scope.selectedPlatform.id;
         $scope.selectedCPUId = !$scope.selectedCPU ? 'all' : $scope.selectedCPU.id;
         $scope.selectedGPUId = !$scope.selectedGPU ? 'all' : $scope.selectedGPU.id;
+        $scope.selectedTestId = !$scope.selectedTest ? 'all' : $scope.selectedTest.id;
+        $scope.selectedBotName = !$scope.selectedBot ? 'all' : $scope.selectedBot.name;
         $scope.loading = true;
         $scope.improvement_reports = botReportsImprovementFactory.query({
             days_since: $scope.selectedDays,
             platform: $scope.selectedPlatformId,
             gpu: $scope.selectedGPUId,
             cpu: $scope.selectedCPUId,
-            browser: $scope.selectedBrowserId
+            browser: $scope.selectedBrowserId,
+            test: $scope.selectedTestId,
+            bot: $scope.selectedBotName,
+            limit: $scope.listLimit
         }, function () {
             $scope.loading_improvements = false;
         });
@@ -97,7 +104,10 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
             platform: $scope.selectedPlatformId,
             gpu: $scope.selectedGPUId,
             cpu: $scope.selectedCPUId,
-            browser: $scope.selectedBrowserId
+            browser: $scope.selectedBrowserId,
+            test: $scope.selectedTestId,
+            bot: $scope.selectedBotName,
+            limit: $scope.listLimit
         }, function () {
             $scope.loading_regressions = false;
         });
