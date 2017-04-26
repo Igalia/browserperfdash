@@ -78,6 +78,9 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
         $scope.reload();
     };
     $scope.reload = function () {
+        $scope.noImprovementsFound = false;
+        $scope.noRegressionsFound = false;
+        $scope.loading = true;
         $scope.selectedDays = !$scope.selectedDays ? 5 : $scope.selectedDays;
         $scope.listLimit = !$scope.listLimit? 10 : $scope.listLimit;
         $scope.selectedBrowserId = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id;
@@ -86,7 +89,6 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
         $scope.selectedGPUId = !$scope.selectedGPU ? 'all' : $scope.selectedGPU.id;
         $scope.selectedTestId = !$scope.selectedTest ? 'all' : $scope.selectedTest.id;
         $scope.selectedBotName = !$scope.selectedBot ? 'all' : $scope.selectedBot.name;
-        $scope.loading = true;
         $scope.improvement_reports = botReportsImprovementFactory.query({
             days_since: $scope.selectedDays,
             platform: $scope.selectedPlatformId,
@@ -96,7 +98,10 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
             test: $scope.selectedTestId,
             bot: $scope.selectedBotName,
             limit: $scope.listLimit
-        }, function () {
+        }, function (data) {
+            if (data.length == 0) {
+                $scope.noImprovementsFound = true;
+            }
             $scope.loading_improvements = false;
         });
         $scope.regression_reports = botReportsRegressionFactory.query({
@@ -108,7 +113,10 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
             test: $scope.selectedTestId,
             bot: $scope.selectedBotName,
             limit: $scope.listLimit
-        }, function () {
+        }, function (data) {
+            if (data.length == 0) {
+                $scope.noRegressionsFound = true;
+            }
             $scope.loading_regressions = false;
         });
         if (!$scope.loading_improvements && !$scope.loading_regressions) {

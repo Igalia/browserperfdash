@@ -53,9 +53,9 @@
                             <div class="form-group">
                                 <label for="days">Days</label>
                                 <input type="number" ng-init="selectedDays=5" min="0" max="50"  name="selectedDays"
-                                       data-ng-model="selectedDays" class="form-control" style="width: 65px;" id="selectedDays">
+                                       data-ng-model="selectedDays" class="form-control" style="width: 65px;" id="selectedDays" ng-change="reload()">
                             </div>
-                            <button type="button" class="btn btn-default" ng-click="reload()" id="reload">
+                            <button type="button" class="btn btn-default" ng-click="reload()" id="reload" disabled="disabled">
                                 <i class="glyphicon glyphicon-refresh" ng-class="{'glyphicon-refresh-animate': loading}"></i></button>
                         </div>
                         {% endverbatim %}
@@ -78,8 +78,7 @@
                                 </thead>
                                 <tbody>
 
-                                <tr ng-repeat="data in improvement_reports | filter: {root_test: selectedTest.id}
-                                | filter: {bot: selectedBot.name} | orderBy: '-delta' | filter: {is_improvement: true}"
+                                <tr ng-repeat="data in improvement_reports | orderBy: '-delta'"
                                     ng-class="(data.test_version==data.prev_results.test_version) ? 'active' : 'danger'"
                                     popover-trigger="mouseenter">
                                     <td>{{ data.delta| number: 1}}%</td>
@@ -130,8 +129,8 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="panel-footer">
-                            * change in days require manual reload with the button
+                        <div class="panel-footer" ng-show="noImprovementsFound">
+                            No results found. Try again
                         </div>
                     </div>
 
@@ -152,8 +151,7 @@
                                 <td>Metric</td>
                                 </thead>
                                 <tbody>
-                                <tr ng-repeat="data in regression_reports | filter: {root_test:selectedTest.id} |
-                                 filter: {bot: selectedBot.name} | filter: {is_improvement: false} | orderBy: '-delta'"
+                                <tr ng-repeat="data in regression_reports | orderBy: '-delta'"
                                     ng-class="(data.test_version==data.prev_results.test_version) ? 'active' : 'danger'">
                                     <td>{{ data.delta| number:1}}%</td>
                                     <td>{{ data.browser }}</td>
@@ -259,8 +257,8 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="panel-footer">
-                            * change in days require manual reload with the button
+                        <div class="panel-footer" ng-show="noRegressionsFound">
+                            No results found. Try again
                         </div>
                     </div>
                 </div>
