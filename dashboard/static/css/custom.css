@@ -34,6 +34,7 @@
 }
 .overview {
     width: 100%;
+    min-height: 80px;
     height: 100%;
     font-size: 14px;
     line-height: 1.2em;
@@ -62,5 +63,5 @@
     height: 240px;
 }
 .sub-container {
-    height:60px;
+    height:80px;
 }

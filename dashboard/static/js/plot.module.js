@@ -115,7 +115,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             subtest: encodeURIComponent($scope.selectedSubtest.test_path),
         });
         $scope.loading = true;
-        var datum = [];
 
         var results = testResultsForTestAndSubtestFactory.query({
             browser: $scope.selectedBrowser.browser_id,
@@ -124,26 +123,28 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             subtest: encodeURIComponent($scope.selectedSubtest.test_path),
         }, function (data) {
             extraToolTipInfo[graphCounter] = {};
+            botReportData = {};
 
             angular.forEach(data, function (value) {
+                botReportData[value['bot']] = !botReportData[value['bot']] ? [] : botReportData[value['bot']];
                 $scope.currentBot = !$scope.currentBot ? value['bot'] : $scope.currentBot;
                 tooltipData = {};
                 jqueryTimestamp = value['timestamp']*1000;
-                datum.push([jqueryTimestamp, value['mean_value']]);
+                botReportData[value['bot']].push([jqueryTimestamp, value['mean_value']]);
                 tooltipData['yvalue'] = value['mean_value'];
                 tooltipData['browser_version'] = value['browser_version'];
                 tooltipData['stddev'] = value['stddev'];
                 tooltipData['delta'] = value['delta'];
                 tooltipData['test_version'] = value['test_version'];
+                tooltipData['bot'] = value['bot'];
                 extraToolTipInfo[graphCounter][jqueryTimestamp] = tooltipData;
             });
 
             $scope.drawnTestsDetails[graphCounter] = {};
-            testDetails = {}
+            testDetails = {};
             testDetails['root_test'] = $scope.selectedTest.root_test.id;
             testDetails['sub_test'] = $scope.currentSubtestPath;
             testDetails['browser'] = $scope.currentBrowser;
-            testDetails['bot'] = $scope.currentBot;
             $scope.drawnTestsDetails[graphCounter] = testDetails;
 
             if(graphCounter > 0) {
@@ -168,8 +169,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     )
                 ).css('padding-top', '10px');
                 var infoRow =  $('<div>').addClass('row').append(
-                    "<span><b>" + $scope.drawnTestsDetails[graphCounter]['bot'] + "" +
-                    "</b>@" + $scope.drawnTestsDetails[graphCounter]['browser'] + "/" +
+                    "<span>" + $scope.drawnTestsDetails[graphCounter]['browser'] + "/" +
                     $scope.drawnTestsDetails[graphCounter]['root_test'] + "/" +
                     $scope.drawnTestsDetails[graphCounter]['sub_test'] + "</span>" +
                     "<button type='button' class='close' aria-label='Close'><span aria-hidden='true' " +
@@ -191,10 +191,16 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             var placeholder = $("div.placeholder:first");
             var overview_placeholder = $("div.overview:first");
 
+            plotdatum = [];
+
+            angular.forEach(botReportData, function (value, key) {
+                plotdatum.push(botReportData[key]);
+            });
+
             // Will need it for selection on overview chart
-            var mid = datum[parseInt(datum.length/2)][0];
-            var end = datum[datum.length-1][0];
-            var plot = $.plot(placeholder, [datum], {
+            var mid = plotdatum[0][parseInt(plotdatum[0].length/2)][0];
+            var end = plotdatum[0][plotdatum[0].length-1][0];
+            var plot = $.plot(placeholder, plotdatum, {
                 xaxis: {
                     mode: "time",
                     tickLength: 5,
@@ -213,7 +219,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     clickable: true
                 },
             });
-            var overview = $.plot(overview_placeholder, [datum], {
+            var overview = $.plot(overview_placeholder, plotdatum, {
                 series: {
                     lines: {
                         show: true,
@@ -266,6 +272,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     var date = new Date(x);
                     var currentPlot = +placeholder.attr('id');
                     $("#tooltip").html( $scope.currentBrowser + "@<i>" + $scope.currentSubtestPath + "</i><br>"
+                        + "<b>Bot</b>: " + extraToolTipInfo[currentPlot][x]['bot'] + "<br>"
                         + "<b>Time</b>: " +  date.toISOString().split('T')[0] + ", " + date.toISOString().split('T')[1].substring(0,8)+ "<br>"
                         + "<b>Test Version</b>: " + extraToolTipInfo[currentPlot][x]['test_version'].slice(-7) + "<br>"
                         + "<b>Browser Version</b>: " + extraToolTipInfo[currentPlot][x]['browser_version'] + "<br>"
