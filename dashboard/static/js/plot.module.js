@@ -194,12 +194,12 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             plotdatum = [];
 
             angular.forEach(botReportData, function (value, key) {
-                plotdatum.push(botReportData[key]);
+                plotdatum.push({ 'data': botReportData[key], 'label': key });
             });
 
             // Will need it for selection on overview chart
-            var mid = plotdatum[0][parseInt(plotdatum[0].length/2)][0];
-            var end = plotdatum[0][plotdatum[0].length-1][0];
+            var mid = plotdatum[0]['data'][parseInt(plotdatum[0]['data'].length/2)][0];
+            var end = plotdatum[0]['data'][plotdatum[0]['data'].length-1][0];
             var plot = $.plot(placeholder, plotdatum, {
                 xaxis: {
                     mode: "time",
@@ -218,6 +218,10 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     hoverable: true,
                     clickable: true
                 },
+                legend: {
+                    show: true,
+                    position: "nw"
+                },
             });
             var overview = $.plot(overview_placeholder, plotdatum, {
                 series: {
@@ -225,7 +229,10 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         show: true,
                         lineWidth: 1
                     },
-                    shadowSize: 0
+                    shadowSize: 0,
+                },
+                legend: {
+                    show: false,
                 },
                 xaxis: {
                     ticks: 10,
