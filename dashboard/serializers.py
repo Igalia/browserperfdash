@@ -112,7 +112,6 @@ class BotReportDataSerializer(serializers.ModelSerializer):
             return {"id": obj.prev_result.id,
                     "test_version": obj.prev_result.test_version,
                     "mean_value": obj.prev_result.mean_value,
-                    "timestamp": obj.prev_result.timestamp,
                     "browser_version": obj.prev_result.browser_version,
                     "stddev": obj.prev_result.stddev,
                     "metric_unit_prefixed": obj.prev_result.metric_unit_prefixed
@@ -123,7 +122,7 @@ class BotReportDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = BotReportData
         fields = ('id', 'bot', 'browser', 'browser_version', 'root_test','test_path', 'test_version', 'metric_unit',
-                  'metric_unit_prefixed', 'mean_value', 'stddev', 'timestamp', 'delta', 'is_improvement', 'prev_results')
+                  'metric_unit_prefixed', 'mean_value', 'stddev', 'delta', 'prev_results')
 
 
 class BotDataCompleteSerializer(serializers.ModelSerializer):
