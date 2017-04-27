@@ -171,7 +171,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         "Test: "+ $scope.selectedTest.root_test.id + "</h3></div>" +
                         "<div class='panel-body' id="+ graphCounter + ">" +
                         "Subtest: "+ $scope.currentSubtestPath + "<br>" +
-                        "Browser: "+ $scope.currentBrowser + "</div></div>"
+                        "Browser: "+ $scope.currentBrowser + "<br>" +
+                        "<span class='choices' id=choice-"+ graphCounter + "></span></div></div>"
                     )
                 ).css('padding-top', '10px');
                 var infoRow =  $('<div>').addClass('row').append(
@@ -196,134 +197,162 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
             var placeholder = $("div.placeholder:first");
             var overview_placeholder = $("div.overview:first");
-
-            plotdatum = [];
+            // insert checkboxes
+            plotdatumcomplete = [];
+            // Select the right container and add in the checkboxes
+            var choiceContainer = $("span.choices#choice-"+ graphCounter);
 
             angular.forEach(botReportData, function (value, key) {
-                plotdatum.push({ 'data': botReportData[key], 'label': key });
+                choiceDiv = $('<div>').addClass('checkbox').append("" +
+                    "<label>" +
+                    "<input name='"+ key + "' id = 'id"+ key +"' type='checkbox' " +
+                    "checked='checked' value=''>"+ key + "</label>"
+                );
+                choiceContainer.append(choiceDiv);
+                plotdatumcomplete.push({ 'data': botReportData[key], 'label': key });
             });
 
-            // Will need it for selection on overview chart
-            var mid = plotdatum[0]['data'][parseInt(plotdatum[0]['data'].length/2)][0];
-            var end = plotdatum[0]['data'][plotdatum[0]['data'].length-1][0];
-            var plot = $.plot(placeholder, plotdatum, {
-                xaxis: {
-                    mode: "time",
-                    tickLength: 5,
-                    timeformat: "%H:%M:%S",
-                },
-                crosshair: {
-                    mode: "x,y"
-                },
-                yaxis: {
-                    axisLabel : $scope.testMetrics[0]['metric_unit']['name'] + ' (' +
-                    ($scope.testMetrics[0]['metric_unit']['is_better'] == 'up' ? 'up' : 'down') + ' is better)',
-                    position: 'left',
-                },
-                grid: {
-                    hoverable: true,
-                    clickable: true
-                },
-                legend: {
-                    show: true,
-                    position: "nw"
-                },
-            });
-            var overview = $.plot(overview_placeholder, plotdatum, {
-                series: {
-                    lines: {
-                        show: true,
-                        lineWidth: 1
-                    },
-                    shadowSize: 0,
-                },
-                legend: {
-                    show: false,
-                },
-                xaxis: {
-                    ticks: 10,
-                    mode: "time",
-                    timeformat: "%Y-%m-%d",
-                    zoomRange: [0.1, 10],
-                    panRange: [-10, 10]
-                },
-                yaxis: {
-                    ticks: [],
-                    min: 0,
-                    autoscaleMargin: 0.1,
-                },
-                grid: {
-                    color: "#666",
-                    backgroundColor: { colors: ["#ddd", "#fff"]}
-                },
-                rangeselection:{
-                    color: "#mar",
-                    start: mid,
-                    end: end,
-                    enabled: true,
-                    callback: function(o){
-                        var xaxis = plot.getAxes().xaxis;
-                        xaxis.options.min = o.start;
-                        xaxis.options.max = o.end;
-                        plot.setupGrid();
-                        plot.draw();
+            choiceContainer.find("input").click(plotAccordingToChoices);
+            function plotAccordingToChoices() {
+                updatedPlotData = [];
+                choiceContainer.find("input:checked").each(function () {
+                    var key = $(this).attr("name");
+                    if (key) {
+                        updatedPlotData.push(
+                            {'data': $filter('filter')(plotdatumcomplete, {'label': key})[0]['data'], 'label': key }
+                        );
                     }
-                }
-            });
-            $("<div id='tooltip'></div>").css({
-                position: "absolute",
-                display: "none",
-                border: "1px solid #fdd",
-                padding: "2px",
-                "background-color": "#fee",
-                opacity: 0.95
-            }).appendTo("body");
-
-            placeholder.bind("plothover", function (event, pos, item) {
-                if(item) {
-                    var x = item.datapoint[0], y = item.datapoint[1];
-                    var date = new Date(x);
-                    var currentPlot = +placeholder.attr('id');
-                    hoveredSeriesBot = item.series.label;
-                    $("#tooltip").html( $scope.currentBrowser + "@<i>" + $scope.currentSubtestPath + "</i><br>"
-                        + "<b>Bot</b>: " + hoveredSeriesBot + "<br>"
-                        + "<b>Time</b>: " +  date.toISOString().split('T')[0] + ", " + date.toISOString().split('T')[1].substring(0,8)+ "<br>"
-                        + "<b>Test Version</b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['test_version'].slice(-7) + "<br>"
-                        + "<b>Browser Version</b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['browser_version'] + "<br>"
-                        + "<b>Std. Dev</b>: " + parseFloat(extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['stddev']).toFixed(3) + "<br>"
-                        + "<b>Value</b>: " +  parseFloat(y).toFixed(3) + " " + $scope.testMetrics[0]['metric_unit']['unit'] + "<br>"
-                        + "<b>Delta</b> :" +  parseFloat(extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['delta']).toFixed(3) + "<br>"
-                        + "<b>Aggregation </b> :" + $scope.selectedSubtest.aggregation + "<br>")
-                        .css({top: item.pageY+5, left: item.pageX+5})
-                        .fadeIn(200);
-                } else {
-                    $("#tooltip").hide();
-                }
-            });
-            placeholder.bind("plotclick", function (event, pos, item) {
-                if (item) {
-                    plot.highlight(item.series, item.datapoint);
-                }
-            });
-
-            placeholder.bind("plotselected", function (event, ranges) {
-                // do the zooming
-                $.each(plot.getXAxes(), function(_, axis) {
-                    var opts = axis.options;
-                    opts.min = ranges.xaxis.from;
-                    opts.max = ranges.xaxis.to;
                 });
-                plot.setupGrid();
-                plot.draw();
-                plot.clearSelection();
-                // don't fire event on the overview to prevent eternal loop
-                overview.setSelection(ranges, true);
-            });
-            overview_placeholder.bind("plotselected", function (event, ranges) {
-                plot.setSelection(ranges);
-            });
-            $scope.loading = false;
-            $scope.loaded = true;
+                createPlot(updatedPlotData);
+            }
+
+            function createPlot(plotdatum) {
+                var mid = 0, end = 0;
+                if (plotdatum.length > 0 ) {
+                    // Will need it for selection on overview chart
+                    mid = plotdatum[0]['data'][parseInt(plotdatum[0]['data'].length/2)][0];
+                    end = plotdatum[0]['data'][plotdatum[0]['data'].length-1][0];
+                }
+                var plot = $.plot(placeholder, plotdatum, {
+                    xaxis: {
+                        mode: "time",
+                        tickLength: 5,
+                        timeformat: "%H:%M:%S",
+                    },
+                    crosshair: {
+                        mode: "x,y"
+                    },
+                    yaxis: {
+                        axisLabel : $scope.testMetrics[0]['metric_unit']['name'] + ' (' +
+                        ($scope.testMetrics[0]['metric_unit']['is_better'] == 'up' ? 'up' : 'down') + ' is better)',
+                        position: 'left',
+                    },
+                    grid: {
+                        hoverable: true,
+                        clickable: true
+                    },
+                    legend: {
+                        show: true,
+                        position: "nw"
+                    },
+                });
+                var overview = $.plot(overview_placeholder, plotdatum, {
+                    series: {
+                        lines: {
+                            show: true,
+                            lineWidth: 1
+                        },
+                        shadowSize: 0,
+                    },
+                    legend: {
+                        show: false,
+                    },
+                    xaxis: {
+                        ticks: 10,
+                        mode: "time",
+                        timeformat: "%Y-%m-%d",
+                        zoomRange: [0.1, 10],
+                        panRange: [-10, 10]
+                    },
+                    yaxis: {
+                        ticks: [],
+                        min: 0,
+                        autoscaleMargin: 0.1,
+                    },
+                    grid: {
+                        color: "#666",
+                        backgroundColor: { colors: ["#ddd", "#fff"]}
+                    },
+                    rangeselection:{
+                        color: "#mar",
+                        start: mid,
+                        end: end,
+                        enabled: true,
+                        callback: function(o){
+                            var xaxis = plot.getAxes().xaxis;
+                            xaxis.options.min = o.start;
+                            xaxis.options.max = o.end;
+                            plot.setupGrid();
+                            plot.draw();
+                        }
+                    }
+                });
+                $("<div id='tooltip'></div>").css({
+                    position: "absolute",
+                    display: "none",
+                    border: "1px solid #fdd",
+                    padding: "2px",
+                    "background-color": "#fee",
+                    opacity: 0.95
+                }).appendTo("body");
+
+                placeholder.bind("plothover", function (event, pos, item) {
+                    if(item) {
+                        var x = item.datapoint[0], y = item.datapoint[1];
+                        var date = new Date(x);
+                        var currentPlot = +placeholder.attr('id');
+                        hoveredSeriesBot = item.series.label;
+                        $("#tooltip").html( $scope.currentBrowser + "@<i>" + $scope.currentSubtestPath + "</i><br>"
+                            + "<b>Bot</b>: " + hoveredSeriesBot + "<br>"
+                            + "<b>Time</b>: " +  date.toISOString().split('T')[0] + ", " + date.toISOString().split('T')[1].substring(0,8)+ "<br>"
+                            + "<b>Test Version</b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['test_version'].slice(-7) + "<br>"
+                            + "<b>Browser Version</b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['browser_version'] + "<br>"
+                            + "<b>Std. Dev</b>: " + parseFloat(extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['stddev']).toFixed(3) + "<br>"
+                            + "<b>Value</b>: " +  parseFloat(y).toFixed(3) + " " + $scope.testMetrics[0]['metric_unit']['unit'] + "<br>"
+                            + "<b>Delta</b> :" +  parseFloat(extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['delta']).toFixed(3) + "<br>"
+                            + "<b>Aggregation </b> :" + $scope.selectedSubtest.aggregation + "<br>")
+                            .css({top: item.pageY+5, left: item.pageX+5})
+                            .fadeIn(200);
+                    } else {
+                        $("#tooltip").hide();
+                    }
+                });
+                placeholder.bind("plotclick", function (event, pos, item) {
+                    if (item) {
+                        plot.highlight(item.series, item.datapoint);
+                    }
+                });
+
+                placeholder.bind("plotselected", function (event, ranges) {
+                    // do the zooming
+                    $.each(plot.getXAxes(), function(_, axis) {
+                        var opts = axis.options;
+                        opts.min = ranges.xaxis.from;
+                        opts.max = ranges.xaxis.to;
+                    });
+                    plot.setupGrid();
+                    plot.draw();
+                    plot.clearSelection();
+                    // don't fire event on the overview to prevent eternal loop
+                    overview.setSelection(ranges, true);
+                });
+                overview_placeholder.bind("plotselected", function (event, ranges) {
+                    plot.setSelection(ranges);
+                });
+                $scope.loading = false;
+                $scope.loaded = true;
+            }
+            createPlot(plotdatumcomplete);
             graphCounter++;
         });
     };
