@@ -249,7 +249,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     },
                     grid: {
                         hoverable: true,
-                        clickable: true
                     },
                     legend: {
                         show: true,
