@@ -126,18 +126,24 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             botReportData = {};
 
             angular.forEach(data, function (value) {
-                botReportData[value['bot']] = !botReportData[value['bot']] ? [] : botReportData[value['bot']];
-                $scope.currentBot = !$scope.currentBot ? value['bot'] : $scope.currentBot;
-                tooltipData = {};
+                currentbot = value['bot'];
+                extraToolTipInfo[graphCounter][currentbot] = !extraToolTipInfo[graphCounter][currentbot] ? {} :
+                    extraToolTipInfo[graphCounter][currentbot];
+                botReportData[value['bot']] = !botReportData[currentbot] ? [] : botReportData[currentbot];
+
+                // Data to draw plots
                 jqueryTimestamp = value['timestamp']*1000;
                 botReportData[value['bot']].push([jqueryTimestamp, value['mean_value']]);
+
+                // Data to populate tooltips
+                tooltipData = {};
                 tooltipData['yvalue'] = value['mean_value'];
                 tooltipData['browser_version'] = value['browser_version'];
                 tooltipData['stddev'] = value['stddev'];
                 tooltipData['delta'] = value['delta'];
                 tooltipData['test_version'] = value['test_version'];
-                tooltipData['bot'] = value['bot'];
-                extraToolTipInfo[graphCounter][jqueryTimestamp] = tooltipData;
+
+                extraToolTipInfo[graphCounter][value['bot']][jqueryTimestamp] = tooltipData;
             });
 
             $scope.drawnTestsDetails[graphCounter] = {};
@@ -278,14 +284,15 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     var x = item.datapoint[0], y = item.datapoint[1];
                     var date = new Date(x);
                     var currentPlot = +placeholder.attr('id');
+                    hoveredSeriesBot = item.series.label;
                     $("#tooltip").html( $scope.currentBrowser + "@<i>" + $scope.currentSubtestPath + "</i><br>"
-                        + "<b>Bot</b>: " + extraToolTipInfo[currentPlot][x]['bot'] + "<br>"
+                        + "<b>Bot</b>: " + hoveredSeriesBot + "<br>"
                         + "<b>Time</b>: " +  date.toISOString().split('T')[0] + ", " + date.toISOString().split('T')[1].substring(0,8)+ "<br>"
-                        + "<b>Test Version</b>: " + extraToolTipInfo[currentPlot][x]['test_version'].slice(-7) + "<br>"
-                        + "<b>Browser Version</b>: " + extraToolTipInfo[currentPlot][x]['browser_version'] + "<br>"
-                        + "<b>Std. Dev</b>: " + parseFloat(extraToolTipInfo[currentPlot][x]['stddev']).toFixed(3) + "<br>"
+                        + "<b>Test Version</b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['test_version'].slice(-7) + "<br>"
+                        + "<b>Browser Version</b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['browser_version'] + "<br>"
+                        + "<b>Std. Dev</b>: " + parseFloat(extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['stddev']).toFixed(3) + "<br>"
                         + "<b>Value</b>: " +  parseFloat(y).toFixed(3) + " " + $scope.testMetrics[0]['metric_unit']['unit'] + "<br>"
-                        + "<b>Delta</b> :" +  parseFloat(extraToolTipInfo[currentPlot][x]['delta']).toFixed(3) + "<br>"
+                        + "<b>Delta</b> :" +  parseFloat(extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['delta']).toFixed(3) + "<br>"
                         + "<b>Aggregation </b> :" + $scope.selectedSubtest.aggregation + "<br>")
                         .css({top: item.pageY+5, left: item.pageX+5})
                         .fadeIn(200);
