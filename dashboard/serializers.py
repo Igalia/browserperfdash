@@ -84,21 +84,15 @@ class TestsForBrowserBottListSerializer(serializers.Serializer):
     root_test = TestListListSerializer()
 
 
-class ResultsForSubtestListSerializer(serializers.Serializer):
+class ResultsForSubtestListSerializer(serializers.ModelSerializer):
     timestamp = serializers.SerializerMethodField()
-    browser = serializers.SerializerMethodField()
-    mean_value = serializers.FloatField()
-    stddev = serializers.FloatField()
-    browser_version = serializers.CharField()
-    delta = serializers.FloatField()
-    bot = serializers.CharField()
-    test_version = serializers.CharField()
-
-    def get_browser(self,obj):
-        return obj.browser.name
 
     def get_timestamp(self,obj):
         return obj.timestamp.strftime('%s')
+
+    class Meta:
+        model = BotReportData
+        fields = ('timestamp', 'browser', 'mean_value', 'stddev', 'browser_version', 'delta', 'bot', 'test_version')
 
 
 class BotResultMinimalSerializer(serializers.ModelSerializer):
