@@ -125,7 +125,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             extraToolTipInfo[graphCounter] = {};
             botReportData = {};
             angular.forEach(data, function (value) {
-                dictkey = value['bot'] + "@" + value['browser'];
+                dictkey = value['browser'] + "@" + value['bot'];
                 extraToolTipInfo[graphCounter][dictkey] = !extraToolTipInfo[graphCounter][dictkey] ? {} :
                     extraToolTipInfo[graphCounter][dictkey];
                 botReportData[dictkey] = !botReportData[dictkey] ? [] : botReportData[dictkey];
