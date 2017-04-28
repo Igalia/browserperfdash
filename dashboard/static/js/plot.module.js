@@ -56,7 +56,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
     $scope.onBotsChange = function () {
         $scope.tests = testsForBrowserAndBotFactory.query({
-            browser: $scope.selectedBrowser.browser_id,
+            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id,
             bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
         }, function (data) {
             if(data.length === 0) {
