@@ -68,6 +68,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 $scope.disableTest = false;
                 $scope.disableSubtest = false;
                 $scope.selectedTest = $scope.tests[0];
+                $scope.onTestsChange();
             }
         });
     };
