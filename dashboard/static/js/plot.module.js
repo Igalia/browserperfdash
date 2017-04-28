@@ -99,8 +99,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             $scope.buttonHide = true;
             return;
         }
-        $scope.selectedBrowser =  $scope.browsers[0];
-        $scope.onBrowserChange($scope.selectedBrowser);
+        $scope.onBrowserChange();
     });
     var graphCounter = 0;
     var extraToolTipInfo = new Array(new Array());
