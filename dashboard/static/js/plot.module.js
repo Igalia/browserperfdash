@@ -312,11 +312,9 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         var date = new Date(x);
                         var currentPlot = +placeholder.attr('id');
                         hoveredSeriesBot = item.series.label;
-                        $("#tooltip").html( $scope.currentBrowser + "@<i>" + $scope.currentSubtestPath + "</i><br>"
-                            + "<b>Bot</b>: " + hoveredSeriesBot + "<br>"
+                        $("#tooltip").html( "<b>" + hoveredSeriesBot + "</b> on <i>" + $scope.currentSubtestPath + "</i><br>"
                             + "<b>Time</b>: " +  date.toISOString().split('T')[0] + ", " + date.toISOString().split('T')[1].substring(0,8)+ "<br>"
                             + "<b>Test Version</b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['test_version'].slice(-7) + "<br>"
-                            + "<b>Browser </b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['browser'] + "<br>"
                             + "<b>Browser Version</b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['browser_version'] + "<br>"
                             + "<b>Std. Dev</b>: " + parseFloat(extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['stddev']).toFixed(3) + "<br>"
                             + "<b>Value</b>: " +  parseFloat(y).toFixed(3) + " " + $scope.testMetrics[0]['metric_unit']['unit'] + "<br>"
