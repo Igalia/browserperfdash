@@ -177,7 +177,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     )
                 ).css('padding-top', '10px');
                 var infoRow =  $('<div>').addClass('row').append(
-                    "<span>" + $scope.drawnTestsDetails[graphCounter]['browser'] + "/" +
+                    "<span><b>" + $scope.drawnTestsDetails[graphCounter]['browser'] + "</b>@" +
                     $scope.drawnTestsDetails[graphCounter]['root_test'] + "/" +
                     $scope.drawnTestsDetails[graphCounter]['sub_test'] + "</span>" +
                     "<button type='button' class='close' aria-label='Close'><span aria-hidden='true' " +
