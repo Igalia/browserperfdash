@@ -214,9 +214,12 @@ class TestPathList(generics.ListAPIView):
     serializer_class = TestPathListSerializer
 
     def get_queryset(self):
-        browser = Browser.objects.filter(pk=self.kwargs.get('browser'))
+        if self.kwargs.get('browser') == 'all':
+            browser_obj = Browser.objects.all()
+        else:
+            browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
         test = Test.objects.filter(pk=self.kwargs.get('test'))
-        return BotReportData.objects.filter(browser=browser, root_test=test).distinct('test_path')
+        return BotReportData.objects.filter(browser__in=browser_obj, root_test=test).distinct('test_path')
 
 
 class MetricsForTestList(generics.ListAPIView):
@@ -232,27 +235,33 @@ class TestsForBrowserBottList(generics.ListAPIView):
     serializer_class = TestsForBrowserBottListSerializer
 
     def get_queryset(self):
-        browser = Browser.objects.get(pk=self.kwargs.get('browser'))
+        if self.kwargs.get('browser') == 'all':
+            browser_obj = Browser.objects.all()
+        else:
+            browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
         try:
             bot = Bot.objects.get(pk=self.kwargs.get('bot'))
-            return BotReportData.objects.filter(browser=browser, bot=bot).distinct('root_test')
+            return BotReportData.objects.filter(browser__in=browser_obj, bot=bot).distinct('root_test')
         except Bot.DoesNotExist:
-            return BotReportData.objects.filter(browser=browser).distinct('root_test')
+            return BotReportData.objects.filter(browser__in=browser_obj).distinct('root_test')
 
 
 class ResultsForSubtestList(generics.ListAPIView):
     serializer_class = ResultsForSubtestListSerializer
 
     def get_queryset(self):
-        browser = Browser.objects.get(pk=self.kwargs.get('browser'))
+        if self.kwargs.get('browser') == 'all':
+            browser_obj = Browser.objects.all()
+        else:
+            browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
         test = Test.objects.get(pk=self.kwargs.get('test'))
         test_path = urllib.unquote(self.kwargs.get('subtest')).decode('utf8')
         if self.kwargs.get('bot') == 'all':
-            return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path).order_by(
+            return BotReportData.objects.filter(browser__in=browser_obj, root_test=test, test_path=test_path).order_by(
                 'timestamp')
         else:
             bot = Bot.objects.get(pk=self.kwargs.get('bot'))
-            return BotReportData.objects.filter(browser=browser, root_test=test, test_path=test_path, bot=bot) \
+            return BotReportData.objects.filter(browser__in=browser_obj, root_test=test, test_path=test_path, bot=bot) \
                 .order_by('timestamp')
 
 

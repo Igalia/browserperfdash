@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from .models import BotReportData, Browser, Bot, Platform, GPUType, CPUArchitecture, Test, MetricUnit
 
+
 class BrowsersForResultsExistListSerializer(serializers.Serializer):
-    browser_id = serializers.CharField(max_length=50)
-    browser = serializers.CharField(max_length=50)
+    browser_id = serializers.CharField()
+    browser = serializers.CharField()
 
 
 class BotsForResultsExistListSerializer(serializers.Serializer):
@@ -64,8 +65,8 @@ class TestListListSerializer(serializers.ModelSerializer):
 
 
 class TestPathListSerializer(serializers.Serializer):
-    test_path = serializers.CharField(max_length=500)
-    root_test = serializers.CharField(max_length=200)
+    test_path = serializers.CharField()
+    root_test = serializers.CharField()
     aggregation = serializers.CharField()
 
 
@@ -85,12 +86,16 @@ class TestsForBrowserBottListSerializer(serializers.Serializer):
 
 class ResultsForSubtestListSerializer(serializers.Serializer):
     timestamp = serializers.SerializerMethodField()
+    browser = serializers.SerializerMethodField()
     mean_value = serializers.FloatField()
     stddev = serializers.FloatField()
-    browser_version = serializers.CharField(max_length=500)
+    browser_version = serializers.CharField()
     delta = serializers.FloatField()
     bot = serializers.CharField()
     test_version = serializers.CharField()
+
+    def get_browser(self,obj):
+        return obj.browser.name
 
     def get_timestamp(self,obj):
         return obj.timestamp.strftime('%s')

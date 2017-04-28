@@ -40,16 +40,16 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     $scope.disableBot = false;
     $scope.buttonHide = false;
 
-    $scope.onBrowserChange = function (selectedBrowser) {
+    $scope.onBrowserChange = function () {
         //Update tests
         $scope.tests = testsForBrowserAndBotFactory.query({
-            browser: !selectedBrowser ? $scope.selectedBrowser.browser_id : selectedBrowser.browser_id,
+            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id,
             bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
         }, function () {
             $scope.selectedTest = $scope.tests[0];
             $scope.onTestsChange();
             $scope.bots = botForResultsExistFactory.query({
-                browser: $scope.selectedBrowser.browser_id
+                browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id
             });
         });
     };
@@ -77,7 +77,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             return;
         }
         $scope.subtests = testPathFactory.query({
-            browser: $scope.selectedBrowser.browser_id,
+            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id,
             root_test: $scope.selectedTest.root_test.id
         }, function (data) {
             $scope.selectedSubtest = $scope.subtests[0];
@@ -107,7 +107,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
     $scope.drawGraph = function () {
         // Need to update tooltips, etc
-        $scope.currentBrowser = $scope.selectedBrowser.browser_id;
+        $scope.currentBrowser = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id;
         $scope.currentSubtestPath = $scope.selectedSubtest.test_path;
 
         $scope.testMetrics = testMetricsOfTestAndSubtestFactory.query({
@@ -117,33 +117,33 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         $scope.loading = true;
 
         var results = testResultsForTestAndSubtestFactory.query({
-            browser: $scope.selectedBrowser.browser_id,
+            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id,
             root_test: $scope.selectedTest.root_test.id,
             bot: !$scope.selectedBot ? 'all' : $scope.selectedBot.bot,
             subtest: encodeURIComponent($scope.selectedSubtest.test_path),
         }, function (data) {
             extraToolTipInfo[graphCounter] = {};
             botReportData = {};
-
             angular.forEach(data, function (value) {
-                currentbot = value['bot'];
-                extraToolTipInfo[graphCounter][currentbot] = !extraToolTipInfo[graphCounter][currentbot] ? {} :
-                    extraToolTipInfo[graphCounter][currentbot];
-                botReportData[value['bot']] = !botReportData[currentbot] ? [] : botReportData[currentbot];
+                dictkey = value['bot'] + "@" + value['browser'];
+                extraToolTipInfo[graphCounter][dictkey] = !extraToolTipInfo[graphCounter][dictkey] ? {} :
+                    extraToolTipInfo[graphCounter][dictkey];
+                botReportData[dictkey] = !botReportData[dictkey] ? [] : botReportData[dictkey];
 
                 // Data to draw plots
                 jqueryTimestamp = value['timestamp']*1000;
-                botReportData[value['bot']].push([jqueryTimestamp, value['mean_value']]);
+                botReportData[dictkey].push([jqueryTimestamp, value['mean_value']]);
 
                 // Data to populate tooltips
                 tooltipData = {};
                 tooltipData['yvalue'] = value['mean_value'];
+                tooltipData['browser'] =  value['browser'];
                 tooltipData['browser_version'] = value['browser_version'];
                 tooltipData['stddev'] = value['stddev'];
                 tooltipData['delta'] = value['delta'];
                 tooltipData['test_version'] = value['test_version'];
 
-                extraToolTipInfo[graphCounter][value['bot']][jqueryTimestamp] = tooltipData;
+                extraToolTipInfo[graphCounter][dictkey][jqueryTimestamp] = tooltipData;
             });
 
             $scope.drawnTestsDetails[graphCounter] = {};
@@ -315,6 +315,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                             + "<b>Bot</b>: " + hoveredSeriesBot + "<br>"
                             + "<b>Time</b>: " +  date.toISOString().split('T')[0] + ", " + date.toISOString().split('T')[1].substring(0,8)+ "<br>"
                             + "<b>Test Version</b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['test_version'].slice(-7) + "<br>"
+                            + "<b>Browser </b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['browser'] + "<br>"
                             + "<b>Browser Version</b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['browser_version'] + "<br>"
                             + "<b>Std. Dev</b>: " + parseFloat(extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['stddev']).toFixed(3) + "<br>"
                             + "<b>Value</b>: " +  parseFloat(y).toFixed(3) + " " + $scope.testMetrics[0]['metric_unit']['unit'] + "<br>"
