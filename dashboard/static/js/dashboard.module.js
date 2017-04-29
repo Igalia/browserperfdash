@@ -66,10 +66,16 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
         templateUrl: 'test-template.html'
     };
     $scope.updateOthersOnBrowserChange = function () {
-        $scope.bots = botFullDetailsForResultsExistFactory.query({
-            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id
+        //There can be chance of test change
+        $scope.tests = testsForBrowserAndBotFactory.query({
+            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id,
+            bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
+        }, function () {
+            $scope.bots = botFullDetailsForResultsExistFactory.query({
+                browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id
+            });
+            $scope.reload();
         });
-        $scope.reload();
     };
     $scope.updateOthersOnBotChange = function () {
         if ( !$scope.selectedBot ) {
