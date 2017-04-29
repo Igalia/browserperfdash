@@ -1,11 +1,10 @@
-from django.conf.urls import include, url
+from django.conf.urls import url
 from dashboard.views import *
-from . import views
 
 urlpatterns = [
     url(r'^gpu/$', GPUTypeList.as_view()),
     url(r'^cpu/$', CPUArchitectureList.as_view()),
-    url(r'^platform/$', PlatformList.as_view(), name='platform-list'),
+    url(r'^platform/$', PlatformList.as_view()),
     url(r'^bot-report', BotReportView.as_view()),
     url(r'^browser_results_exist/$', BrowsersForResultsExistList.as_view()),
     url(r'^bot_results_exist/(?P<browser>.+)$', BotsForResultsExistList.as_view()),

@@ -5,13 +5,10 @@ from rest_framework import authentication, permissions
 from rest_framework import generics
 from dashboard.models import *
 from rest_framework import exceptions
-import json
 from helpers.benchmark_results import BenchmarkResults
-from django.views.generic import ListView
 from .serializers import *
 from datetime import datetime, timedelta
-import urllib
-import logging
+import json, urllib, logging
 
 log = logging.getLogger(__name__)
 db_character_separator = '\\'
