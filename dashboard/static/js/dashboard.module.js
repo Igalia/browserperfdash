@@ -34,14 +34,14 @@ app.factory('cpuArchFactory', function($resource) {
     return $resource('/dash/cpu');
 });
 
-app.factory('testFactory', function($resource) {
-    return $resource('/dash/test');
+app.factory('testsForBrowserAndBotFactory', function ($resource) {
+    return $resource('/dash/tests_for_browser_bot/:browser/:bot');
 });
 
 
 app.controller('DeltaController', function($scope, botReportsImprovementFactory, botReportsRegressionFactory,
                                            browserFactory, botFullDetailsForResultsExistFactory, platformFactory, gpuFactory,
-                                           cpuArchFactory, testFactory, $interval, $sce, $filter) {
+                                           cpuArchFactory, testsForBrowserAndBotFactory, $interval, $sce, $filter) {
     $scope.browsers = browserFactory.query();
     $scope.bots = botFullDetailsForResultsExistFactory.query({
         browser: 'all'
@@ -49,7 +49,10 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
     $scope.platforms = platformFactory.query();
     $scope.gpus = gpuFactory.query();
     $scope.cpus = cpuArchFactory.query();
-    $scope.tests = testFactory.query();
+    $scope.tests = testsForBrowserAndBotFactory.query({
+        browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id,
+        bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
+    });
     $scope.botDetailsPopover = {
         templateUrl: 'bot-template.html'
     };
@@ -90,7 +93,7 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
         $scope.selectedPlatformId = !$scope.selectedPlatform ? 'all' : $scope.selectedPlatform.id;
         $scope.selectedCPUId = !$scope.selectedCPU ? 'all' : $scope.selectedCPU.id;
         $scope.selectedGPUId = !$scope.selectedGPU ? 'all' : $scope.selectedGPU.id;
-        $scope.selectedTestId = !$scope.selectedTest ? 'all' : $scope.selectedTest.id;
+        $scope.selectedTestId = !$scope.selectedTest ? 'all' : $scope.selectedTest.root_test.id;
         $scope.selectedBotName = !$scope.selectedBot ? 'all' : $scope.selectedBot.name;
         $scope.improvement_reports = botReportsImprovementFactory.query({
             days_since: $scope.selectedDays,

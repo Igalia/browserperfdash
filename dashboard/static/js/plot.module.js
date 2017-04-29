@@ -17,7 +17,7 @@ app.factory('testsForBrowserAndBotFactory', function ($resource) {
     return $resource('/dash/tests_for_browser_bot/:browser/:bot');
 });
 
-app.factory('testPathFactory', function ($resource) {
+app.factory('subTestPathFactory', function ($resource) {
     return $resource('/dash/testpath/:browser/:root_test');
 });
 
@@ -29,7 +29,7 @@ app.factory('testResultsForTestAndSubtestFactory', function ($resource) {
     return $resource('/dash/results_for_subtest/:browser/:root_test/:bot/:subtest/');
 });
 
-app.controller('PlotController', function ($scope, browserForResultExistFactory, botForResultsExistFactory, testPathFactory,
+app.controller('PlotController', function ($scope, browserForResultExistFactory, botForResultsExistFactory, subTestPathFactory,
                                            testMetricsOfTestAndSubtestFactory, testResultsForTestAndSubtestFactory,
                                            testsForBrowserAndBotFactory, $filter){
     $scope.loaded = false;
@@ -77,7 +77,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         if(!$scope.selectedTest) {
             return;
         }
-        $scope.subtests = testPathFactory.query({
+        $scope.subtests = subTestPathFactory.query({
             browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id,
             root_test: $scope.selectedTest.root_test.id
         }, function (data) {

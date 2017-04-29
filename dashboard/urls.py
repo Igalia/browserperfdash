@@ -5,7 +5,6 @@ from . import views
 urlpatterns = [
     url(r'^gpu/$', GPUTypeList.as_view()),
     url(r'^cpu/$', CPUArchitectureList.as_view()),
-    url(r'^test/$', TestList.as_view()),
     url(r'^platform/$', PlatformList.as_view(), name='platform-list'),
     url(r'^bot-report', BotReportView.as_view()),
     url(r'^browser_results_exist/$', BrowsersForResultsExistList.as_view()),

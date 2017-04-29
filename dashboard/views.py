@@ -221,12 +221,6 @@ class CPUArchitectureList(generics.ListAPIView):
     serializer_class = CPUArchitectureListSerializer
 
 
-class TestList(generics.ListAPIView):
-    model = Test
-    queryset = Test.objects.filter(enabled=True)
-    serializer_class = TestListListSerializer
-
-
 class TestPathList(generics.ListAPIView):
     serializer_class = TestPathListSerializer
 
@@ -283,6 +277,7 @@ class ResultsForSubtestList(generics.ListAPIView):
 
 
 class BotReportView(APIView):
+    """View to accept in report data from evaluation bots"""
     authentication_classes = (BotAuthentication,)
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
