@@ -80,7 +80,7 @@ class MetricsForTestListSerializer(serializers.Serializer):
     metric_unit = MetricUnitSerializer()
 
 
-class TestsForBrowserBottListSerializer(serializers.Serializer):
+class TestsForBrowserBotListSerializer(serializers.Serializer):
     root_test = TestListListSerializer()
 
 

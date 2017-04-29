@@ -231,8 +231,8 @@ class MetricsForTestList(generics.ListAPIView):
         return BotReportData.objects.filter(root_test=test, test_path=test_path)[:1]
 
 
-class TestsForBrowserBottList(generics.ListAPIView):
-    serializer_class = TestsForBrowserBottListSerializer
+class TestsForBrowserBotList(generics.ListAPIView):
+    serializer_class = TestsForBrowserBotListSerializer
 
     def get_queryset(self):
         if self.kwargs.get('browser') == 'all':

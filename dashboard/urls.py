@@ -14,7 +14,7 @@ urlpatterns = [
     url(r'^bot_results_exist/(?P<browser>.+)$', BotsForResultsExistList.as_view()),
     url(r'^testpath/(?P<browser>.+)/(?P<test>.+)$', TestPathList.as_view()),
     url(r'^test_metrics/(?P<test>[-\w]+)/(?P<subtest>.+)$', MetricsForTestList.as_view()),
-    url(r'^tests_for_browser_bot/(?P<browser>.+)/(?P<bot>.*)$', TestsForBrowserBottList.as_view()),
+    url(r'^tests_for_browser_bot/(?P<browser>.+)/(?P<bot>.*)$', TestsForBrowserBotList.as_view()),
     url(r'^results_for_subtest/(?P<browser>[-\w]+)/(?P<test>[-\w]+)/(?P<bot>[-\w]+)/(?P<subtest>.+)/$',
         ResultsForSubtestList.as_view()),
     url(r'^report/detail/(?P<pk>\d+)$', BotDataReportDetailView.as_view()),
