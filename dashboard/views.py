@@ -151,26 +151,6 @@ class BotDataReportRegressionListView(generics.ListAPIView):
                                bot__in=bot, browser__in=browser_obj, is_improvement=False).order_by('-delta')[:limit]
 
 
-class BotDataReportDetailView(generics.RetrieveAPIView):
-    """Used to view details of a bot report data in homepage"""
-    model = BotReportData
-    queryset = BotReportData.objects.all()
-    serializer_class = BotReportDataSerializer
-
-
-class BotResultsForTestListView(generics.ListAPIView):
-    """Used to view details of other """
-    model = BotReportData
-    queryset = BotReportData.objects.filter(aggregation='None')
-    serializer_class = BotReportDataSerializer
-
-    def get_queryset(self):
-        obj = BotReportData.objects.get(pk=self.kwargs.get('pk'))
-        queryset = super(BotResultsForTestListView, self).get_queryset()
-        return queryset.filter(browser=obj.browser, root_test=obj.root_test, test_path=obj.test_path,
-                               aggregation=obj.aggregation, bot=obj.bot)
-
-
 class BrowsersForResultsExistList(generics.ListAPIView):
     """List out browsers in home page and plot page"""
     model = BotReportData
