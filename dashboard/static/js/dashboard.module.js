@@ -18,12 +18,8 @@ app.factory('browserFactory', function($resource) {
     return $resource('/dash/browser_results_exist');
 });
 
-app.factory('botFactory', function($resource) {
-    return $resource('/dash/bot');
-});
-
-app.factory('botDetailsFactory', function ($resource) {
-    return $resource('/dash/bot/detail/:bot');
+app.factory('botFullDetailsForResultsExistFactory', function($resource) {
+    return $resource('/dash/bot_full_details_for_exist/:browser');
 });
 
 app.factory('platformFactory', function($resource) {
@@ -44,11 +40,12 @@ app.factory('testFactory', function($resource) {
 
 
 app.controller('DeltaController', function($scope, botReportsImprovementFactory, botReportsRegressionFactory,
-                                           browserFactory, botFactory, platformFactory, gpuFactory,
-                                           cpuArchFactory, testFactory, botDetailsFactory,
-                                           $interval, $sce, $filter) {
+                                           browserFactory, botFullDetailsForResultsExistFactory, platformFactory, gpuFactory,
+                                           cpuArchFactory, testFactory, $interval, $sce, $filter) {
     $scope.browsers = browserFactory.query();
-    $scope.bots = botFactory.query();
+    $scope.bots = botFullDetailsForResultsExistFactory.query({
+        browser: 'all'
+    });
     $scope.platforms = platformFactory.query();
     $scope.gpus = gpuFactory.query();
     $scope.cpus = cpuArchFactory.query();
@@ -65,15 +62,21 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
     $scope.testDetailsPopover = {
         templateUrl: 'test-template.html'
     };
-    $scope.updateOtherCombos = function () {
+    $scope.updateOthersOnBrowserChange = function () {
+        $scope.bots = botFullDetailsForResultsExistFactory.query({
+            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id
+        });
+        $scope.reload();
+    };
+    $scope.updateOthersOnBotChange = function () {
         if ( !$scope.selectedBot ) {
             $scope.selectedPlatform = '';
             $scope.selectedCPU = '';
             $scope.selectedGPU = '';
         } else {
-            $scope.selectedPlatform = $filter('filter')($scope.platforms, {'id': $scope.selectedBot.platform})[0];
-            $scope.selectedCPU = $filter('filter')($scope.cpus, {'id': $scope.selectedBot.cpuArchitecture})[0];
-            $scope.selectedGPU = $filter('filter')($scope.gpus, {'id': $scope.selectedBot.gpuType})[0];
+            $scope.selectedPlatform = $filter('filter')($scope.platforms, {'id': $scope.selectedBot.platform.id})[0];
+            $scope.selectedCPU = $filter('filter')($scope.cpus, {'id': $scope.selectedBot.cpuArchitecture.id})[0];
+            $scope.selectedGPU = $filter('filter')($scope.gpus, {'id': $scope.selectedBot.gpuType.id})[0];
         }
         $scope.reload();
     };
@@ -124,14 +127,11 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
         }
     };
     $scope.updateBotPopover = function (botname) {
-        botDetailsFactory.get({
-            bot: botname
-        }, function (data) {
-            $scope.bot_cpu_arch = data.cpuArchitecture;
-            $scope.bot_gpu_type = data.gpuType;
-            $scope.bot_platform = data.platform;
-            $scope.loadedBotData = true;
-        });
+        currentbot = $filter('filter')($scope.bots, {'name': botname})[0];
+        $scope.bot_cpu_arch = currentbot.cpuArchitecture.name;
+        $scope.bot_gpu_type = currentbot.gpuType.name;
+        $scope.bot_platform = currentbot.platform.name;
+        $scope.loadedBotData = true;
     };
     $scope.reload();
 });

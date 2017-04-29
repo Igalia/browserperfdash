@@ -16,7 +16,20 @@ import logging
 log = logging.getLogger(__name__)
 db_character_separator = '\\'
 
+
+class DefaultHomeView(TemplateView):
+    """Home page view"""
+    template_name="index.html"
+
+
+class GraphPlotView(TemplateView):
+    """Graph view"""
+    template_name = "plot.html"
+
+
 class BotAuthentication(authentication.BaseAuthentication):
+    """Bot authentication view, used to authenticate data sending bots via API"""
+
     def authenticate(self, request):
         bot_name = request.POST.get('bot_id')
         bot_password = request.POST.get('bot_password')
@@ -35,6 +48,8 @@ class BotAuthentication(authentication.BaseAuthentication):
 
 
 class BotDataReportImprovementListView(generics.ListAPIView):
+    """Fetch improvements for main page tables"""
+
     model = BotReportData
     serializer_class = BotReportDataSerializer
     queryset = BotReportData.objects.filter(aggregation='None')
@@ -85,6 +100,8 @@ class BotDataReportImprovementListView(generics.ListAPIView):
 
 
 class BotDataReportRegressionListView(generics.ListAPIView):
+    """Fetch regressions for main page tables"""
+
     model = BotReportData
     serializer_class = BotReportDataSerializer
     queryset = BotReportData.objects.filter(aggregation='None')
@@ -133,19 +150,16 @@ class BotDataReportRegressionListView(generics.ListAPIView):
         return queryset.filter(aggregation='None', timestamp__gt=requested_time, root_test__in=root_test,
                                bot__in=bot, browser__in=browser_obj, is_improvement=False).order_by('-delta')[:limit]
 
-class BotDataCompleteListView(generics.ListCreateAPIView):
-    model = BotReportData
-    queryset = BotReportData.objects.all()
-    serializer_class = BotDataCompleteSerializer
-
 
 class BotDataReportDetailView(generics.RetrieveAPIView):
+    """Used to view details of a bot report data in homepage"""
     model = BotReportData
     queryset = BotReportData.objects.all()
     serializer_class = BotReportDataSerializer
 
 
 class BotResultsForTestListView(generics.ListAPIView):
+    """Used to view details of other """
     model = BotReportData
     queryset = BotReportData.objects.filter(aggregation='None')
     serializer_class = BotReportDataSerializer
@@ -158,24 +172,14 @@ class BotResultsForTestListView(generics.ListAPIView):
 
 
 class BrowsersForResultsExistList(generics.ListAPIView):
+    """List out browsers in home page and plot page"""
     model = BotReportData
     queryset = BotReportData.objects.distinct('browser')
     serializer_class = BrowsersForResultsExistListSerializer
 
 
-class BotsList(generics.ListAPIView):
-    model = Bot
-    queryset = Bot.objects.filter(enabled=True)
-    serializer_class = BotListSerializer
-
-
-class BotDetailView(generics.RetrieveAPIView):
-    model = Bot
-    queryset = Bot.objects.all()
-    serializer_class = BotDetailsListSerializer
-
-
 class BotsForResultsExistList(generics.ListAPIView):
+    """Fetch just the botname for the plot pages"""
     serializer_class = BotsForResultsExistListSerializer
 
     def get_queryset(self):
@@ -184,6 +188,19 @@ class BotsForResultsExistList(generics.ListAPIView):
         else:
             browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
         return BotReportData.objects.filter(browser__in=browser_obj).distinct('bot')
+
+
+class BotsFullDetailsForResultsExistList(generics.ListAPIView):
+    """Fetch detailed bot feilds for the home page"""
+    serializer_class = BotsFullDetailsForResultsExistListSerializer
+
+    def get_queryset(self):
+        if self.kwargs.get('browser') == 'all':
+            browser_obj = Browser.objects.all()
+        else:
+            browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
+        bots = BotReportData.objects.filter(browser__in=browser_obj).distinct('bot').values('bot')
+        return Bot.objects.filter(name__in=bots)
 
 
 class PlatformList(generics.ListAPIView):
@@ -263,17 +280,6 @@ class ResultsForSubtestList(generics.ListAPIView):
             bot = Bot.objects.get(pk=self.kwargs.get('bot'))
             return BotReportData.objects.filter(browser__in=browser_obj, root_test=test, test_path=test_path, bot=bot) \
                 .order_by('timestamp')
-
-
-class DefaultHomeView(ListView):
-    template_name="index.html"
-
-    def get_queryset(self):
-        return BotReportData.objects.all()
-
-
-class GraphPlotView(TemplateView):
-    template_name = "plot.html"
 
 
 class BotReportView(APIView):

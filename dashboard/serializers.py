@@ -2,19 +2,13 @@ from rest_framework import serializers
 from .models import BotReportData, Browser, Bot, Platform, GPUType, CPUArchitecture, Test, MetricUnit
 
 
-class BrowsersForResultsExistListSerializer(serializers.Serializer):
+class BrowsersForResultsExistListSerializer(serializers.ModelSerializer):
     browser_id = serializers.CharField()
     browser = serializers.CharField()
 
-
-class BotsForResultsExistListSerializer(serializers.Serializer):
-    bot = serializers.CharField(max_length=50)
-
-
-class PlatformListSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Platform
-        fields = ('id', 'name')
+        model = BotReportData
+        fields = ('browser_id', 'browser')
 
 
 class GPUTypeListSerializer(serializers.ModelSerializer):
@@ -29,33 +23,24 @@ class CPUArchitectureListSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
-class BotListSerializer(serializers.ModelSerializer):
-    gpuType = GPUTypeListSerializer
-    cpuArchitecture = CPUArchitectureListSerializer
-    platform = PlatformListSerializer
+class BotsForResultsExistListSerializer(serializers.Serializer):
+    bot = serializers.CharField(max_length=50)
+
+
+class PlatformListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Platform
+        fields = '__all__'
+
+
+class BotsFullDetailsForResultsExistListSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    platform = PlatformListSerializer()
+    cpuArchitecture = CPUArchitectureListSerializer()
+    gpuType = GPUTypeListSerializer()
 
     class Meta:
-        model = Bot
-        fields = ('name', 'gpuType', 'cpuArchitecture', 'platform')
-
-
-class BotDetailsListSerializer(serializers.ModelSerializer):
-    gpuType = serializers.SerializerMethodField()
-    cpuArchitecture = serializers.SerializerMethodField()
-    platform = serializers.SerializerMethodField()
-
-    def get_gpuType(self, obj):
-        return obj.gpuType.name
-
-    def get_cpuArchitecture(self, obj):
-        return obj.cpuArchitecture.name
-
-    def get_platform(self,obj):
-        return obj.platform.name
-
-    class Meta:
-        model = Bot
-        fields = ('name', 'cpuArchitecture', 'gpuType', 'platform')
+        fields = '__all__'
 
 
 class TestListListSerializer(serializers.ModelSerializer):
@@ -122,17 +107,3 @@ class BotReportDataSerializer(serializers.ModelSerializer):
         model = BotReportData
         fields = ('id', 'bot', 'browser', 'browser_version', 'root_test','test_path', 'test_version', 'metric_unit',
                   'metric_unit_prefixed', 'mean_value', 'stddev', 'delta', 'prev_results')
-
-
-class BotDataCompleteSerializer(serializers.ModelSerializer):
-    metric_unit = serializers.SerializerMethodField()
-
-    def get_metric_unit(self, obj):
-        return { "name": obj.metric_unit.name, "unit": obj.metric_unit.unit, "is_better": obj.metric_unit.is_better }
-
-
-    class Meta:
-        model = BotReportData
-        fields = ('id', 'bot', 'root_test', 'test_path', 'test_version', 'metric_unit', 'mean_value', 'stddev',
-                  'aggregation', 'timestamp', 'is_improvement')
-
