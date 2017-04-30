@@ -26,7 +26,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'dashboard'
+    'dashboard',
+    'django_db_logger'
 ]
 
 MIDDLEWARE = [
@@ -106,22 +107,22 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'standard': {
-            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt' : "%d/%b/%Y %H:%M:%S"
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(asctime)s %(message)s'
         },
     },
     'handlers': {
-        'logfile': {
+        'db_log': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR + "/logfile.txt",
-            'formatter': 'standard',
+            'class': 'django_db_logger.db_log_handler.DatabaseLogHandler'
         },
     },
     'loggers': {
         'dashboard': {
-            'handlers': ['logfile'],
+            'handlers': ['db_log'],
             'level': 'DEBUG',
         },
     }
