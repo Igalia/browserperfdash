@@ -7,3 +7,4 @@ django-crispy-forms
 django-guardian
 pytz
 psycopg2
+django-db-logger
