@@ -23,15 +23,15 @@ app.factory('botFullDetailsForResultsExistFactory', function($resource) {
 });
 
 app.factory('platformFactory', function($resource) {
-    return $resource('/dash/platform');
+    return $resource('/dash/platform_results_exist');
 });
 
 app.factory('gpuFactory', function($resource) {
-    return $resource('/dash/gpu');
+    return $resource('/dash/gpu_results_exist');
 });
 
 app.factory('cpuArchFactory', function($resource) {
-    return $resource('/dash/cpu');
+    return $resource('/dash/cpu_results_exist');
 });
 
 app.factory('testsForBrowserAndBotFactory', function ($resource) {

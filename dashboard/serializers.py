@@ -23,14 +23,14 @@ class CPUArchitectureListSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
-class BotsForResultsExistListSerializer(serializers.Serializer):
-    bot = serializers.CharField(max_length=50)
-
-
 class PlatformListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Platform
-        fields = '__all__'
+        fields = ('id', 'name')
+
+
+class BotsForResultsExistListSerializer(serializers.Serializer):
+    bot = serializers.CharField(max_length=50)
 
 
 class BotsFullDetailsForResultsExistListSerializer(serializers.Serializer):

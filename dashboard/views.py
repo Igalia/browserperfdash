@@ -91,6 +91,7 @@ class BotDataReportImprovementListView(generics.ListAPIView):
         limit = self.kwargs.get('limit')
         bot = bot_obj.filter(platform__in=platform_obj, cpuArchitecture__in=cpu_obj, gpuType__in=gpu_obj,
                              enabled=True)
+
         requested_time = datetime.utcnow() + timedelta(days=-days_since)
         queryset = super(BotDataReportImprovementListView, self).get_queryset()
         return queryset.filter(aggregation='None', timestamp__gt=requested_time, root_test__in=root_test,
@@ -149,13 +150,6 @@ class BotDataReportRegressionListView(generics.ListAPIView):
                                bot__in=bot, browser__in=browser_obj, is_improvement=False).order_by('-delta')[:limit]
 
 
-class BrowsersForResultsExistList(generics.ListAPIView):
-    """List out browsers in home page and plot page"""
-    model = BotReportData
-    queryset = BotReportData.objects.distinct('browser')
-    serializer_class = BrowsersForResultsExistListSerializer
-
-
 class BotsForResultsExistList(generics.ListAPIView):
     """Fetch just the botname for the plot pages"""
     serializer_class = BotsForResultsExistListSerializer
@@ -181,22 +175,47 @@ class BotsFullDetailsForResultsExistList(generics.ListAPIView):
         return Bot.objects.filter(name__in=bots)
 
 
-class PlatformList(generics.ListAPIView):
+class BrowsersForResultsExistList(generics.ListAPIView):
+    """List out browsers in home page and plot page"""
+    model = BotReportData
+    queryset = BotReportData.objects.distinct('browser')
+    serializer_class = BrowsersForResultsExistListSerializer
+
+
+class PlatformForWhichResultsExistList(generics.ListAPIView):
+    """Fetch platforms for which results exist for home page"""
     model = Platform
-    queryset = Platform.objects.filter(enabled=True)
     serializer_class = PlatformListSerializer
 
+    def get_queryset(self):
+        return Platform.objects.filter(
+            id__in=BotReportData.objects.distinct('bot__platform').values('bot__platform'),
+            enabled=True
+        )
 
-class GPUTypeList(generics.ListAPIView):
+
+class GPUTypeForWhichResultsExistList(generics.ListAPIView):
+    """Fetch GPU Types for which results exist for home page"""
     model = GPUType
-    queryset = GPUType.objects.filter(enabled=True)
     serializer_class = GPUTypeListSerializer
 
+    def get_queryset(self):
+        return GPUType.objects.filter(
+            id__in=BotReportData.objects.distinct('bot__gpuType').values('bot__gpuType'),
+            enabled=True
+        )
 
-class CPUArchitectureList(generics.ListAPIView):
+
+class CPUArchitectureForWhichResultsExistList(generics.ListAPIView):
+    """Fetch CPU Architectures for which results exist for home page"""
     model = CPUArchitecture
-    queryset = CPUArchitecture.objects.filter(enabled=True)
     serializer_class = CPUArchitectureListSerializer
+
+    def get_queryset(self):
+        return CPUArchitecture.objects.filter(
+            id__in=BotReportData.objects.distinct('bot__cpuArchitecture').values('bot__cpuArchitecture'),
+            enabled=True
+        )
 
 
 class TestPathList(generics.ListAPIView):
