@@ -19,7 +19,6 @@ from dashboard.views import DefaultHomeView
 
 urlpatterns = [
     url(r'^$', DefaultHomeView.as_view(), name='home'),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^admin/', admin.site.urls),
     url(r'^dash/', include('dashboard.urls')),
 ]
