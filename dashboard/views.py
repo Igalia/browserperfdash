@@ -413,16 +413,18 @@ class BotReportView(APIView):
             is_improvement = delta_improvements[1]
             prev_result = delta_improvements[2]
 
-            report = BotReportData.objects.create_report(bot=bot, browser=browser, browser_version=browser_version,
-                                                         root_test=root_test, test_path=raw_path,
-                                                         test_version=test_version, aggregation=aggregation,
-                                                         metric_unit=current_metric, metric_unit_prefixed=modified_prefix,
-                                                         mean_value=mean_value, stddev=stddev,delta=delta,
-                                                         is_improvement=is_improvement, prev_result=prev_result,
-                                                         timestamp=timestamp)
-            if not report:
+            try:
+                report = BotReportData.objects.create_report(bot=bot, browser=browser, browser_version=browser_version,
+                                                             root_test=root_test, test_path=raw_path,
+                                                             test_version=test_version, aggregation=aggregation,
+                                                             metric_unit=current_metric, metric_unit_prefixed=modified_prefix,
+                                                             mean_value=mean_value, stddev=stddev,delta=delta,
+                                                             is_improvement=is_improvement, prev_result=prev_result,
+                                                             timestamp=timestamp)
+            except Exception as e:
                 log.error("Failed inserting data for bot: %s, browser: %s, browser_version: %s, root_test: %s, "
-                          "test_description: %s" % (bot_id, browser_id, browser_version, test_id,raw_path)
+                          "test_description: %s and Exception %s" % (bot_id, browser_id, browser_version, test_id, raw_path,
+                                                                     str(e))
                           )
 
         return HttpResponse("The POST went through")
