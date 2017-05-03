@@ -8,9 +8,14 @@ from rest_framework import exceptions
 from helpers.benchmark_results import BenchmarkResults
 from .serializers import *
 from datetime import datetime, timedelta
-import json, urllib, logging
+import json, urllib, logging, sys
 
 log = logging.getLogger(__name__)
+
+if len(sys.argv) > 1 and sys.argv[1] == 'test':
+    log = logging.getLogger()
+    log.disabled = True
+
 
 db_character_separator = '\\'
 
