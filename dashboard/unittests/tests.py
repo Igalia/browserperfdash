@@ -36,6 +36,28 @@ class BotReportDataTestCase(TransactionTestCase):
             )
         ])
 
+    def test_bot_authentications(self):
+        """Test all possible authentication cases"""
+        upload_data = OrderedDict([
+            ('bot_id', self.bot_id+self.bot_id),('bot_password', self.bot_password), ('browser_id', 'test_browser'),
+            ('browser_version', self.browser_version), ('test_id', 'test_root_test'),
+            ('test_version', self.test_version),
+            ('test_data', '{"test_root_test": {"metrics": {"Time": {"current": [1, 2, 3]},"Score": {"current": [2, 3, 4]}}}}')
+        ])
+        response = client.post('/dash/bot-report/', dict(upload_data))
+        self.assertEqual(response.data['detail'], "This bot cannot be authenticated")
+
+        # Try POSTing with wrong password, and cehck if the data went well
+        upload_data = OrderedDict([
+            ('bot_id', self.bot_id),('bot_password', self.bot_password+self.bot_password ), ('browser_id', 'test_browser'),
+            ('browser_version', self.browser_version), ('test_id', 'test_root_test'),
+            ('test_version', self.test_version),
+            ('test_data', '{"test_root_test": {"metrics": {"Time": {"current": [1, 2, 3]},"Score": {"current": [2, 3, 4]}}}}')
+        ])
+        response = client.post('/dash/bot-report/', dict(upload_data))
+        self.assertEqual(response.data['detail'],"Bad authentication details")
+        self.assertEqual(BotReportData.objects.all().count(), 0)
+
     def test_data_no_aggregation_uploaded_correctly(self):
         # Try POSTing to the path, and cehck if the data went well
         upload_data = OrderedDict([
@@ -44,17 +66,17 @@ class BotReportDataTestCase(TransactionTestCase):
             ('test_version', self.test_version),
             ('test_data', '{"test_root_test": {"metrics": {"Time": {"current": [1, 2, 3]},"Score": {"current": [2, 3, 4]}}}}')
         ])
-        request = client.post('/dash/bot-report/', dict(upload_data))
-        self.assertEqual(request.status_code, 200)
+        response = client.post('/dash/bot-report/', dict(upload_data))
+        self.assertEqual(response.status_code, 200)
 
         # There should be two objects created
         self.assertEqual(BotReportData.objects.all().count(), 2)
 
         # Check for individual items
         score_object = BotReportData.objects.get(metric_unit='Score')
-        time_objcect = BotReportData.objects.get(metric_unit='Time')
+        time_object = BotReportData.objects.get(metric_unit='Time')
 
         self.assertEqual(score_object.mean_value, 3.0)
         self.assertEqual(round(score_object.stddev*100, 2), 33.33)
-        self.assertEqual(time_objcect.mean_value, 2.0)
+        self.assertEqual(time_object.mean_value, 2.0)
         self.assertEqual(round(time_objcect.stddev*100, 2), 50.00)
