@@ -12,6 +12,7 @@ class BotReportDataTestCase(TransactionTestCase):
     bot_password = "test_pwd"
     test_version = "https://test.dummy.org/test_root_test/@r182170"
     browser_version = 'test_browser_version'
+    root_test = "RootTest"
 
     def setUp(self):
         test_cpu_arch = CPUArchitecture.objects.create(name='test_cpu', enabled=True)
@@ -24,7 +25,7 @@ class BotReportDataTestCase(TransactionTestCase):
         )
         Browser.objects.create(id='test_browser', name='Test_Browser', enabled=True)
         Test.objects.create(
-            id='test_root_test', description='test_root_test_desc', url='http://something_here.com',
+            id=self.root_test, description='test_root_test_desc', url='http://something_here.com',
             enabled=True
         )
         MetricUnit.objects.bulk_create([
@@ -40,9 +41,9 @@ class BotReportDataTestCase(TransactionTestCase):
         """Test all possible authentication cases"""
         upload_data = OrderedDict([
             ('bot_id', self.bot_id+self.bot_id),('bot_password', self.bot_password), ('browser_id', 'test_browser'),
-            ('browser_version', self.browser_version), ('test_id', 'test_root_test'),
+            ('browser_version', self.browser_version), ('test_id', self.root_test),
             ('test_version', self.test_version),
-            ('test_data', '{"test_root_test": {"metrics": {"Time": {"current": [1, 2, 3]},"Score": {"current": [2, 3, 4]}}}}')
+            ('test_data', '{"RootTest": {"metrics": {"Time": {"current": [1, 2, 3]},"Score": {"current": [2, 3, 4]}}}}')
         ])
         response = client.post('/dash/bot-report/', dict(upload_data))
         self.assertEqual(response.data['detail'], "This bot cannot be authenticated")
@@ -50,9 +51,9 @@ class BotReportDataTestCase(TransactionTestCase):
         # Try POSTing with wrong password, and cehck if the data went well
         upload_data = OrderedDict([
             ('bot_id', self.bot_id),('bot_password', self.bot_password+self.bot_password ), ('browser_id', 'test_browser'),
-            ('browser_version', self.browser_version), ('test_id', 'test_root_test'),
+            ('browser_version', self.browser_version), ('test_id', self.root_test),
             ('test_version', self.test_version),
-            ('test_data', '{"test_root_test": {"metrics": {"Time": {"current": [1, 2, 3]},"Score": {"current": [2, 3, 4]}}}}')
+            ('test_data', '{"RootTest": {"metrics": {"Time": {"current": [1, 2, 3]},"Score": {"current": [2, 3, 4]}}}}')
         ])
         response = client.post('/dash/bot-report/', dict(upload_data))
         self.assertEqual(response.data['detail'],"Bad authentication details")
@@ -62,9 +63,9 @@ class BotReportDataTestCase(TransactionTestCase):
         # Try POSTing to the path, and cehck if the data went well
         upload_data = OrderedDict([
             ('bot_id', self.bot_id),('bot_password', self.bot_password), ('browser_id', 'test_browser'),
-            ('browser_version', self.browser_version), ('test_id', 'test_root_test'),
+            ('browser_version', self.browser_version), ('test_id', self.root_test),
             ('test_version', self.test_version),
-            ('test_data', '{"test_root_test": {"metrics": {"Time": {"current": [1, 2, 3]},"Score": {"current": [2, 3, 4]}}}}')
+            ('test_data', '{"RootTest": {"metrics": {"Time": {"current": [1, 2, 3]},"Score": {"current": [2, 3, 4]}}}}')
         ])
         response = client.post('/dash/bot-report/', dict(upload_data))
         self.assertEqual(response.status_code, 200)
@@ -83,3 +84,24 @@ class BotReportDataTestCase(TransactionTestCase):
 
         self.assertEqual(score_object.prev_result, None)
         self.assertEqual(time_object.prev_result, None)
+
+    def test_with_more_complicated_data(self):
+        # Try POSTing to the path, and cehck if the data went well
+        upload_data = OrderedDict([
+            ('bot_id', self.bot_id),('bot_password', self.bot_password), ('browser_id', 'test_browser'),
+            ('browser_version', self.browser_version), ('test_id', self.root_test),
+            ('test_version', self.test_version),
+            ('test_data', '{"RootTest": {"metrics": {"Time": ["Total", "Arithmetic"]},'
+                          '"tests": {"SubTest1": {"metrics": {"Time": {"current": [1, 2, 3]}}},'
+                          '"SubTest2": {"metrics": {"Time": {"current": [4, 5, 6]}}}}}}'
+             )
+        ])
+        response = client.post('/dash/bot-report/', dict(upload_data))
+        self.assertEqual(response.status_code, 200)
+        bot_report_obj = BotReportData.objects.all()
+
+        # There should be 4 report rows from the above processed data
+        self.assertEqual(bot_report_obj.count(), 4)
+        for report in bot_report_obj:
+            # There should be no previous result at this point as aggregations are different for each results
+            self.assertEqual(report.prev_result, None)
