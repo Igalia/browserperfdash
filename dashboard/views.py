@@ -319,8 +319,9 @@ class BotReportView(APIView):
     def process_delta_and_improvement(cls, browser, root_test, test_path, mean_value, current_metric):
         delta = 0.0
         # We take in the previous result (if exists)
-        previous_result = BotReportData.objects.filter(browser=browser, root_test=root_test, test_path=test_path
-                                                       ).order_by('-timestamp')[:1]
+        previous_result = BotReportData.objects.filter(
+            browser=browser, root_test=root_test, test_path=test_path,metric_unit=current_metric
+        ).order_by('-timestamp')[:1]
 
         is_improvement = False
         prev_result = None

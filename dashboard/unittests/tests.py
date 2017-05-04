@@ -80,3 +80,6 @@ class BotReportDataTestCase(TransactionTestCase):
         self.assertEqual(round(score_object.stddev*100, 2), 33.33)
         self.assertEqual(time_object.mean_value, 2.0)
         self.assertEqual(round(time_object.stddev*100, 2), 50.00)
+
+        self.assertEqual(score_object.prev_result, None)
+        self.assertEqual(time_object.prev_result, None)
