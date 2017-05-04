@@ -316,11 +316,11 @@ class BotReportView(APIView):
 
 
     @classmethod
-    def process_delta_and_improvement(cls, browser, root_test, test_path, mean_value, current_metric):
+    def process_delta_and_improvement(cls, browser, root_test, test_path, mean_value, current_metric, aggregation):
         delta = 0.0
         # We take in the previous result (if exists)
         previous_result = BotReportData.objects.filter(
-            browser=browser, root_test=root_test, test_path=test_path,metric_unit=current_metric
+            browser=browser, root_test=root_test, test_path=test_path,metric_unit=current_metric, aggregation=aggregation
         ).order_by('-timestamp')[:1]
 
         is_improvement = False
@@ -414,7 +414,8 @@ class BotReportView(APIView):
                 aggregation = 'None'
 
             # Calculate the change and store it during processing the POST
-            delta_and_prev_results = self.process_delta_and_improvement(browser, root_test, raw_path, mean_value, current_metric)
+            delta_and_prev_results = self.process_delta_and_improvement(browser, root_test, raw_path, mean_value,
+                                                                        current_metric, aggregation)
 
             try:
                 report = BotReportData.objects.create_report(bot=bot, browser=browser, browser_version=browser_version,
