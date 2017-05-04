@@ -49,3 +49,12 @@ class BotReportDataTestCase(TransactionTestCase):
 
         # There should be two objects created
         self.assertEqual(BotReportData.objects.all().count(), 2)
+
+        # Check for individual items
+        score_object = BotReportData.objects.get(metric_unit='Score')
+        time_objcect = BotReportData.objects.get(metric_unit='Time')
+
+        self.assertEqual(score_object.mean_value, 3.0)
+        self.assertEqual(round(score_object.stddev*100, 2), 33.33)
+        self.assertEqual(time_objcect.mean_value, 2.0)
+        self.assertEqual(round(time_objcect.stddev*100, 2), 50.00)
