@@ -147,4 +147,4 @@ class BotReportData(models.Model):
                self.test_path + ":" + str(self.mean_value)
 
     class Meta:
-        unique_together = ('bot', 'browser', 'browser_version', 'root_test', 'test_path', 'test_version', )
+        unique_together = ('bot', 'browser', 'browser_version', 'root_test', 'test_path', 'test_version', 'metric_unit',)
