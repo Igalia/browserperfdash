@@ -6,7 +6,6 @@ services: postgresql
 before_install:
   - export DJANGO_SETTINGS_MODULE=dashboard.settings
   - export PYTHONPATH=$HOME/builds/Igalia/browserperfdash
-  - export PIP_USE_MIRRORS=true
 
 install:
   - pip install -r requirements.txt
@@ -17,7 +16,7 @@ before_script:
 
 script:
   - python manage.py makemigrations --noinput
-  - python manage.py migrate --noinput --traceback --settings=dashboard.settings
+  - python manage.py migrate --noinput --traceback --settings=browserperfdash.settings
   - python manage.py test
 
 branches:
