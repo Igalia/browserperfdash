@@ -196,5 +196,19 @@ class BotReportDataTestCase(TransactionTestCase):
         for report in bot_reports_full.filter(timestamp=initial_ver_timestamp_datetime):
             self.assertEqual(report.prev_result, None)
 
+        # verify if delta was correctly processed and added to
         for report in bot_reports_full.filter(timestamp=next_ver_timestamp_datetime):
-            self.assertNotEqual(report.prev_result, None)
+            # a precision upto 5 is good enough ?
+            self.assertEqual(
+                round(report.delta, 5),
+                round(abs(1 - float(report.prev_result.mean_value) / float(report.mean_value))* 100.00, 5)
+            )
+
+            # Verify if the previous result is set correctly
+            self.assertEqual(
+                report.prev_result,
+                BotReportData.objects.get(
+                    browser=report.browser, root_test=report.root_test, test_path=report.test_path,
+                    metric_unit=report.metric_unit, aggregation=report.aggregation, timestamp=initial_ver_timestamp_datetime
+                )
+            )
