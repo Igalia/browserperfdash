@@ -78,9 +78,9 @@ class BotReportDataTestCase(TransactionTestCase):
         time_object = BotReportData.objects.get(metric_unit='Time')
 
         self.assertEqual(score_object.mean_value, 3.0)
-        self.assertEqual(round(score_object.stddev*100, 2), 33.33)
+        self.assertEqual(round(score_object.stddev*100, 1), 33.3)
         self.assertEqual(time_object.mean_value, 2.0)
-        self.assertEqual(round(time_object.stddev*100, 2), 50.00)
+        self.assertEqual(round(time_object.stddev*100, 1), 50.0)
 
         self.assertEqual(score_object.prev_result, None)
         self.assertEqual(time_object.prev_result, None)
@@ -105,3 +105,24 @@ class BotReportDataTestCase(TransactionTestCase):
         for report in bot_report_obj:
             # There should be no previous result at this point as aggregations are different for each results
             self.assertEqual(report.prev_result, None)
+            self.assertEqual(report.delta, 0)
+
+        # RootTest\SubTest1:Time: 2.0ms stdev=50.0%
+        subtest1 = bot_report_obj.get(test_path='RootTest\SubTest1', metric_unit='Time', aggregation='None')
+        self.assertEqual(subtest1.mean_value, 2.0)
+        self.assertEqual(round(subtest1.stddev*100, 1), 50.0)
+
+        # RootTest\SubTest2:Time: 5.0ms stdev=20.0%
+        subtest2 = bot_report_obj.get(test_path='RootTest\SubTest2', metric_unit='Time', aggregation='None')
+        self.assertEqual(subtest2.mean_value, 5.0)
+        self.assertEqual(round(subtest2.stddev * 100, 1), 20.0)
+
+        # RootTest:Time:Arithmetic: 3.0ms stdev=33.3%
+        root_test1 = bot_report_obj.get(test_path='RootTest', metric_unit='Time', aggregation='Arithmetic')
+        self.assertEqual(root_test1.mean_value, 3.0)
+        self.assertEqual(round(root_test1.stddev*100, 1), 33.3)
+
+        # RootTest:Time:Total: 7.0ms stdev=28.6%
+        root_test2 = bot_report_obj.get(test_path='RootTest', metric_unit='Time', aggregation='Total')
+        self.assertEqual(root_test2.mean_value, 7.0)
+        self.assertEqual(round(root_test2.stddev * 100, 1), 28.6)
