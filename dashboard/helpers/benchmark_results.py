@@ -82,25 +82,23 @@ class BenchmarkResults(object):
         self._results = None
 
     """
-    The method below returns a list of dictionaries, with the following format:
+    The method below returns a list of dictionaries, with the following format (backward-slashes are escaped):
 
-    [{'name': SpeedometerExample, 'metric': Score\None, 'value': 142.0, 'stdev': 0.00704225352113}
-    {'name': SpeedometerExample, 'metric': Time\Total, 'value': 674.22, 'stdev': 0.098284410446}
-    {'name': SpeedometerExample\AngularJS-TodoMVC, 'metric': Time:Total, 'value': 674.22, 'stdev': 0.098284410446}
-    {'name': SpeedometerExample\AngularJS-TodoMVC\Adding100Items, 'metric': Time\Total, 'value': 217.81, 'stdev': 0.0290934151339}
-    {'name': SpeedometerExample\AngularJS-TodoMVC\Adding100Items, 'metric': Time\Total, 'value': 217.81, 'stdev': 0.0290934151339}
-    {'name': SpeedometerExample\AngularJS-TodoMVC\Adding100Items\Async, 'metric': Time\None, 'value': 11.25, 'stdev': 0.173561103909}
-    {'name': SpeedometerExample\AngularJS-TodoMVC\Adding100Items\Sync, 'metric': Time\None, 'value': 206.56, 'stdev': 0.0294749686776}
-    {'name': SpeedometerExample\AngularJS-TodoMVC\Adding200Items, 'metric': Time\Total, 'value': 456.41, 'stdev': 0.136262489719}
-    {'name': SpeedometerExample\AngularJS-TodoMVC\Adding200Items\Async, 'metric': Time\None, 'value': 27.25, 'stdev': 0.395773479085}
-    {'name': SpeedometerExample\AngularJS-TodoMVC\Adding200Items\Sync, 'metric': Time\None, 'value': 429.16, 'stdev': 0.122973388375}]
+    [{'name': SpeedometerExample, 'metric': Score\\None, 'value': 142.0, 'stdev': 0.00704225352113}
+    {'name': SpeedometerExample, 'metric': Time\\Total, 'value': 674.22, 'stdev': 0.098284410446}
+    {'name': SpeedometerExample\\AngularJS-TodoMVC, 'metric': Time:Total, 'value': 674.22, 'stdev': 0.098284410446}
+    {'name': SpeedometerExample\\AngularJS-TodoMVC\\Adding100Items, 'metric': Time\\Total, 'value': 217.81, 'stdev': 0.0290934151339}
+    {'name': SpeedometerExample\\AngularJS-TodoMVC\\Adding100Items, 'metric': Time\\Total, 'value': 217.81, 'stdev': 0.0290934151339}
+    {'name': SpeedometerExample\\AngularJS-TodoMVC\\Adding100Items\\Async, 'metric': Time\\None, 'value': 11.25, 'stdev': 0.173561103909}
+    {'name': SpeedometerExample\\AngularJS-TodoMVC\\Adding100Items\\Sync, 'metric': Time\\None, 'value': 206.56, 'stdev': 0.0294749686776}
+    {'name': SpeedometerExample\\AngularJS-TodoMVC\\Adding200Items, 'metric': Time\\Total, 'value': 456.41, 'stdev': 0.136262489719}
+    {'name': SpeedometerExample\\AngularJS-TodoMVC\\Adding200Items\\Async, 'metric': Time\\None, 'value': 27.25, 'stdev': 0.395773479085}
+    {'name': SpeedometerExample\\AngularJS-TodoMVC\\Adding200Items\\Sync, 'metric': Time\\None, 'value': 429.16, 'stdev': 0.122973388375}]
 
     The Value of the metric field indicates the metric and the aggregator.
-    It uses the character "\" as separator, so it contains metric:aggregator
-    If aggregator is "None" then it means its a real value (not aggregated).
-
+    It uses the character \\ as separator, so it contains metric:aggregator
+    If aggregator is "None" then it means its a real value (not aggregated)
     """
-
     @classmethod
     def _generate_db_entries(cls, tests, test_table, skip_aggregated=False, parent=None):
         for test_name in sorted(tests.keys()):
@@ -289,7 +287,7 @@ class BenchmarkResults(object):
     @classmethod
     def _lint_subtest_results(cls, subtests, parent_needing_aggregation):
         iteration_groups_by_config = {}
-        for test_name, test in subtests.items():
+        for test_name, test in list(subtests.items()):
             needs_aggregation = False
 
             if 'metrics' not in test and 'tests' not in test:

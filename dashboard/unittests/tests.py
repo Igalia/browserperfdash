@@ -89,14 +89,18 @@ class BotReportDataTestCase(TransactionTestCase):
         self.assertEqual(time_object.prev_result, None)
 
     def test_with_more_complicated_data(self):
+        """
+        [{'value': 7.0, 'name': 'RootTest', 'unit': 'ms', 'metric': 'Time\\Total', 'stdev': 0.2857142857142857},
+        {'value': 3.5, 'name': 'RootTest', 'unit': 'ms', 'metric': 'Time\\Arithmetic', 'stdev': 0.2857142857142857},
+        {'value': 2.0, 'name': 'RootTest\\SubTest1', 'unit': 'ms', 'metric': 'Time\\None', 'stdev': 0.5},
+        {'value': 5.0, 'name': 'RootTest\\SubTest2', 'unit': 'ms', 'metric': 'Time\\None', 'stdev': 0.2}]
+        """
         # Try POSTing to the path, and cehck if the data went well
         upload_data = OrderedDict([
             ('bot_id', self.bot_id),('bot_password', self.bot_password), ('browser_id', 'test_browser'),
             ('browser_version', self.browser_version), ('test_id', self.root_test),
             ('test_version', self.test_version),
-            ('test_data', '{"RootTest": {"metrics": {"Time": ["Total", "Arithmetic"]},'
-                          '"tests": {"SubTest1": {"metrics": {"Time": {"current": [1, 2, 3]}}},'
-                          '"SubTest2": {"metrics": {"Time": {"current": [4, 5, 6]}}}}}}'
+            ('test_data', '{"RootTest": {"metrics": {"Time": ["Total", "Arithmetic"]},"tests": {"SubTest1": {"metrics": {"Time": {"current": [1, 2, 3]}}},"SubTest2": {"metrics": {"Time": {"current": [4, 5, 6]}}}}}}'
              )
         ])
         response = client.post('/dash/bot-report/', dict(upload_data))
@@ -120,10 +124,10 @@ class BotReportDataTestCase(TransactionTestCase):
         self.assertEqual(subtest2.mean_value, 5.0)
         self.assertEqual(round(subtest2.stddev * 100, 1), 20.0)
 
-        # RootTest:Time:Arithmetic: 3.0ms stdev=33.3%
+        # RootTest:Time:Arithmetic: 3.5ms stdev=33.3%
         root_test1 = bot_report_obj.get(test_path='RootTest', metric_unit='Time', aggregation='Arithmetic')
-        self.assertEqual(root_test1.mean_value, 3.0)
-        self.assertEqual(round(root_test1.stddev*100, 1), 33.3)
+        self.assertEqual(root_test1.mean_value, 3.5)
+        self.assertEqual(round(root_test1.stddev*100, 1), 28.6)
 
         # RootTest:Time:Total: 7.0ms stdev=28.6%
         root_test2 = bot_report_obj.get(test_path='RootTest', metric_unit='Time', aggregation='Total')

@@ -149,4 +149,4 @@ if 'TRAVIS' in os.environ:
     STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, "static")
 else:
-    from local_settings import *
+    from browserperfdash.local_settings import *
