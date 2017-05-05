@@ -29,7 +29,7 @@ class BenchmarkResults(object):
 
     aggregators = {
         'Total': (lambda values: sum(values)),
-        'Arithmetic': (lambda values: sum(values) / len(values)),
+        'Arithmetic': (lambda values: float(sum(values)) / len(values)),
         'Geometric': (lambda values: math.exp(sum(map(math.log, values)) / len(values))),
     }
     metric_to_unit = {
