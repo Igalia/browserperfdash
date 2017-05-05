@@ -5,8 +5,8 @@ from rest_framework import authentication, permissions
 from rest_framework import generics
 from dashboard.models import *
 from rest_framework import exceptions
-from helpers.benchmark_results import BenchmarkResults
-from .serializers import *
+from dashboard.helpers.benchmark_results import BenchmarkResults
+from dashboard.serializers import *
 from datetime import datetime, timedelta
 import json, urllib, logging, sys
 
