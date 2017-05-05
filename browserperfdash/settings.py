@@ -142,5 +142,11 @@ if 'TRAVIS' in os.environ:
             'PORT':     '',
         }
     }
-
-from local_settings import *
+    DEBUG = True
+    ALLOWED_HOSTS = []
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    SECRET_KEY = '+n#x9$u3_bh$mfuq!pikscg3vcfaeasdfasdfasdf5454@79b!'
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, "static")
+else:
+    from local_settings import *
