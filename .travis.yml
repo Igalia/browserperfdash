@@ -4,7 +4,7 @@ python:
  - "2.7"
 services: postgresql
 before_install:
-  - export DJANGO_SETTINGS_MODULE=dashboard.settings
+  - export DJANGO_SETTINGS_MODULE=browserperfdash.settings
   - export PYTHONPATH=$HOME/builds/Igalia/browserperfdash
 
 install:
