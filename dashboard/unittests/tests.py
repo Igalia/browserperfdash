@@ -3,6 +3,7 @@ from dashboard.models import Bot, BotReportData, CPUArchitecture, GPUType, Platf
     MetricUnit
 from rest_framework.test import APIClient
 from collections import OrderedDict
+from datetime import datetime
 
 client = APIClient()
 
@@ -11,7 +12,9 @@ class BotReportDataTestCase(TransactionTestCase):
     bot_id = "test_bot"
     bot_password = "test_pwd"
     test_version = "https://test.dummy.org/test_root_test/@r182170"
+    test_version_next_ver = "https://test.dummy.org/test_root_test/@r182500"
     browser_version = 'test_browser_version'
+    browser_version_next_ver = 'test_browser_version_next_ver'
     root_test = "RootTest"
 
     def setUp(self):
@@ -126,3 +129,64 @@ class BotReportDataTestCase(TransactionTestCase):
         root_test2 = bot_report_obj.get(test_path='RootTest', metric_unit='Time', aggregation='Total')
         self.assertEqual(root_test2.mean_value, 7.0)
         self.assertEqual(round(root_test2.stddev * 100, 1), 28.6)
+
+    def test_previous_result_with_some_real_data(self):
+        """
+        timestamp = 1493981500;
+        Should end up creating report data for a data with the below one.
+        {'metric': u'Score\\None', 'unit': 'pt', 'name': u'SpeedometerExample', 'value': 142.0, 'stdev': 0.007042253521126761}
+        {'metric': u'Time\\Total', 'unit': 'ms', 'name': u'SpeedometerExample', 'value': 41405200016.409996, 'stdev': 2.2357169550550746}
+        {'metric': u'Time\\Total', 'unit': 'ms', 'name': u'SpeedometerExample\\AngularJS-TodoMVC', 'value': 41405200016.409996, 'stdev': 2.2357169550550746}
+        {'metric': u'Time\\Total', 'unit': 'ms', 'name': u'SpeedometerExample\\AngularJS-TodoMVC\\Adding100Items', 'value': 41405200016.409996, 'stdev': 2.2357169550550746}
+        {'metric': u'Time\\None', 'unit': 'ms', 'name': u'SpeedometerExample\\AngularJS-TodoMVC\\Adding100Items\\Async', 'value': 11.25, 'stdev': 0.17356110390903676}
+        {'metric': u'Time\\None', 'unit': 'ms', 'name': u'SpeedometerExample\\AngularJS-TodoMVC\\Adding100Items\\Sync', 'value': 41405200005.159996, 'stdev': 2.2357169556929097}
+
+        and then later at timestamp = 1493981600;
+        {'metric': u'Score\\None', 'unit': 'pt', 'name': u'SpeedometerExample', 'value': 146.0, 'stdev': 0.010829718014275272}
+        {'metric': u'Time\\Total', 'unit': 'ms', 'name': u'SpeedometerExample', 'value': 61407800017.409996, 'stdev': 2.235712954065906}
+        {'metric': u'Time\\Total', 'unit': 'ms', 'name': u'SpeedometerExample\\AngularJS-TodoMVC', 'value': 61407800017.409996, 'stdev': 2.235712954065906}
+        {'metric': u'Time\\Total', 'unit': 'ms', 'name': u'SpeedometerExample\\AngularJS-TodoMVC\\Adding100Items', 'value': 61407800017.409996, 'stdev': 2.235712954065906}
+        {'metric': u'Time\\None', 'unit': 'ms', 'name': u'SpeedometerExample\\AngularJS-TodoMVC\\Adding100Items\\Async', 'value': 12.25, 'stdev': 0.15939285052870722}
+        {'metric': u'Time\\None', 'unit': 'ms', 'name': u'SpeedometerExample\\AngularJS-TodoMVC\\Adding100Items\\Sync', 'value': 61407800005.159996, 'stdev': 2.2357129545323837}
+        """
+        Test.objects.create(
+            id="SpeedometerExample", description='SpeedometerExample test', url='http://something_here.com',
+            enabled=True
+        )
+        # Try POSTing to the path, and check if the data went well
+        upload_data = OrderedDict([
+            ('bot_id', self.bot_id),('bot_password', self.bot_password), ('browser_id', 'test_browser'),
+            ('browser_version', self.browser_version), ('test_id', "SpeedometerExample"),
+            ('test_version', self.test_version), ('timestamp', 1493981500),
+            ('test_data', '{"SpeedometerExample":{"metrics":{"Score":{"current":[142,141,143,141,143]},'
+                          '"Time":["Total"]},"tests":{"AngularJS-TodoMVC":{"metrics":{"Time":["Total"]},'
+                          '"tests":{"Adding100Items":{"metrics":{"Time":["Total"]},'
+                          '"tests":{"Async":{"metrics":{"Time":{"current":[9,11,10,12.25,14]}}},'
+                          '"Sync":{"metrics":{"Time":{"current":[207000000000,1900008,20000014,2000003.8,2100000]'
+                          '}}}}}}}}}}'
+             )
+        ])
+        response = client.post('/dash/bot-report/', dict(upload_data))
+        self.assertEqual(response.status_code, 200)
+
+        intial_ver_timestamp_datetime = datetime.fromtimestamp(float(1493981500))
+        self.assertEqual(BotReportData.objects.all().filter(timestamp=intial_ver_timestamp_datetime).count(), 6)
+
+        # Try POSTing to the path, and check if the data went well
+        upload_data_next_ver = OrderedDict([
+            ('bot_id', self.bot_id),('bot_password', self.bot_password), ('browser_id', 'test_browser'),
+            ('browser_version', self.browser_version_next_ver), ('test_id', "SpeedometerExample"),
+            ('test_version', self.test_version_next_ver), ('timestamp', 1493981600),
+            ('test_data', '{"SpeedometerExample":{"metrics":{"Score":{"current":[144,145,146,147,148]},'
+                          '"Time":["Total"]},"tests":{"AngularJS-TodoMVC":{"metrics":{"Time":["Total"]},'
+                          '"tests":{"Adding100Items":{"metrics":{"Time":["Total"]},'
+                          '"tests":{"Async":{"metrics":{"Time":{"current":[10,12,11,13.25,15]}}},'
+                          '"Sync":{"metrics":{"Time":{"current":[307000000000,2900008,30000014,3000003.8,3100000]'
+                          '}}}}}}}}}}'
+             )
+        ])
+        response = client.post('/dash/bot-report/', dict(upload_data_next_ver))
+        self.assertEqual(response.status_code, 200)
+
+        next_ver_timestamp_datetime = datetime.fromtimestamp(float(1493981600))
+        self.assertEqual(BotReportData.objects.all().filter(timestamp=next_ver_timestamp_datetime).count(), 6)
