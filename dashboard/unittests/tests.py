@@ -169,8 +169,8 @@ class BotReportDataTestCase(TransactionTestCase):
         response = client.post('/dash/bot-report/', dict(upload_data))
         self.assertEqual(response.status_code, 200)
 
-        intial_ver_timestamp_datetime = datetime.fromtimestamp(float(1493981500))
-        self.assertEqual(BotReportData.objects.all().filter(timestamp=intial_ver_timestamp_datetime).count(), 6)
+        initial_ver_timestamp_datetime = datetime.fromtimestamp(float(1493981500))
+        self.assertEqual(BotReportData.objects.all().filter(timestamp=initial_ver_timestamp_datetime).count(), 6)
 
         # Try POSTing to the path, and check if the data went well
         upload_data_next_ver = OrderedDict([
@@ -190,3 +190,11 @@ class BotReportDataTestCase(TransactionTestCase):
 
         next_ver_timestamp_datetime = datetime.fromtimestamp(float(1493981600))
         self.assertEqual(BotReportData.objects.all().filter(timestamp=next_ver_timestamp_datetime).count(), 6)
+
+        bot_reports_full = BotReportData.objects.all()
+        # verify previous_results were populated correctly
+        for report in bot_reports_full.filter(timestamp=initial_ver_timestamp_datetime):
+            self.assertEqual(report.prev_result, None)
+
+        for report in bot_reports_full.filter(timestamp=next_ver_timestamp_datetime):
+            self.assertNotEqual(report.prev_result, None)
