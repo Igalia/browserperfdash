@@ -352,7 +352,7 @@ class BotReportView(APIView):
 
         log.info("Started processing data from bot %s" % (bot_id))
         # The timestamp may/may not be there - hence not checking
-        timestamp = datetime.datetime.fromtimestamp(float(self.request.POST.get('timestamp'))) \
+        timestamp = datetime.fromtimestamp(float(self.request.POST.get('timestamp'))) \
             if self.request.POST.get('timestamp') else None
         try:
             test_data = json.loads(json_data)
