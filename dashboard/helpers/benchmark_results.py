@@ -75,8 +75,8 @@ class BenchmarkResults(object):
         test_table = []
         db_entries = self._generate_db_entries(self._results, test_table, skip_aggregated)
         for db_entry in db_entries:
-            print('Name=%s \t Metric=%s \t Unit=%s \t Value=%s \t Stdev=%s' %(db_entry['name'], db_entry['metric'],
-                                                                              db_entry['unit'], db_entry['value'], db_entry['stdev']))
+            print(('Name=%s \t Metric=%s \t Unit=%s \t Value=%s \t Stdev=%s' %(db_entry['name'], db_entry['metric'],
+                                                                              db_entry['unit'], db_entry['value'], db_entry['stdev'])))
 
     def __del__(self):
         self._results = None
@@ -112,7 +112,7 @@ class BenchmarkResults(object):
                 test_path = '%s%s%s' %(parent, cls.db_character_separator, test_name)
 
             for unit in sorted(tests[test_name]['metrics'].keys()):
-                for aggregator in tests[test_name]['metrics'][unit].keys():
+                for aggregator in list(tests[test_name]['metrics'][unit].keys()):
                     if skip_aggregated:
                         if aggregator is not None:
                             continue
@@ -143,7 +143,7 @@ class BenchmarkResults(object):
             # Fill metric_to_unit and aggregator/None
             for unit in sorted(tests[test_name]['metrics'].keys()):
                 format_dict[test_name]['metrics'][unit] = {}
-                for aggregator in tests[test_name]['metrics'][unit].keys():
+                for aggregator in list(tests[test_name]['metrics'][unit].keys()):
                     format_dict[test_name]['metrics'][unit][aggregator] = cls._format_values(unit, tests[test_name]['metrics'][unit][aggregator]['current'], json_format=True)
 
             if 'tests' in tests[test_name]:
@@ -178,10 +178,10 @@ class BenchmarkResults(object):
 
     @classmethod
     def _format_values(cls, metric_name, values, scale_unit=True, json_format=False, db_format=False):
-        values = map(float, values)
+        values = list(map(float, values))
         total = sum(values)
         mean = total / len(values)
-        square_sum = sum(map(lambda x: x * x, values))
+        square_sum = sum([x * x for x in values])
         sample_count = len(values)
 
         # With sum and sum of squares, we can compute the sample standard deviation in O(1).
@@ -230,7 +230,7 @@ class BenchmarkResults(object):
     @classmethod
     def _aggregate_results(cls, tests):
         results = {}
-        for test_name, test in tests.iteritems():
+        for test_name, test in tests.items():
             results[test_name] = cls._aggregate_results_for_test(test)
         return results
 
@@ -238,10 +238,10 @@ class BenchmarkResults(object):
     def _aggregate_results_for_test(cls, test):
         subtest_results = cls._aggregate_results(test['tests']) if 'tests' in test else {}
         results = {}
-        for metric_name, metric in test.get('metrics', {}).iteritems():
+        for metric_name, metric in test.get('metrics', {}).items():
             if not isinstance(metric, list):
                 results[metric_name] = {None: {}}
-                for config_name, values in metric.iteritems():
+                for config_name, values in metric.items():
                     results[metric_name][None][config_name] = cls._flatten_list(values)
                 continue
 
@@ -249,7 +249,7 @@ class BenchmarkResults(object):
             results[metric_name] = {}
             for aggregator in aggregator_list:
                 values_by_config_iteration = cls._subtest_values_by_config_iteration(subtest_results, metric_name, aggregator)
-                for config_name, values_by_iteration in values_by_config_iteration.iteritems():
+                for config_name, values_by_iteration in values_by_config_iteration.items():
                     results[metric_name].setdefault(aggregator, {})
                     results[metric_name][aggregator][config_name] = [cls._aggregate_values(aggregator, values) for values in values_by_iteration]
 
@@ -268,10 +268,10 @@ class BenchmarkResults(object):
     @classmethod
     def _subtest_values_by_config_iteration(cls, subtest_results, metric_name, aggregator):
         values_by_config_iteration = {}
-        for subtest_name, subtest in subtest_results.iteritems():
+        for subtest_name, subtest in subtest_results.items():
             results_for_metric = subtest['metrics'].get(metric_name, {})
             results_for_aggregator = results_for_metric.get(aggregator, results_for_metric.get(None, {}))
-            for config_name, values in results_for_aggregator.iteritems():
+            for config_name, values in results_for_aggregator.items():
                 values_by_config_iteration.setdefault(config_name, [[] for _ in values])
                 for iteration, value in enumerate(values):
                     values_by_config_iteration[config_name][iteration].append(value)
@@ -289,7 +289,7 @@ class BenchmarkResults(object):
     @classmethod
     def _lint_subtest_results(cls, subtests, parent_needing_aggregation):
         iteration_groups_by_config = {}
-        for test_name, test in subtests.iteritems():
+        for test_name, test in subtests.items():
             needs_aggregation = False
 
             if 'metrics' not in test and 'tests' not in test:
@@ -299,7 +299,7 @@ class BenchmarkResults(object):
                 metrics = test['metrics']
                 if not isinstance(metrics, dict):
                     raise TypeError('The metrics in "%s" is not a dictionary' % test_name)
-                for metric_name, metric in metrics.iteritems():
+                for metric_name, metric in metrics.items():
                     if isinstance(metric, list):
                         cls._lint_aggregator_list(test_name, metric_name, metric)
                         needs_aggregation = True
@@ -328,7 +328,7 @@ class BenchmarkResults(object):
 
     @classmethod
     def _lint_configuration(cls, test_name, metric_name, configurations, parent_needing_aggregation, iteration_groups_by_config):
-        for config_name, values in configurations.iteritems():
+        for config_name, values in configurations.items():
             if config_name != "current":
                 raise ValueError('config name should be "current" instead of "%s"' % config_name)
             nested_list_count = [isinstance(value, list) for value in values].count(True)
