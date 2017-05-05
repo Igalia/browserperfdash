@@ -131,5 +131,16 @@ LOGGING = {
     }
 }
 
+if 'TRAVIS' in os.environ:
+    DATABASES = {
+        'default': {
+            'ENGINE':   'django.db.backends.postgresql_psycopg2',
+            'NAME':     'traviscidb',
+            'USER':     'travisci',
+            'PASSWORD': 'traviscipass',
+            'HOST':     'localhost',
+            'PORT':     '',
+        }
+    }
 
 from local_settings import *
