@@ -1,4 +1,8 @@
 # Igalia Browsers Performance Dashboard
+
+[![Build Status](https://travis-ci.org/Igalia/browserperfdash?branch=master)](https://travis-ci.org/Igalia/browserperfdash)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+
 The applicaiton powers https://browserperfdash.igalia.com and provides a dashboard to analyze browser perofrmance reports. Bots 
 send in the data via `POST` APIs and the application perfroms the number crunching. 
 
