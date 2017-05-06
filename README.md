@@ -7,10 +7,9 @@ The applicaiton powers https://browserperfdash.igalia.com and provides a dashboa
 send in the data via `POST` APIs and the application perfroms the number crunching. 
 
 ## Collect Pre-requisites
-Install `python-pip`, `python-dev` and `virtualenvwrapper`
+Install `python3-pip`, `python-dev` and `virtualenvwrapper`
 ```bash
-sudo apt-get install python-pip python-dev memcached
-sudo pip install virtualenvwrapper
+sudo apt-get install python3 python3-pip python3-dev virtualenvwrapper
 ```
 
 ## Get the files
@@ -31,9 +30,9 @@ mkdir -p $WORKON_HOME
 source /usr/local/bin/virtualenvwrapper.sh
 ```
 
-Lets create a virtual environment for our project
+Lets create a virtual environment `dashboard` for our project
 ```bash
-mkvirtualenv dashboard
+mkvirtualenv -p /usr/bin/python3 dashboard
 workon dashboard
 ```
 
