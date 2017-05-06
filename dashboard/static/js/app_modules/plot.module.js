@@ -3,7 +3,7 @@
  *
  * Created by tthomas@igalia.com on 11/4/17.
  */
-app = angular.module('browserperfdash.plot.static', ['ngResource','ngAnimate', 'ngSanitize', 'ui.bootstrap', 'angular-flot' ]);
+app = angular.module('browserperfdash.plot.static', ['ngResource','ngAnimate', 'ngSanitize', 'angular-flot']);
 
 app.factory('browserForResultExistFactory', function ($resource) {
     return $resource('/dash/browser_results_exist');
