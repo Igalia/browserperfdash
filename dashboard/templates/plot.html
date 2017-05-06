@@ -9,19 +9,19 @@
                     {% verbatim %}
                     <div class="form-group">
                         <select name="browser" class="form-control" ng-model="selectedBrowser" ng-disabled="disableBrowser"
-                                ng-options="x.browser for x in browsers" ng-change="onBrowserChange()">
+                                ng-options="browser.name for browser in browsers" ng-change="onBrowserChange()">
                             <option value="">--All browsers--</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <select name="bot" class="form-control" ng-model="selectedBot" ng-disabled="disableBot"
-                                ng-options="bot.bot for bot in bots" ng-change="onBotsChange()">
+                                ng-options="bot.name for bot in bots" ng-change="onBotsChange()">
                             <option value="">--All bots--</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <select name="test" class="form-control" ng-disabled="disableTest" ng-model="selectedTest" ng-change="onTestsChange()"
-                                ng-options="x.root_test.id for x in tests">
+                                ng-options="test.root_test.id for test in tests">
                         </select>
                     </div>
                     <div class="form-group">
