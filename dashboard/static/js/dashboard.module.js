@@ -50,8 +50,8 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
     $scope.gpus = gpuFactory.query();
     $scope.cpus = cpuArchFactory.query();
     $scope.tests = testsForBrowserAndBotFactory.query({
-        browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id,
-        bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
+        browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
+        bot: !$scope.selectedBot ? null : $scope.selectedBot.name,
     });
     $scope.botDetailsPopover = {
         templateUrl: 'bot-template.html'
@@ -68,11 +68,11 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
     $scope.updateOthersOnBrowserChange = function () {
         //There can be chance of test change
         $scope.tests = testsForBrowserAndBotFactory.query({
-            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id,
-            bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
+            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
+            bot: !$scope.selectedBot ? null : $scope.selectedBot.name,
         }, function () {
             $scope.bots = botFullDetailsForResultsExistFactory.query({
-                browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id
+                browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id
             });
             $scope.reload();
         });
@@ -95,7 +95,7 @@ app.controller('DeltaController', function($scope, botReportsImprovementFactory,
         $scope.loading = true;
         $scope.selectedDays = !$scope.selectedDays ? 5 : $scope.selectedDays;
         $scope.listLimit = !$scope.listLimit? 10 : $scope.listLimit;
-        $scope.selectedBrowserId = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id;
+        $scope.selectedBrowserId = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id;
         $scope.selectedPlatformId = !$scope.selectedPlatform ? 'all' : $scope.selectedPlatform.id;
         $scope.selectedCPUId = !$scope.selectedCPU ? 'all' : $scope.selectedCPU.id;
         $scope.selectedGPUId = !$scope.selectedGPU ? 'all' : $scope.selectedGPU.id;

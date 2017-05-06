@@ -16,13 +16,13 @@
                             </div>
                             <div class="form-group">
                                 <select name="browser" class="form-control" ng-model="selectedBrowser"
-                                        ng-options="x.browser for x in browsers" ng-change="updateOthersOnBrowserChange()">
+                                        ng-options="browser.name for browser in browsers" ng-change="updateOthersOnBrowserChange()">
                                     <option value="">--All browsers--</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <select name="test" class="form-control" ng-model="selectedTest"
-                                        ng-options="x.root_test.id for x in tests" ng-change="reload()">
+                                        ng-options="test.root_test.id for test in tests" ng-change="reload()">
                                     <option value="">--All tests--</option>
                                 </select>
                             </div>

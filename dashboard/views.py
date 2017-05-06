@@ -6,7 +6,7 @@ from dashboard.models import Bot, Browser, BotReportData, CPUArchitecture, GPUTy
 from dashboard.helpers.benchmark_results import BenchmarkResults
 from dashboard.serializers import BotReportDataSerializer, BotsForResultsExistListSerializer, \
     BotsFullDetailsForResultsExistListSerializer, BrowsersForResultsExistListSerializer, PlatformListSerializer, \
-    GPUTypeListSerializer, CPUArchitectureListSerializer, TestPathListSerializer, MetricsForTestListSerializer, \
+    GPUTypeListSerializer, CPUArchitectureListSerializer, TestPathListSerializer, MetricUnitSerializer, \
     TestsForBrowserBotListSerializer, ResultsForSubtestListSerializer
 from datetime import datetime, timedelta
 import json, urllib.request, urllib.parse, urllib.error, logging, sys
@@ -158,6 +158,7 @@ class BotDataReportRegressionListView(generics.ListAPIView):
 
 class BotsForResultsExistList(generics.ListAPIView):
     """Fetch just the botname for the plot pages"""
+    model = Bot
     serializer_class = BotsForResultsExistListSerializer
 
     def get_queryset(self):
@@ -165,11 +166,15 @@ class BotsForResultsExistList(generics.ListAPIView):
             browser_obj = Browser.objects.all()
         else:
             browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
-        return BotReportData.objects.filter(browser__in=browser_obj).distinct('bot')
+        return Bot.objects.filter(
+            name__in=BotReportData.objects.filter(browser__in=browser_obj).distinct('bot').values('bot'),
+            enabled=True
+        )
 
 
 class BotsFullDetailsForResultsExistList(generics.ListAPIView):
-    """Fetch detailed bot feilds for the home page"""
+    """Fetch detailed bot fields for the home page"""
+    model = Bot
     serializer_class = BotsFullDetailsForResultsExistListSerializer
 
     def get_queryset(self):
@@ -177,15 +182,22 @@ class BotsFullDetailsForResultsExistList(generics.ListAPIView):
             browser_obj = Browser.objects.all()
         else:
             browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
-        bots = BotReportData.objects.filter(browser__in=browser_obj).distinct('bot').values('bot')
-        return Bot.objects.filter(name__in=bots)
+        return Bot.objects.filter(
+            name__in=BotReportData.objects.filter(browser__in=browser_obj).distinct('bot').values('bot'),
+            enabled=True
+        )
 
 
 class BrowsersForResultsExistList(generics.ListAPIView):
     """List out browsers in home page and plot page"""
-    model = BotReportData
-    queryset = BotReportData.objects.distinct('browser')
+    model = Browser
     serializer_class = BrowsersForResultsExistListSerializer
+
+    def get_queryset(self):
+        return Browser.objects.filter(
+            id__in=BotReportData.objects.distinct('browser').values('browser'),
+            enabled=True
+        )
 
 
 class PlatformForWhichResultsExistList(generics.ListAPIView):
@@ -237,12 +249,17 @@ class TestPathList(generics.ListAPIView):
 
 
 class MetricsForTestList(generics.ListAPIView):
-    serializer_class = MetricsForTestListSerializer
+    """ Show up metrics for a given test and subtest"""
+    model = MetricUnit
+    serializer_class = MetricUnitSerializer
 
     def get_queryset(self):
-        test = Test.objects.filter(pk=self.kwargs.get('test'))
-        test_path = urllib.parse.unquote(self.kwargs.get('subtest'))
-        return BotReportData.objects.filter(root_test=test, test_path=test_path)[:1]
+        return MetricUnit.objects.filter(
+            name__in=BotReportData.objects.filter(
+                root_test=Test.objects.filter(pk=self.kwargs.get('test')),
+                test_path=urllib.parse.unquote(self.kwargs.get('subtest'))
+            )[:1].values('metric_unit')
+        )
 
 
 class TestsForBrowserBotList(generics.ListAPIView):
@@ -315,7 +332,6 @@ class BotReportView(APIView):
 
             return cls.calculate_prefix(munits, mean_value, curr_string, original_prefix)
 
-
     @classmethod
     def process_delta_and_improvement(cls, browser, root_test, test_path, mean_value, current_metric, aggregation):
         delta = 0.0
@@ -340,6 +356,16 @@ class BotReportView(APIView):
         return [delta, is_improvement, prev_result]
 
     def post(self, request, format=None):
+        """
+        The API expects POST data on /dash/bot-report/ in the following format:
+            upload_data = OrderedDict([
+            ('bot_id', 'bot_name'),('bot_password', 'bot_password'), ('browser_id', 'test_browser'),
+            ('browser_version', 'browser_version'), ('test_id', 'test_id'),
+            ('test_version', 'test_veresion'),
+            ('test_data', '{"RootTest": {"metrics": {"Time": {"current": [1, 2, 3]},
+                "Score": {"current": [2, 3, 4]}}}}')
+            ])
+        """
         try:
             browser_id = self.request.POST.get('browser_id')
             browser_version = self.request.POST.get('browser_version')

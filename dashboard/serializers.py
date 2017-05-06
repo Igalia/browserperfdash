@@ -1,14 +1,12 @@
 from rest_framework import serializers
-from dashboard.models import BotReportData, Platform, GPUType, CPUArchitecture, Test, MetricUnit
+from dashboard.models import BotReportData, Platform, GPUType, CPUArchitecture, Test, MetricUnit, \
+    Browser, Bot
 
 
 class BrowsersForResultsExistListSerializer(serializers.ModelSerializer):
-    browser_id = serializers.CharField()
-    browser = serializers.CharField()
-
     class Meta:
-        model = BotReportData
-        fields = ('browser_id', 'browser')
+        model = Browser
+        fields = ('id', 'name')
 
 
 class GPUTypeListSerializer(serializers.ModelSerializer):
@@ -29,18 +27,21 @@ class PlatformListSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
-class BotsForResultsExistListSerializer(serializers.Serializer):
-    bot = serializers.CharField(max_length=50)
+class BotsForResultsExistListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bot
+        fields = ('name', )
 
 
-class BotsFullDetailsForResultsExistListSerializer(serializers.Serializer):
+class BotsFullDetailsForResultsExistListSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
     platform = PlatformListSerializer()
     cpuArchitecture = CPUArchitectureListSerializer()
     gpuType = GPUTypeListSerializer()
 
     class Meta:
-        fields = '__all__'
+        model = Bot
+        fields = ('name', 'platform', 'cpuArchitecture', 'gpuType')
 
 
 class TestListListSerializer(serializers.ModelSerializer):
@@ -59,10 +60,6 @@ class MetricUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = MetricUnit
         fields = ('name', 'unit', 'is_better')
-
-
-class MetricsForTestListSerializer(serializers.Serializer):
-    metric_unit = MetricUnitSerializer()
 
 
 class TestsForBrowserBotListSerializer(serializers.Serializer):

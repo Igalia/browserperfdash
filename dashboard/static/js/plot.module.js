@@ -43,21 +43,21 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     $scope.onBrowserChange = function () {
         //Update tests
         $scope.tests = testsForBrowserAndBotFactory.query({
-            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id,
-            bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
+            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
+            bot: !$scope.selectedBot ? null : $scope.selectedBot.name,
         }, function () {
             $scope.selectedTest = $scope.tests[0];
             $scope.onTestsChange();
             $scope.bots = botForResultsExistFactory.query({
-                browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id
+                browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id
             });
         });
     };
 
     $scope.onBotsChange = function () {
         $scope.tests = testsForBrowserAndBotFactory.query({
-            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id,
-            bot: !$scope.selectedBot ? null : $scope.selectedBot.bot,
+            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
+            bot: !$scope.selectedBot ? null : $scope.selectedBot.name,
         }, function (data) {
             if(data.length === 0) {
                 $scope.selectedTest = [];
@@ -78,7 +78,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             return;
         }
         $scope.subtests = subTestPathFactory.query({
-            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id,
+            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
             root_test: $scope.selectedTest.root_test.id
         }, function (data) {
             $scope.selectedSubtest = $scope.subtests[0];
@@ -107,7 +107,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
     $scope.drawGraph = function () {
         // Need to update tooltips, etc
-        $scope.currentBrowser = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id;
+        $scope.currentBrowser = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id;
         $scope.currentSubtestPath = $scope.selectedSubtest.test_path;
 
         $scope.testMetrics = testMetricsOfTestAndSubtestFactory.query({
@@ -117,9 +117,9 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         $scope.loading = true;
 
         var results = testResultsForTestAndSubtestFactory.query({
-            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.browser_id,
+            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
             root_test: $scope.selectedTest.root_test.id,
-            bot: !$scope.selectedBot ? 'all' : $scope.selectedBot.bot,
+            bot: !$scope.selectedBot ? 'all' : $scope.selectedBot.name,
             subtest: encodeURIComponent($scope.selectedSubtest.test_path),
         }, function (data) {
             extraToolTipInfo[graphCounter] = {};
@@ -243,8 +243,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         mode: "x,y"
                     },
                     yaxis: {
-                        axisLabel : $scope.testMetrics[0]['metric_unit']['name'] + ' (' +
-                        ($scope.testMetrics[0]['metric_unit']['is_better'] == 'up' ? 'up' : 'down') + ' is better)',
+                        axisLabel : $scope.testMetrics[0]['name'] + ' (' +
+                        ($scope.testMetrics[0]['is_better'] == 'up' ? 'up' : 'down') + ' is better)',
                         position: 'left',
                     },
                     grid: {
@@ -316,7 +316,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                             + "<b>Test Version</b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['test_version'].slice(-7) + "<br>"
                             + "<b>Browser Version</b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['browser_version'] + "<br>"
                             + "<b>Std. Dev</b>: " + parseFloat(extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['stddev']).toFixed(3) + "<br>"
-                            + "<b>Value</b>: " +  parseFloat(y).toFixed(3) + " " + $scope.testMetrics[0]['metric_unit']['unit'] + "<br>"
+                            + "<b>Value</b>: " +  parseFloat(y).toFixed(3) + " " + $scope.testMetrics[0]['unit'] + "<br>"
                             + "<b>Delta</b> :" +  parseFloat(extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['delta']).toFixed(3) + "<br>"
                             + "<b>Aggregation </b> :" + $scope.selectedSubtest.aggregation + "<br>")
                             .css({top: item.pageY+5, left: item.pageX+5})
