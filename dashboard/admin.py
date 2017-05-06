@@ -35,6 +35,7 @@ admin.site.register(Test, TestAdmin)
 
 
 class MetricUnitAdmin(admin.ModelAdmin):
+    list_display = ('name', 'unit')
     change_form_template = 'admin/dashboard/metric_change_form.html'
     exclude = ['prefix']
 
@@ -93,9 +94,22 @@ admin.site.register(MetricUnit, MetricUnitAdmin)
 
 
 class BotReportDataAdmin(admin.ModelAdmin):
-    list_display = ('bot', 'browser', 'browser_version', 'test_path', 'timestamp', 'metric_unit','mean_value',
-                    'is_improvement')
+    list_display = ('get_bot', 'get_browser', 'browser_version', 'get_root_test', 'test_path', 'get_metric_unit',
+                    'timestamp', 'mean_value')
     readonly_fields = ('timestamp',)
+
+    def get_bot(self, obj):
+        return obj.bot.name
+
+    def get_browser(self, obj):
+        return obj.browser.id
+
+    def get_root_test(self, obj):
+        return obj.root_test.id
+
+    def get_metric_unit(self, obj):
+        return obj.metric_unit.name
+
 admin.site.register(BotReportData, BotReportDataAdmin)
 
 
