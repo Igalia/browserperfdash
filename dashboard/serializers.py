@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BotReportData, Platform, GPUType, CPUArchitecture, Test, MetricUnit
+from dashboard.models import BotReportData, Platform, GPUType, CPUArchitecture, Test, MetricUnit
 
 
 class BrowsersForResultsExistListSerializer(serializers.ModelSerializer):

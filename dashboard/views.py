@@ -1,14 +1,15 @@
 from django.views.generic import TemplateView
 from django.http import HttpResponse, HttpResponseBadRequest
 from rest_framework.views import APIView
-from rest_framework import authentication, permissions
-from rest_framework import generics
-from dashboard.models import *
-from rest_framework import exceptions
+from rest_framework import authentication, permissions, generics, exceptions
+from dashboard.models import Bot, Browser, BotReportData, CPUArchitecture, GPUType, Platform, Test, MetricUnit
 from dashboard.helpers.benchmark_results import BenchmarkResults
-from dashboard.serializers import *
+from dashboard.serializers import BotReportDataSerializer, BotsForResultsExistListSerializer, \
+    BotsFullDetailsForResultsExistListSerializer, BrowsersForResultsExistListSerializer, PlatformListSerializer, \
+    GPUTypeListSerializer, CPUArchitectureListSerializer, TestPathListSerializer, MetricsForTestListSerializer, \
+    TestsForBrowserBotListSerializer, ResultsForSubtestListSerializer
 from datetime import datetime, timedelta
-import json, urllib, logging, sys
+import json, urllib.request, urllib.parse, urllib.error, logging, sys
 
 log = logging.getLogger(__name__)
 
@@ -93,7 +94,7 @@ class BotDataReportImprovementListView(generics.ListAPIView):
         else:
             bot_obj = Bot.objects.filter(pk=self.kwargs.get('bot'))
 
-        limit = self.kwargs.get('limit')
+        limit = int(self.kwargs.get('limit'))
         bot = bot_obj.filter(platform__in=platform_obj, cpuArchitecture__in=cpu_obj, gpuType__in=gpu_obj,
                              enabled=True)
 
@@ -146,7 +147,7 @@ class BotDataReportRegressionListView(generics.ListAPIView):
         else:
             bot_obj = Bot.objects.filter(pk=self.kwargs.get('bot'))
 
-        limit = self.kwargs.get('limit')
+        limit = int(self.kwargs.get('limit'))
         bot = bot_obj.filter(platform__in=platform_obj, cpuArchitecture__in=cpu_obj, gpuType__in=gpu_obj,
                                  enabled=True)
         requested_time = datetime.utcnow() + timedelta(days=-days_since)
@@ -240,7 +241,7 @@ class MetricsForTestList(generics.ListAPIView):
 
     def get_queryset(self):
         test = Test.objects.filter(pk=self.kwargs.get('test'))
-        test_path = urllib.unquote(self.kwargs.get('subtest')).decode('utf8')
+        test_path = urllib.parse.unquote(self.kwargs.get('subtest'))
         return BotReportData.objects.filter(root_test=test, test_path=test_path)[:1]
 
 
@@ -268,7 +269,7 @@ class ResultsForSubtestList(generics.ListAPIView):
         else:
             browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
         test = Test.objects.get(pk=self.kwargs.get('test'))
-        test_path = urllib.unquote(self.kwargs.get('subtest')).decode('utf8')
+        test_path = urllib.parse.unquote(self.kwargs.get('subtest'))
         if self.kwargs.get('bot') == 'all':
             return BotReportData.objects.filter(browser__in=browser_obj, root_test=test, test_path=test_path).order_by(
                 'timestamp')
@@ -418,13 +419,13 @@ class BotReportView(APIView):
                                                                         current_metric, aggregation)
 
             try:
-                report = BotReportData.objects.create_report(bot=bot, browser=browser, browser_version=browser_version,
-                                                             root_test=root_test, test_path=raw_path,
-                                                             test_version=test_version, aggregation=aggregation,
-                                                             metric_unit=current_metric, metric_unit_prefixed=modified_prefix,
-                                                             mean_value=mean_value, stddev=stddev,delta=delta_and_prev_results[0],
-                                                             is_improvement=delta_and_prev_results[1], prev_result=delta_and_prev_results[2],
-                                                             timestamp=timestamp)
+                BotReportData.objects.create_report(
+                    bot=bot, browser=browser, browser_version=browser_version, root_test=root_test, test_path=raw_path,
+                    test_version=test_version, aggregation=aggregation, metric_unit=current_metric,
+                    metric_unit_prefixed=modified_prefix, mean_value=mean_value, stddev=stddev,
+                    delta=delta_and_prev_results[0], is_improvement=delta_and_prev_results[1],
+                    prev_result=delta_and_prev_results[2], timestamp=timestamp
+                )
             except Exception as e:
                 log.error("Failed inserting data for bot: %s, browser: %s, browser_version: %s, root_test: %s, "
                           "test_description: %s and Exception %s" % (bot_id, browser_id, browser_version, test_id, raw_path,

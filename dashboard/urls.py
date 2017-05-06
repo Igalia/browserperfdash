@@ -1,5 +1,8 @@
 from django.conf.urls import url
-from dashboard.views import *
+from dashboard.views import GraphPlotView, BotReportView, GPUTypeForWhichResultsExistList, \
+    CPUArchitectureForWhichResultsExistList, PlatformForWhichResultsExistList, BrowsersForResultsExistList, \
+    BotsForResultsExistList, BotsFullDetailsForResultsExistList, TestPathList, MetricsForTestList, \
+    TestsForBrowserBotList, ResultsForSubtestList, BotDataReportImprovementListView, BotDataReportRegressionListView
 
 urlpatterns = [
     url(r'^graph/$', GraphPlotView.as_view(), name='graph_report'),
