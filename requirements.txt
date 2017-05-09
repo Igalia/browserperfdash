@@ -7,4 +7,4 @@ django-guardian==1.4.6
 pytz==2016.10
 psycopg2==2.7
 django-db-logger==0.1.6
-django-jasmine==0.5.0
+django-jasmine==0.5.1
