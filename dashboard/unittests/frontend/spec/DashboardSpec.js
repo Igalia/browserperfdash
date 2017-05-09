@@ -83,7 +83,7 @@ describe('DeltaController', function() {
             });
         });
 
-        it("check if paltform, gpu and cpu changed on bot change", function (done) {
+        it("check if paltform, gpu and cpu changed correctly on bot change", function (done) {
             $scope.bots.$promise.then(function() {
                 $scope.platforms.$promise.then(function () {
                     $scope.cpus.$promise.then(function() {
@@ -97,16 +97,41 @@ describe('DeltaController', function() {
                             // "gpuType":{"id":3,"name":"mesa-llvmpipe"}}
                             $scope.selectedBot = $filter('filter')($scope.bots, {'name': "buildbox3" })[0];
                             // Manually fire the select box change
-                            $scope.updateOthersOnBotChange();
-                            expect($scope.selectedGPU).toBe(
-                                $filter('filter')($scope.gpus, {'id': $scope.selectedBot.gpuType.id })[0]
-                            );
-                            expect($scope.selectedCPU).toBe(
-                                $filter('filter')($scope.cpus, {'id': $scope.selectedBot.cpuArchitecture.id })[0]
-                            );
-                            expect($scope.selectedPlatform).toBe(
-                                $filter('filter')($scope.platforms, {'id': $scope.selectedBot.platform.id })[0]
-                            );
+                            // We should expect calls to botReportsImprovementFactory
+                            it("intercept botReportsImprovementFactory",
+                                inject(function(botReportsImprovementFactory, botReportsRegressionFactory) {
+                                    // Create spies to watch calls to APIs
+                                    spyOn(botReportsImprovementFactory, 'query');
+                                    spyOn(botReportsRegressionFactory, 'query');
+                                    botReportsImprovementFactory.query.and.callFake(function(arguments) {
+                                        // The following part gets called only after the $scope.updateOthersOnBotChange()
+                                        expect(arguments.platform).toEqual($scope.selectedBot.platform.id);
+                                        expect(arguments.gpu).toEqual($scope.selectedBot.gpuType.id);
+                                        expect(arguments.cpu).toEqual($scope.selectedBot.cpuArchitecture.id);
+                                    });
+                                    botReportsRegressionFactory.query.and.callFake(function(arguments) {
+                                        // The following part gets called only after the $scope.updateOthersOnBotChange()
+                                        expect(arguments.platform).toEqual($scope.selectedBot.platform.id);
+                                        expect(arguments.gpu).toEqual($scope.selectedBot.gpuType.id);
+                                        expect(arguments.cpu).toEqual($scope.selectedBot.cpuArchitecture.id);
+                                    });
+                                    // Should trigger the above spies
+                                    $scope.updateOthersOnBotChange();
+                                    // Check if the select combos changed correctly
+                                    expect($scope.selectedGPU).toBe(
+                                        $filter('filter')($scope.gpus, {'id': $scope.selectedBot.gpuType.id })[0]
+                                    );
+                                    expect($scope.selectedCPU).toBe(
+                                        $filter('filter')($scope.cpus, {'id': $scope.selectedBot.cpuArchitecture.id })[0]
+                                    );
+                                    expect($scope.selectedPlatform).toBe(
+                                        $filter('filter')($scope.platforms, {'id': $scope.selectedBot.platform.id })[0]
+                                    );
+
+                                    // We should expect calls to get improvements and regressions
+                                    expect(botReportsImprovementFactory.query).toHaveBeenCalled();
+                                    expect(botReportsRegressionFactory.query).toHaveBeenCalled();
+                                }));
                             done();
                         });
                     });
