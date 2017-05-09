@@ -15,9 +15,9 @@ var tests = [{"root_test":{"id":"dromaeo-cssquery"}},{"root_test":{"id":"dromaeo
 
 describe('DeltaController', function() {
     beforeEach(module('browserperfdash.dashboard.static'));
-    var $controller, $filter;
+    var $controller, resource, $filter;
 
-    beforeEach(inject(function(_$controller_, _$filter_, $injector, $rootScope, $q){
+    beforeEach(inject(function(_$controller_, _$filter_, $rootScope, $q){
         // The injector unwraps the underscores (_) from around the parameter names when matching
         var $injector = angular.injector(['ng', 'ngResource']);
         var $resource = $injector.get('$resource');
@@ -59,7 +59,7 @@ describe('DeltaController', function() {
         $controller('DeltaController', { $scope: $scope });
     }));
 
-    describe('Populating the combo boxes correctly', function () {
+    describe('Populating all the select boxes via service query', function () {
         it("check if all select boxes are populated correctly", function (done) {
             //Load all elements correctly
             $scope.browsers.$promise.then(function () {
@@ -82,5 +82,36 @@ describe('DeltaController', function() {
                 });
             });
         });
-    })
+
+        it("check if paltform, gpu and cpu changed on bot change", function (done) {
+            $scope.bots.$promise.then(function() {
+                $scope.platforms.$promise.then(function () {
+                    $scope.cpus.$promise.then(function() {
+                        $scope.gpus.$promise.then(function () {
+                            // At this point, expect platform, cpu and GPU to point to "All objects"
+                            expect($scope.selectedGPU).toBeUndefined();
+                            expect($scope.selectedBot).toBeUndefined();
+                            expect($scope.selectedPlatform).toBeUndefined();
+                            // Now change the bot to check if the change is reflected on the other selects
+                            // {"name":"buildbox3","platform":{"id":1,"name":"Linux/X11"},"cpuArchitecture":{"id":1,"name":"amd64"},
+                            // "gpuType":{"id":3,"name":"mesa-llvmpipe"}}
+                            $scope.selectedBot = $filter('filter')($scope.bots, {'name': "buildbox3" })[0];
+                            // Manually fire the select box change
+                            $scope.updateOthersOnBotChange();
+                            expect($scope.selectedGPU).toBe(
+                                $filter('filter')($scope.gpus, {'id': $scope.selectedBot.gpuType.id })[0]
+                            );
+                            expect($scope.selectedCPU).toBe(
+                                $filter('filter')($scope.cpus, {'id': $scope.selectedBot.cpuArchitecture.id })[0]
+                            );
+                            expect($scope.selectedPlatform).toBe(
+                                $filter('filter')($scope.platforms, {'id': $scope.selectedBot.platform.id })[0]
+                            );
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+    });
 });
