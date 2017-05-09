@@ -27,7 +27,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'dashboard',
-    'django_db_logger'
+    'django_db_logger',
+    'django_jasmine'
 ]
 
 MIDDLEWARE = [
@@ -130,7 +131,7 @@ LOGGING = {
         },
     }
 }
-
+JASMINE_TEST_DIRECTORY = os.path.join(BASE_DIR, "dashboard/unittests/frontend")
 if 'TRAVIS' in os.environ:
     DATABASES = {
         'default': {

@@ -18,6 +18,7 @@ from django.conf.urls import url, include
 from dashboard.views import DefaultHomeView
 
 urlpatterns = [
+    url(r'^tests/', include('django_jasmine.urls'), name='jasmine_test'),
     url(r'^$', DefaultHomeView.as_view(), name='home'),
     url(r'^admin/', admin.site.urls),
     url(r'^dash/', include('dashboard.urls')),

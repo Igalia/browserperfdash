@@ -1,0 +1,14 @@
+[
+    {
+        "id":"chrome",
+        "name":"Chrome Browser"
+    },
+    {
+        "id":"epiphany",
+        "name":"Epiphany (GNOME Web)"
+    },
+    {
+        "id":"firefox",
+        "name":"Firefox"
+    }
+]

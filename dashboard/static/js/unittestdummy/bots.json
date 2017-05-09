@@ -1,0 +1,32 @@
+[
+    {
+        "name":"buildbox3",
+        "platform":{
+            "id":1,
+            "name":"Linux/X11"
+        },
+        "cpuArchitecture":{
+            "id":1,
+            "name":"amd64"
+        },
+        "gpuType":{
+            "id":3,
+            "name":"mesa-llvmpipe"
+        }
+    },
+    {
+        "name":"getafix",
+        "platform":{
+            "id":1,
+            "name":"Linux/X11"
+        },
+        "cpuArchitecture":{
+            "id":2,
+            "name":"armv7"
+        },
+        "gpuType":{
+            "id":3,
+            "name":"mesa-llvmpipe"
+        }
+    }
+]
