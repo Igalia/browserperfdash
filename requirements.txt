@@ -8,3 +8,4 @@ pytz==2016.10
 psycopg2==2.7
 django-db-logger==0.1.6
 django-jasmine==0.5.1
+selenium==3.4.1
