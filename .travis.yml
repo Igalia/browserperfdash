@@ -18,6 +18,7 @@ before_script:
   - psql -c "CREATE DATABASE traviscidb;" -U postgres
 
 script:
+  - python manage.py collectstatic --noinput
   - python manage.py makemigrations
   - python manage.py migrate --noinput --traceback --settings=browserperfdash.settings
   - python manage.py test
