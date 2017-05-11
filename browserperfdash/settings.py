@@ -131,7 +131,6 @@ LOGGING = {
         },
     }
 }
-JASMINE_TEST_DIRECTORY = os.path.join(BASE_DIR, "dashboard/unittests/frontend")
 if 'TRAVIS' in os.environ:
     DATABASES = {
         'default': {
@@ -151,3 +150,5 @@ if 'TRAVIS' in os.environ:
     STATIC_ROOT = os.path.join(BASE_DIR, "static")
 else:
     from browserperfdash.local_settings import *
+
+JASMINE_TEST_DIRECTORY = os.path.join(BASE_DIR, "dashboard/static/js/unittest")

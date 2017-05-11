@@ -22,11 +22,12 @@ describe('DeltaController', function() {
         var $injector = angular.injector(['ng', 'ngResource']);
         var $resource = $injector.get('$resource');
 
-        $scope = $rootScope.$new();
+        $controller = _$controller_;
         $filter = _$filter_;
 
-        $controller = _$controller_;
-        it("intercept browserFactory", inject(function(browserFactory, $rootScope) {
+        $scope = $rootScope.$new();
+
+        it("intercept browserFactory", inject(function(browserFactory) {
             spyOn(browserFactory, 'query').and.returnValue(
                 $resource('/static/js/unittestdummy/browsers.json').query()
             );
@@ -56,6 +57,7 @@ describe('DeltaController', function() {
                 $resource('/static/js/unittestdummy/tests.json').query()
             );
         }));
+
         $controller('DeltaController', { $scope: $scope });
     }));
 
