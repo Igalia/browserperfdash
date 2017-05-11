@@ -16,6 +16,9 @@ install:
 before_script:
   - psql -c "create role travisci with createrole createdb login password 'traviscipass';" -U postgres
   - psql -c "CREATE DATABASE traviscidb;" -U postgres
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
 
 script:
   - python manage.py collectstatic --noinput
