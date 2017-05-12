@@ -16,10 +16,18 @@ Including another URLconf
 from django.contrib import admin
 from django.conf.urls import url, include
 from dashboard.views import DefaultHomeView
+import os
 
-urlpatterns = [
-    url(r'^tests/', include('django_jasmine.urls'), name='jasmine_test'),
-    url(r'^$', DefaultHomeView.as_view(), name='home'),
-    url(r'^admin/', admin.site.urls),
-    url(r'^dash/', include('dashboard.urls')),
-]
+if 'TRAVIS' in os.environ:
+    urlpatterns = [
+        url(r'^tests/', include('django_jasmine.urls'), name='jasmine_test'),
+        url(r'^$', DefaultHomeView.as_view(), name='home'),
+        url(r'^admin/', admin.site.urls),
+        url(r'^dash/', include('dashboard.urls')),
+    ]
+else:
+    urlpatterns = [
+        url(r'^$', DefaultHomeView.as_view(), name='home'),
+        url(r'^admin/', admin.site.urls),
+        url(r'^dash/', include('dashboard.urls')),
+    ]

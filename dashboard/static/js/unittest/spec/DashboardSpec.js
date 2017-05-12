@@ -29,32 +29,32 @@ describe('DeltaController', function() {
 
         it("intercept browserFactory", inject(function(browserFactory) {
             spyOn(browserFactory, 'query').and.returnValue(
-                $resource('/static/js/unittestdummy/browsers.json').query()
+                $resource('/static/js/unittest/dummy/browsers.json').query()
             );
         }));
         it("intercept browserFactory", inject(function(botFullDetailsForResultsExistFactory) {
             spyOn(botFullDetailsForResultsExistFactory, 'query').and.returnValue(
-                $resource('/static/js/unittestdummy/bots.json').query()
+                $resource('/static/js/unittest/dummy/bots.json').query()
             );
         }));
         it("intercept platformFactory", inject(function(platformFactory) {
             spyOn(platformFactory, 'query').and.returnValue(
-                $resource('/static/js/unittestdummy/platforms.json').query()
+                $resource('/static/js/unittest/dummy/platforms.json').query()
             );
         }));
         it("intercept gpuFactory", inject(function(gpuFactory) {
             spyOn(gpuFactory, 'query').and.returnValue(
-                $resource('/static/js/unittestdummy/gpus.json').query()
+                $resource('/static/js/unittest/dummy/gpus.json').query()
             );
         }));
         it("intercept cpuArchFactory", inject(function(cpuArchFactory) {
             spyOn(cpuArchFactory, 'query').and.returnValue(
-                $resource('/static/js/unittestdummy/cpus.json').query()
+                $resource('/static/js/unittest/dummy/cpus.json').query()
             );
         }));
         it("intercept testsForBrowserAndBotFactory", inject(function(testsForBrowserAndBotFactory) {
             spyOn(testsForBrowserAndBotFactory, 'query').and.returnValue(
-                $resource('/static/js/unittestdummy/tests.json').query()
+                $resource('/static/js/unittest/dummy/tests.json').query()
             );
         }));
 

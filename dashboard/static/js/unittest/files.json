@@ -6,7 +6,7 @@
       "js/angular/angular-animate.js",
       "js/angular/angular-sanitize.js",
       "js/bootstrap/ui-bootstrap-tpls-2.5.0.js",
-      "js/angular/angular-mocks/angular-mocks.js",
+      "js/unittest/angular-mocks/angular-mocks.js",
       "js/app_modules/dashboard.module.js"
     ],
     "media_files": [
