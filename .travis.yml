@@ -22,7 +22,7 @@ script:
   - python manage.py collectstatic --noinput
   - python manage.py makemigrations
   - python manage.py migrate --noinput --traceback --settings=browserperfdash.settings
-  - python manage.py test
+  - python manage.py test --verbosity=2
 
 branches:
  only:
