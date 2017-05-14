@@ -131,6 +131,9 @@ LOGGING = {
         },
     }
 }
+
+JASMINE_TEST_DIRECTORY = os.path.join(BASE_DIR, "dashboard/static/js/unittest")
+
 if 'TRAVIS' in os.environ:
     DATABASES = {
         'default': {
@@ -144,11 +147,8 @@ if 'TRAVIS' in os.environ:
     }
     DEBUG = True
     ALLOWED_HOSTS = []
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     SECRET_KEY = '+n#x9$u3_bh$mfuq!pikscg3vcfaeasdfasdfasdf5454@79b!'
     STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, "static")
 else:
     from browserperfdash.local_settings import *
-
-JASMINE_TEST_DIRECTORY = os.path.join(BASE_DIR, "dashboard/static/js/unittest")
