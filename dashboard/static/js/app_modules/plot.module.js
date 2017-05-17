@@ -31,7 +31,12 @@ app.factory('testResultsForTestAndSubtestFactory', function ($resource) {
 
 app.controller('PlotController', function ($scope, browserForResultExistFactory, botForResultsExistFactory, subTestPathFactory,
                                            testMetricsOfTestAndSubtestFactory, testResultsForTestAndSubtestFactory,
-                                           testsForBrowserAndBotFactory, $filter){
+                                           testsForBrowserAndBotFactory, $filter, $location, $q){
+    var graphCounter = 0;
+    var extraToolTipInfo = new Array(new Array());
+    $scope.drawnTestsDetails = new Array(new Array());
+    var plots = [];
+
     $scope.loaded = false;
     $scope.loading = false;
     $scope.disableSubtest = false;
@@ -86,41 +91,118 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     };
 
 
-    $scope.browsers = browserForResultExistFactory.query({}, function (data) {
-        if(data.length === 0) {
-            $scope.selectedTest = [];
-            $scope.selectedSubtest = [];
-            $scope.selectedBrowser = [];
-            $scope.selectedBot = [];
-            $scope.disableBot = true;
-            $scope.disableBrowser = true;
-            $scope.disableTest = true;
-            $scope.disableSubtest = true;
-            $scope.buttonHide = true;
-            return;
-        }
-        $scope.onBrowserChange();
-    });
-    var graphCounter = 0;
-    var extraToolTipInfo = new Array(new Array());
-    $scope.drawnTestsDetails = new Array(new Array());
-
-    $scope.drawGraph = function () {
-        // Need to update tooltips, etc
-        $scope.currentBrowser = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id;
-        $scope.currentSubtestPath = $scope.selectedSubtest.test_path;
-
-        $scope.testMetrics = testMetricsOfTestAndSubtestFactory.query({
-            root_test: $scope.selectedTest.root_test.id,
-            subtest: encodeURIComponent($scope.selectedSubtest.test_path),
+    if($location.$$path == "") {
+        $scope.browsers = browserForResultExistFactory.query({}, function (data) {
+            if (data.length === 0) {
+                $scope.selectedTest = [];
+                $scope.selectedSubtest = [];
+                $scope.selectedBrowser = [];
+                $scope.selectedBot = [];
+                $scope.disableBot = true;
+                $scope.disableBrowser = true;
+                $scope.disableTest = true;
+                $scope.disableSubtest = true;
+                $scope.buttonHide = true;
+                return;
+            }
+            $scope.onBrowserChange();
         });
-        $scope.loading = true;
+    } else {
+        // Just load browsers, bots, tests and subtest with rand
+        $scope.browsers = browserForResultExistFactory.query();
+        $scope.bots = botForResultsExistFactory.query({
+            browser: 'all'
+        });
+        $scope.tests = testsForBrowserAndBotFactory.query({
+            browser: 'all',
+            bot: null
+        }, function () {
+            //To update subtests
+            $scope.selectedTest = $scope.tests[0];
+            $scope.onTestsChange();
+        })
+    }
 
+    //Lets just wait for everything to load, and then think about populating things
+    $scope.browsers.$promise.then(function () {
+        $scope.tests.$promise.then(function () {
+            $scope.bots.$promise.then(function () {
+                if($location.$$path != "") {
+                    var plotlist = JSON.parse(atob(decodeURIComponent($location.$$path.substr(1))));
+                    var defer = $q.defer();
+                    var promises = [];
+                    function resolveStuff(){
+                        $scope.tests.$promise.then( function(){
+                            $scope.subtests.$promise.then(function() {
+                                defer.resolve();
+                            });
+                        });
+                    }
+                    //We need to order it by the sequence number
+                    var plotlistInSeq = $filter('orderBy')(plotlist, '-seq');
+                    angular.forEach(plotlistInSeq, function (value) {
+                        // We will have to update things a bit here
+                        $scope.tests = testsForBrowserAndBotFactory.query({
+                            browser: value['browser'],
+                            bot: value['bot']
+                        });
+                        $scope.subtests = subTestPathFactory.query({
+                            browser: value['browser'],
+                            root_test: value['root_test']
+                        });
+                        promises.push($scope.tests, $scope.subtests);
+                        $q.all(promises).then(function() {
+                            resolveStuff();
+                            $scope.tests.$promise.then(function () {
+                                $scope.subtests.$promise.then(function() {
+                                    $scope.drawGraph(value['browser'], value['bot'], value['root_test'], value['subtest']);
+                                })
+                            })
+                        });
+                    });
+                }
+            });
+        });
+    });
+
+    $scope.drawGraph = function (browser_inc, bot_inc, root_test_inc, subtest_inc) {
+        // Update tooltips, etc
+        var currentBrowser = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id;
+        var selectedTest = $scope.selectedTest;
+        var selectedSubtest = $scope.selectedSubtest;
+
+        /* Check if args were present. If yes, we need to modify drop-down selections and plot */
+        if (browser_inc) {
+            var selectedBrowser = $filter('filter')($scope.browsers, {'id': browser_inc})[0];
+            currentBrowser = browser_inc;
+        }
+        if (root_test_inc) {
+            selectedTest = $filter('filter')($scope.tests, function (value, index, array) {
+                if (value['root_test']['id'] == root_test_inc) {
+                    return array[index];
+                }
+            })[0];
+            $scope.selectedTest = selectedTest;
+        }
+        if (subtest_inc) {
+            selectedSubtest = $filter('filter')($scope.subtests, {'test_path': subtest_inc})[0];
+        }
+        if (bot_inc) {
+            var selectedBot = $filter('filter')($scope.bots, {'name': bot_inc})[0];
+        }
+        var currentSubtestPath = !subtest_inc ? selectedSubtest.test_path : subtest_inc;
+
+        var testMetrics = testMetricsOfTestAndSubtestFactory.query({
+            root_test: selectedTest.root_test.id,
+            subtest: encodeURIComponent(selectedSubtest.test_path),
+        });
+
+        $scope.loading = true;
         var results = testResultsForTestAndSubtestFactory.query({
-            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
-            root_test: $scope.selectedTest.root_test.id,
-            bot: !$scope.selectedBot ? 'all' : $scope.selectedBot.name,
-            subtest: encodeURIComponent($scope.selectedSubtest.test_path),
+            browser: !selectedBrowser ? 'all' : selectedBrowser.id,
+            root_test: selectedTest.root_test.id,
+            bot: !selectedBot ? 'all' : selectedBot.name,
+            subtest: encodeURIComponent(selectedSubtest.test_path)
         }, function (data) {
             extraToolTipInfo[graphCounter] = {};
             botReportData = {};
@@ -148,9 +230,9 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
             $scope.drawnTestsDetails[graphCounter] = {};
             testDetails = {};
-            testDetails['root_test'] = $scope.selectedTest.root_test.id;
-            testDetails['sub_test'] = $scope.currentSubtestPath;
-            testDetails['browser'] = $scope.currentBrowser;
+            testDetails['root_test'] = selectedTest.root_test.id;
+            testDetails['sub_test'] = currentSubtestPath;
+            testDetails['browser'] = currentBrowser;
             $scope.drawnTestsDetails[graphCounter] = testDetails;
 
             if(graphCounter > 0) {
@@ -168,10 +250,10 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     $('<div>').addClass('col-md-3').attr('ng-show', 'loaded').append(
                         "<div class='panel panel-default'>" +
                         "<div class='panel-heading'><h3 class='panel-title' id="+ graphCounter + ">" +
-                        "Test: "+ $scope.selectedTest.root_test.id + "</h3></div>" +
+                        "Test: "+ selectedTest.root_test.id + "</h3></div>" +
                         "<div class='panel-body' id="+ graphCounter + ">" +
-                        "Subtest: "+ $scope.currentSubtestPath + "<br>" +
-                        "Browser: "+ $scope.currentBrowser + "<br>" +
+                        "Subtest: "+ currentSubtestPath + "<br>" +
+                        "Browser: "+ currentBrowser + "<br>" +
                         "<span class='choices' id=choice-"+ graphCounter + "></span></div></div>"
                     )
                 ).css('padding-top', '10px');
@@ -243,8 +325,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         mode: "x,y"
                     },
                     yaxis: {
-                        axisLabel : $scope.testMetrics[0]['name'] + ' (' +
-                        ($scope.testMetrics[0]['is_better'] == 'up' ? 'up' : 'down') + ' is better)',
+                        axisLabel : testMetrics[0]['name'] + ' (' +
+                        (testMetrics[0]['is_better'] == 'up' ? 'up' : 'down') + ' is better)',
                         position: 'left',
                     },
                     grid: {
@@ -311,14 +393,14 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         var date = new Date(x);
                         var currentPlot = +placeholder.attr('id');
                         hoveredSeriesBot = item.series.label;
-                        $("#tooltip").html( "<b>" + hoveredSeriesBot + "</b> on <i>" + $scope.currentSubtestPath + "</i><br>"
+                        $("#tooltip").html( "<b>" + hoveredSeriesBot + "</b> on <i>" + currentSubtestPath + "</i><br>"
                             + "<b>Time</b>: " +  date.toISOString().split('T')[0] + ", " + date.toISOString().split('T')[1].substring(0,8)+ "<br>"
                             + "<b>Test Version</b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['test_version'].slice(-7) + "<br>"
                             + "<b>Browser Version</b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['browser_version'] + "<br>"
                             + "<b>Std. Dev</b>: " + parseFloat(extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['stddev']).toFixed(3) + "<br>"
-                            + "<b>Value</b>: " +  parseFloat(y).toFixed(3) + " " + $scope.testMetrics[0]['unit'] + "<br>"
+                            + "<b>Value</b>: " +  parseFloat(y).toFixed(3) + " " + testMetrics[0]['unit'] + "<br>"
                             + "<b>Delta</b> :" +  parseFloat(extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['delta']).toFixed(3) + "<br>"
-                            + "<b>Aggregation </b> :" + $scope.selectedSubtest.aggregation + "<br>")
+                            + "<b>Aggregation </b> :" + selectedSubtest.aggregation + "<br>")
                             .css({top: item.pageY+5, left: item.pageX+5})
                             .fadeIn(200);
                     } else {
@@ -352,13 +434,23 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             }
             createPlot(plotdatumcomplete);
             graphCounter++;
+            if (!subtest_inc) {
+                var plot = {
+                    "browser": !selectedBrowser ? 'all' : selectedBrowser.id,
+                    "bot": !selectedBot ? 'all' : selectedBot.name,
+                    "root_test": selectedTest.root_test.id,
+                    "subtest": selectedSubtest.test_path,
+                    'seq': graphCounter
+                };
+                plots.push(plot);
+                $location.path(encodeURIComponent(btoa(JSON.stringify(plots))));
+            }
         });
     };
     // Some JQuery stuff - to handle close button clicks
     $(document).on('click','.close_button',function(){
         $(this).parent().parent().parent().remove();
     });
-
 
 });
 
