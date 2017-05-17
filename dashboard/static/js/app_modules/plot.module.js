@@ -139,7 +139,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         });
                     }
                     //We need to order it by the sequence number
-                    var plotlistInSeq = $filter('orderBy')(plotlist, 'seq');
+                    var plotlistInSeq = $filter('orderBy')(plotlist, '-seq');
                     angular.forEach(plotlistInSeq, function (value) {
                         // We will have to update things a bit here
                         $scope.tests = testsForBrowserAndBotFactory.query({
