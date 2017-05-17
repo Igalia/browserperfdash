@@ -31,7 +31,7 @@ app.factory('testResultsForTestAndSubtestFactory', function ($resource) {
 
 app.controller('PlotController', function ($scope, browserForResultExistFactory, botForResultsExistFactory, subTestPathFactory,
                                            testMetricsOfTestAndSubtestFactory, testResultsForTestAndSubtestFactory,
-                                           testsForBrowserAndBotFactory, $filter, $location, $q){
+                                           testsForBrowserAndBotFactory, $filter, $location, $q, orderByFilter){
     var graphCounter = 0;
     var extraToolTipInfo = new Array(new Array());
     $scope.drawnTestsDetails = new Array(new Array());
@@ -138,9 +138,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                             });
                         });
                     }
-                    //We need to order it by the sequence number
-                    var plotlistInSeq = $filter('orderBy')(plotlist, '-seq');
-                    angular.forEach(plotlistInSeq, function (value) {
+                    angular.forEach(orderByFilter(plotlist, 'seq' ), function (value) {
                         // We will have to update things a bit here
                         $scope.tests = testsForBrowserAndBotFactory.query({
                             browser: value['browser'],
