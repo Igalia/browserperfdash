@@ -130,7 +130,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             $scope.bots.$promise.then(function () {
                 if($location.$$path != "") {
                     var plotlist = JSON.parse(atob(decodeURIComponent($location.$$path.substr(1))));
-                    angular.forEach(orderByFilter(plotlist, 'seq'), function (value) {
+                    angular.forEach(orderByFilter(plotlist, '-seq'), function (value) {
                         var tests = testsForBrowserAndBotFactory.query({
                             browser: value['browser'],
                             bot: value['bot']
