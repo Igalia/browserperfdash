@@ -86,7 +86,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
             root_test: $scope.selectedTest.root_test.id
         }, function (data) {
-            $scope.selectedSubtest = $scope.subtests[0];
+            // We might have something here due to URL data
+            if (!$scope.selectedSubtest) { $scope.selectedSubtest = data[0]; }
         });
     };
 
@@ -129,7 +130,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             $scope.bots.$promise.then(function () {
                 if($location.$$path != "") {
                     var plotlist = JSON.parse(atob(decodeURIComponent($location.$$path.substr(1))));
-                    angular.forEach(orderByFilter(plotlist, '-seq'), function (value) {
+                    angular.forEach(orderByFilter(plotlist, 'seq'), function (value) {
                         var tests = testsForBrowserAndBotFactory.query({
                             browser: value['browser'],
                             bot: value['bot']
@@ -140,6 +141,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         });
                         tests.$promise.then(function () {
                             subtests.$promise.then(function() {
+                                $scope.tests = tests;
+                                $scope.subtests = subtests;
                                 $scope.drawGraph(value['browser'], value['bot'], value['root_test'], value['subtest'],
                                     value['seq'], subtests, tests);
                             })
@@ -163,22 +166,25 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             $scope.selectedBrowser = selectedBrowser;
             currentBrowser = browser_inc;
         }
+        if (bot_inc) {
+            selectedBot = $filter('filter')($scope.bots, {'name': bot_inc})[0];
+        }
         if (root_test_inc) {
             selectedTest = $filter('filter')(tests, function (value, index, array) {
                 if (value['root_test']['id'] == root_test_inc) {
                     return array[index];
                 }
             })[0];
-            $scope.selectedTest = selectedTest;
         }
-        if (bot_inc) {
-            selectedBot = $filter('filter')($scope.bots, {'name': bot_inc})[0];
-        }
+
         var currentSubtestPath = !subtest_inc ? selectedSubtest.test_path : subtest_inc;
 
         if (subtest_inc) {
             selectedSubtest = $filter('filter')(subtests, {'test_path': subtest_inc})[0];
         }
+        // Modify dropdown selections manually
+        $scope.selectedTest = selectedTest;
+        $scope.selectedSubtest = selectedSubtest;
         $scope.testMetrics = testMetricsOfTestAndSubtestFactory.query({
             root_test: selectedTest.root_test.id,
             subtest: encodeURIComponent(selectedSubtest.test_path),
@@ -309,7 +315,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         xaxis: {
                             mode: "time",
                             tickLength: 5,
-                            timeformat: "%H:%M:%S",
+                            timeformat: "%H:%M:%S"
                         },
                         crosshair: {
                             mode: "x,y"
@@ -317,10 +323,10 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         yaxis: {
                             axisLabel: testMetrics[0]['name'] + ' (' +
                             (testMetrics[0]['is_better'] == 'up' ? 'up' : 'down') + ' is better)',
-                            position: 'left',
+                            position: 'left'
                         },
                         grid: {
-                            hoverable: true,
+                            hoverable: true
                         },
                         legend: {
                             show: true,
@@ -333,10 +339,10 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                                 show: true,
                                 lineWidth: 1
                             },
-                            shadowSize: 0,
+                            shadowSize: 0
                         },
                         legend: {
-                            show: false,
+                            show: false
                         },
                         xaxis: {
                             ticks: 10,
@@ -348,7 +354,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         yaxis: {
                             ticks: [],
                             min: 0,
-                            autoscaleMargin: 0.1,
+                            autoscaleMargin: 0.1
                         },
                         grid: {
                             color: "#666",
