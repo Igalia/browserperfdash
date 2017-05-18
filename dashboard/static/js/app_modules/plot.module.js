@@ -129,7 +129,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             $scope.bots.$promise.then(function () {
                 if($location.$$path != "") {
                     var plotlist = JSON.parse(atob(decodeURIComponent($location.$$path.substr(1))));
-                    angular.forEach(orderByFilter(plotlist, 'seq'), function (value) {
+                    angular.forEach(orderByFilter(plotlist, '-seq'), function (value) {
                         var tests = testsForBrowserAndBotFactory.query({
                             browser: value['browser'],
                             bot: value['bot']
@@ -141,7 +141,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         tests.$promise.then(function () {
                             subtests.$promise.then(function() {
                                 $scope.drawGraph(value['browser'], value['bot'], value['root_test'], value['subtest'],
-                                    subtests, tests);
+                                    value['seq'], subtests, tests);
                             })
                         })
                     });
@@ -150,7 +150,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         });
     });
 
-    $scope.drawGraph = function (browser_inc, bot_inc, root_test_inc, subtest_inc, subtests, tests) {
+    $scope.drawGraph = function (browser_inc, bot_inc, root_test_inc, subtest_inc, seq, subtests, tests) {
         // Update tooltips, etc
         var currentBrowser = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id;
         var selectedTest = $scope.selectedTest;
@@ -222,47 +222,47 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 testDetails['browser'] = currentBrowser;
                 $scope.drawnTestsDetails[graphCounter] = testDetails;
 
-                if (graphCounter > 0) {
-                    var subcontainer = $('<div>').addClass("sub-container").append(
-                        $('<div>').addClass("overview")
-                    );
-                    var maincontainer = $('<div>').addClass("main-container").append(
-                        $('<div>').addClass("placeholder").attr('id', graphCounter)
-                    );
 
-                    var newRow = $('<div>').addClass('row').append(
-                        $('<div>').addClass('col-md-9').append(
-                            maincontainer, subcontainer
-                        ),
-                        $('<div>').addClass('col-md-3').attr('ng-show', 'loaded').append(
-                            "<div class='panel panel-default'>" +
-                            "<div class='panel-heading'><h3 class='panel-title' id=" + graphCounter + ">" +
-                            "Test: " + selectedTest.root_test.id + "</h3></div>" +
-                            "<div class='panel-body' id=" + graphCounter + ">" +
-                            "Subtest: " + currentSubtestPath + "<br>" +
-                            "Browser: " + currentBrowser + "<br>" +
-                            "<span class='choices' id=choice-" + graphCounter + "></span></div></div>"
-                        )
-                    ).css('padding-top', '10px');
-                    var infoRow = $('<div>').addClass('row').append(
-                        "<span><b>" + $scope.drawnTestsDetails[graphCounter]['browser'] + "</b>@" +
-                        $scope.drawnTestsDetails[graphCounter]['root_test'] + "/" +
-                        $scope.drawnTestsDetails[graphCounter]['sub_test'] + "</span>" +
-                        "<button type='button' class='close' aria-label='Close'><span aria-hidden='true' " +
-                        "class='close_button'>&times;</span></button>"
-                    ).css('text-align', 'center').attr('ng-show', 'loaded');
+                var subcontainer = $('<div>').addClass("sub-container").append(
+                    $('<div>').addClass("overview")
+                );
+                var maincontainer = $('<div>').addClass("main-container").append(
+                    $('<div>').addClass("placeholder").attr('id', graphCounter)
+                );
 
-                    var dummyrow = $('<div>').addClass('dummy').append(infoRow, newRow);
+                var newRow = $('<div>').addClass('row').append(
+                    $('<div>').addClass('col-md-9').append(
+                        maincontainer, subcontainer
+                    ),
+                    $('<div>').addClass('col-md-3').attr('ng-show', 'loaded').append(
+                        "<div class='panel panel-default'>" +
+                        "<div class='panel-heading'><h3 class='panel-title' id=" + graphCounter + ">" +
+                        "Test: " + selectedTest.root_test.id + "</h3></div>" +
+                        "<div class='panel-body' id=" + graphCounter + ">" +
+                        "Subtest: " + currentSubtestPath + "<br>" +
+                        "Browser: " + currentBrowser + "<br>" +
+                        "<span class='choices' id=choice-" + graphCounter + "></span></div></div>"
+                    )
+                ).css('padding-top', '10px');
+                var infoRow = $('<div>').addClass('row').append(
+                    "<span><b>" + $scope.drawnTestsDetails[graphCounter]['browser'] + "</b>@" +
+                    $scope.drawnTestsDetails[graphCounter]['root_test'] + "/" +
+                    $scope.drawnTestsDetails[graphCounter]['sub_test'] + "</span>" +
+                    "<button type='button' class='close' aria-label='Close'><span aria-hidden='true' " +
+                    "class='close_button'>&times;</span></button>"
+                ).css('text-align', 'center').attr('ng-show', 'loaded');
 
-                    var topRow = $('div#plot_area>.dummy:first');
-                    if (!topRow.length) {
-                        //Looks like the first plot was deleted. Need to manually create a div here to add
-                        //things to
-                        $('div.loader_parent').after(dummyrow);
-                    } else {
-                        topRow.before(dummyrow);
-                    }
+                var dummyrow = $('<div>').addClass('dummy').append(infoRow, newRow);
+
+                var topRow = $('div#plot_area>.dummy:first');
+                if (!topRow.length) {
+                    //Looks like the first plot was deleted. Need to manually create a div here to add
+                    //things to
+                    $('div.loader_parent').after(dummyrow);
+                } else {
+                    topRow.before(dummyrow);
                 }
+
 
                 var placeholder = $("div.placeholder:first");
                 var overview_placeholder = $("div.overview:first");
