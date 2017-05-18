@@ -269,7 +269,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     topRow.before(dummyrow);
                 }
 
-
                 var placeholder = $("div.placeholder:first");
                 var overview_placeholder = $("div.overview:first");
                 // insert checkboxes
@@ -431,17 +430,15 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
                 createPlot(plotdatumcomplete);
                 graphCounter++;
-                if (!subtest_inc) {
-                    var plot = {
-                        "browser": !selectedBrowser ? 'all' : selectedBrowser.id,
-                        "bot": !selectedBot ? 'all' : selectedBot.name,
-                        "root_test": selectedTest.root_test.id,
-                        "subtest": selectedSubtest.test_path,
-                        'seq': graphCounter
-                    };
-                    plots.push(plot);
-                    $location.path(encodeURIComponent(btoa(JSON.stringify(plots))));
-                }
+                var plot = {
+                    "browser": !selectedBrowser ? 'all' : selectedBrowser.id,
+                    "bot": !selectedBot ? 'all' : selectedBot.name,
+                    "root_test": selectedTest.root_test.id,
+                    "subtest": selectedSubtest.test_path,
+                    'seq': graphCounter
+                };
+                plots.push(plot);
+                $location.path(encodeURIComponent(btoa(JSON.stringify(plots))));
             });
         });
     };
