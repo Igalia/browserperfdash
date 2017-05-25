@@ -31,7 +31,7 @@ app.factory('testResultsForTestAndSubtestFactory', function ($resource) {
 
 app.controller('PlotController', function ($scope, browserForResultExistFactory, botForResultsExistFactory, subTestPathFactory,
                                            testMetricsOfTestAndSubtestFactory, testResultsForTestAndSubtestFactory,
-                                           testsForBrowserAndBotFactory, $filter, $location, orderByFilter){
+                                           testsForBrowserAndBotFactory, $filter, $location){
     var graphCounter = 0;
     var extraToolTipInfo = new Array(new Array());
     $scope.drawnTestsDetails = new Array(new Array());
@@ -92,7 +92,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     };
 
 
-    if($location.$$path == "") {
+    if( $location.$$path === "" ) {
         $scope.browsers = browserForResultExistFactory.query({}, function (data) {
             if (data.length === 0) {
                 $scope.selectedTest = [];
@@ -126,8 +126,10 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     var plotlistSorted = $filter('orderBy')(
                         JSON.parse(atob(decodeURIComponent($location.$$path.substr(1)))
                         ), '-seq');
+
                     angular.forEach(plotlistSorted, function (value) {
-                        var subtests = subTestPathFactory.query({
+                        // We need subtests resolved at this point, or later in the drawGraph function
+                        subTestPathFactory.query({
                             browser: value['browser'],
                             root_test: value['root_test']
                         }, function (subtests) {
@@ -172,21 +174,23 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         // Modify dropdown selections manually
         $scope.selectedTest = selectedTest;
         $scope.selectedSubtest = selectedSubtest;
-        $scope.testMetrics = testMetricsOfTestAndSubtestFactory.query({
+
+        testMetricsOfTestAndSubtestFactory.query({
             root_test: selectedTest.root_test.id,
             subtest: encodeURIComponent(selectedSubtest.test_path),
-        }, function (data) {
-            var testMetrics = data;
+        }, function (testMetrics) {
             $scope.loading = true;
-            var results = testResultsForTestAndSubtestFactory.query({
+            testResultsForTestAndSubtestFactory.query({
                 browser: !selectedBrowser ? 'all' : selectedBrowser.id,
                 root_test: selectedTest.root_test.id,
                 bot: !selectedBot ? 'all' : selectedBot.name,
                 subtest: encodeURIComponent(selectedSubtest.test_path)
-            }, function (data) {
+            }, function (results) {
                 extraToolTipInfo[graphCounter] = {};
                 botReportData = {};
-                angular.forEach(data, function (value) {
+
+                angular.forEach(results, function (value) {
+
                     dictkey = value['browser'] + "@" + value['bot'];
                     extraToolTipInfo[graphCounter][dictkey] = !extraToolTipInfo[graphCounter][dictkey] ? {} :
                         extraToolTipInfo[graphCounter][dictkey];
@@ -258,6 +262,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
                 var placeholder = $("div.placeholder:first");
                 var overview_placeholder = $("div.overview:first");
+
                 // insert checkboxes
                 plotdatumcomplete = [];
                 // Select the right container and add in the checkboxes
@@ -308,7 +313,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         },
                         yaxis: {
                             axisLabel: testMetrics[0]['name'] + ' (' +
-                            (testMetrics[0]['is_better'] == 'up' ? 'up' : 'down') + ' is better)',
+                            (testMetrics[0]['is_better'] === 'up' ? 'up' : 'down') + ' is better)',
                             position: 'left'
                         },
                         grid: {
@@ -360,6 +365,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                             }
                         }
                     });
+
                     $("<div id='tooltip'></div>").css({
                         position: "absolute",
                         display: "none",
@@ -417,6 +423,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
                 createPlot(plotdatumcomplete);
                 graphCounter++;
+
                 var plot = {
                     "browser": !selectedBrowser ? 'all' : selectedBrowser.id,
                     "bot": !selectedBot ? 'all' : selectedBot.name,
