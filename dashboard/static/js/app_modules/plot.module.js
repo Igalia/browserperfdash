@@ -117,49 +117,36 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         $scope.tests = testsForBrowserAndBotFactory.query({
             browser: 'all',
             bot: null
-        }, function () {
-            //To update subtests
-            $scope.selectedTest = $scope.tests[0];
-            $scope.onTestsChange();
-        })
-    }
+        });
 
-    //Lets just wait for everything to load, and then think about populating things
-    $scope.browsers.$promise.then(function () {
-        $scope.tests.$promise.then(function () {
-            $scope.bots.$promise.then(function () {
-                if($location.$$path != "") {
-                    var plotlist = JSON.parse(atob(decodeURIComponent($location.$$path.substr(1))));
-                    angular.forEach(orderByFilter(plotlist, '-seq'), function (value) {
-                        var tests = testsForBrowserAndBotFactory.query({
-                            browser: value['browser'],
-                            bot: value['bot']
-                        });
+        //Lets just wait for everything to load, and then think about populating things
+        $scope.browsers.$promise.then(function () {
+            $scope.tests.$promise.then(function () {
+                $scope.bots.$promise.then(function () {
+                    var plotlistSorted = $filter('orderBy')(
+                        JSON.parse(atob(decodeURIComponent($location.$$path.substr(1)))
+                        ), '-seq');
+                    angular.forEach(plotlistSorted, function (value) {
                         var subtests = subTestPathFactory.query({
                             browser: value['browser'],
                             root_test: value['root_test']
+                        }, function (subtests) {
+                            $scope.subtests = subtests;
+                            $scope.drawGraph(value['browser'], value['bot'], value['root_test'], value['subtest'],
+                                value['seq'], subtests);
                         });
-                        tests.$promise.then(function () {
-                            subtests.$promise.then(function() {
-                                $scope.tests = tests;
-                                $scope.subtests = subtests;
-                                $scope.drawGraph(value['browser'], value['bot'], value['root_test'], value['subtest'],
-                                    value['seq'], subtests, tests);
-                            })
-                        })
                     });
-                }
+                });
             });
         });
-    });
+    }
 
-    $scope.drawGraph = function (browser_inc, bot_inc, root_test_inc, subtest_inc, seq, subtests, tests) {
+    $scope.drawGraph = function (browser_inc, bot_inc, root_test_inc, subtest_inc, seq, subtests) {
         // Update tooltips, etc
-        var currentBrowser = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id;
-        var selectedTest = $scope.selectedTest;
-        var selectedSubtest = $scope.selectedSubtest;
-        var selectedBrowser = $scope.selectedBrowser;
-        var selectedBot = $scope.selectedBot;
+        var currentBrowser = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
+            selectedTest = $scope.selectedTest, selectedSubtest = $scope.selectedSubtest,
+            selectedBrowser = $scope.selectedBrowser, selectedBot = $scope.selectedBot;
+
         /* Check if args were present. If yes, we need to modify drop-down selections and plot */
         if (browser_inc) {
             selectedBrowser = $filter('filter')($scope.browsers, {'id': browser_inc})[0];
@@ -170,7 +157,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             selectedBot = $filter('filter')($scope.bots, {'name': bot_inc})[0];
         }
         if (root_test_inc) {
-            selectedTest = $filter('filter')(tests, function (value, index, array) {
+            selectedTest = $filter('filter')($scope.tests, function (value, index, array) {
                 if (value['root_test']['id'] == root_test_inc) {
                     return array[index];
                 }
