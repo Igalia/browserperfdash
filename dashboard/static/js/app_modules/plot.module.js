@@ -31,7 +31,7 @@ app.factory('testResultsForTestAndSubtestFactory', function ($resource) {
 
 app.controller('PlotController', function ($scope, browserForResultExistFactory, botForResultsExistFactory, subTestPathFactory,
                                            testMetricsOfTestAndSubtestFactory, testResultsForTestAndSubtestFactory,
-                                           testsForBrowserAndBotFactory, $filter, $location, $timeout){
+                                           testsForBrowserAndBotFactory, $filter, $location){
     var graphCounter = 0;
     var extraToolTipInfo = new Array(new Array());
     $scope.drawnTestsDetails = new Array(new Array());
@@ -135,27 +135,28 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         });
 
                         $scope.drawGraph(value['browser'], value['bot'], value['root_test'], value['subtest'],
-                            value['seq'], subtests, function (plotnumberdrawn) {
-                            $scope.drawnsequences.push(plotnumberdrawn);
-                        });
+                            value['seq'], value['start'], value['end'], subtests, function (plotnumberdrawn) {
+                                $scope.drawnsequences.push(plotnumberdrawn);
+                            });
                     }
 
                     var checkIfEverThingDrawn = setInterval(function () {
-                       if($scope.drawnsequences.length === plotlistSorted.length) {
-                           reorderGraphs($scope.drawnsequences.length);
-                           clearInterval(checkIfEverThingDrawn);
-                       }
+                        if($scope.drawnsequences.length === sortedPlotArray.length) {
+                            reorderGraphs($scope.drawnsequences.length);
+                            clearInterval(checkIfEverThingDrawn);
+                        }
                     }, 500);
                 });
             });
         });
     }
 
-    $scope.drawGraph = function (browser_inc, bot_inc, root_test_inc, subtest_inc, seq, subtests, callbackondone) {
+    $scope.drawGraph = function (browser_inc, bot_inc, root_test_inc, subtest_inc, seq, start_inc, end_inc, subtests, callbackondone) {
+        console.log(start_inc);
         // Update tooltips, etc
         var currentBrowser = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
             selectedTest = $scope.selectedTest, selectedSubtest = $scope.selectedSubtest,
-            selectedBrowser = $scope.selectedBrowser, selectedBot = $scope.selectedBot;
+            selectedBrowser = $scope.selectedBrowser, selectedBot = $scope.selectedBot, selectionstart, selectionend;
 
         /* Check if args were present. If yes, we need to modify drop-down selections and plot */
         if (browser_inc) {
@@ -269,7 +270,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         var dummyrow = $('<div>').addClass('dummy').attr('id', graphCounter).append(infoRow, newRow);
                     }
 
-
                     var topRow = $('div#plot_area>.dummy:first');
                     if (!topRow.length) {
                         //Looks like the first plot was deleted. Need to manually create a div here to add
@@ -281,6 +281,9 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
                     var placeholder = $("div.placeholder:first");
                     var overview_placeholder = $("div.overview:first");
+
+                    // We need this id to plot from URL later
+                    overview_placeholder.attr('id', graphCounter);
 
                     // insert checkboxes
                     plotdatumcomplete = [];
@@ -316,10 +319,12 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
                     $scope.mainplotcomplate = false, $scope.overviewplotcomplete = false;
 
+                    // Hook called after main plot drawn
                     function mainplotdrawn() {
                         $scope.mainplotcomplete = true;
                     }
 
+                    // Hook called after overview plot drawn
                     function overviewplotdrawn() {
                         $scope.overviewplotcomplete = true;
                     }
@@ -387,10 +392,28 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                             },
                             rangeselection: {
                                 color: "#mar",
-                                start: mid,
-                                end: end,
+                                start: start_inc ? start_inc :mid,
+                                end: end_inc  ? end_inc: end,
                                 enabled: true,
                                 callback: function (o) {
+                                    var plotSeq = overview.getPlaceholder().attr('id');
+                                    var plotSeqInArray = 0;
+                                    $filter('filter')(plots, function (item) {
+                                        if (item.seq == plotSeq) {
+                                            plotSeqInArray = plots.indexOf(item);
+                                            return true;
+                                        }
+                                        return false;
+                                    });
+
+                                    // Update the URL
+                                    plots[plotSeqInArray]['start'] = o.start;
+                                    plots[plotSeqInArray]['end'] = o.end;
+
+                                    $location.path(encodeURIComponent(btoa(JSON.stringify(plots))));
+                                    $scope.$apply();
+
+                                    // updaterangeSelection(o.start, o.end);
                                     var xaxis = plot.getAxes().xaxis;
                                     xaxis.options.min = o.start;
                                     xaxis.options.max = o.end;
@@ -440,22 +463,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                             }
                         });
 
-                        placeholder.bind("plotselected", function (event, ranges) {
-                            // do the zooming
-                            $.each(plot.getXAxes(), function (_, axis) {
-                                var opts = axis.options;
-                                opts.min = ranges.xaxis.from;
-                                opts.max = ranges.xaxis.to;
-                            });
-                            plot.setupGrid();
-                            plot.draw();
-                            plot.clearSelection();
-                            // don't fire event on the overview to prevent eternal loop
-                            overview.setSelection(ranges, true);
-                        });
-                        overview_placeholder.bind("plotselected", function (event, ranges) {
-                            plot.setSelection(ranges);
-                        });
                         $scope.loading = false;
                         $scope.loaded = true;
 
@@ -469,20 +476,25 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                                 }
                             }, 500);
                         } else {
+                            // Both graphs are plotted, now call the callback
                             callback(true);
                         }
                     }
+
                     createPlot(plotdatumcomplete, function (plotcompleted) {
                         // Callback might not exist for nature
                         if (callbackondone) {
                             callbackondone(graphCounter);
                         }
+
                         var plot = {
                             "browser": !selectedBrowser ? 'all' : selectedBrowser.id,
                             "bot": !selectedBot ? 'all' : selectedBot.name,
                             "root_test": selectedTest.root_test.id,
                             "subtest": selectedSubtest.test_path,
-                            'seq': graphCounter
+                            "seq": graphCounter,
+                            "start": undefined,
+                            "end": undefined
                         };
 
                         graphCounter++;
@@ -492,7 +504,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 });
             });
         });
-
     };
     // Some JQuery stuff - to handle close button clicks
     $(document).on('click','.close_button',function(){
@@ -512,7 +523,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         var plotarraysorted = $filter('orderBy')(plotsarray, '-seq');
 
         // Redraw the graphs according to sequence
-        for (var j=0; i<plotarraysorted.length; j++) {
+        for (var j=0; j<plotarraysorted.length; j++) {
             $('#plot_area').append(plotarraysorted[j].data);
         }
         $scope.loading = false;
