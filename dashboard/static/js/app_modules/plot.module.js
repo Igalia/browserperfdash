@@ -31,7 +31,7 @@ app.factory('testResultsForTestAndSubtestFactory', function ($resource) {
 
 app.controller('PlotController', function ($scope, browserForResultExistFactory, botForResultsExistFactory, subTestPathFactory,
                                            testMetricsOfTestAndSubtestFactory, testResultsForTestAndSubtestFactory,
-                                           testsForBrowserAndBotFactory, $filter, $location){
+                                           testsForBrowserAndBotFactory, $filter, $location, $timeout){
     var graphCounter = 0;
     var extraToolTipInfo = new Array(new Array());
     $scope.drawnTestsDetails = new Array(new Array());
@@ -127,16 +127,22 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         JSON.parse(atob(decodeURIComponent($location.$$path.substr(1)))
                         ), '-seq');
 
+
                     angular.forEach(plotlistSorted, function (value) {
                         // We need subtests resolved at this point, or later in the drawGraph function
-                        subTestPathFactory.query({
+                        var subtests = subTestPathFactory.query({
                             browser: value['browser'],
                             root_test: value['root_test']
-                        }, function (subtests) {
-                            $scope.subtests = subtests;
-                            $scope.drawGraph(value['browser'], value['bot'], value['root_test'], value['subtest'],
-                                value['seq'], subtests);
                         });
+
+                        var checkIfResolved = setInterval(function () {
+                            if (subtests.$resolved === true)  {
+                                $scope.subtests = subtests;
+                                $scope.drawGraph(value['browser'], value['bot'], value['root_test'], value['subtest'],value['seq'], subtests);
+
+                                clearInterval(checkIfResolved);
+                            }
+                        }, 500);
                     });
                 });
             });
