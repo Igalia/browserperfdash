@@ -151,8 +151,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         });
     }
 
-    $scope.drawGraph = function (browser_inc, bot_inc, root_test_inc, subtest_inc, seq, start_inc, end_inc, subtests, callbackondone) {
-        console.log(start_inc);
+    $scope.drawGraph = function (browser_inc, bot_inc, root_test_inc, subtest_inc, seq, start_inc, end_inc, subtests,
+                                 callbackondone) {
         // Update tooltips, etc
         var currentBrowser = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
             selectedTest = $scope.selectedTest, selectedSubtest = $scope.selectedSubtest,
@@ -363,6 +363,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                                 ]
                             }
                         });
+
                         var overview = $.plot(overview_placeholder, plotdatum, {
                             series: {
                                 lines: {
@@ -392,8 +393,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                             },
                             rangeselection: {
                                 color: "#mar",
-                                start: start_inc ? start_inc :mid,
-                                end: end_inc  ? end_inc: end,
+                                start: !start_inc ? mid: +start_inc,
+                                end: !end_inc ? end: +end_inc,
                                 enabled: true,
                                 callback: function (o) {
                                     var plotSeq = overview.getPlaceholder().attr('id');
@@ -426,23 +427,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                                     overviewplotdrawn
                                 ]
                             }
-                        });
-
-                        placeholder.bind("plotselected", function (event, ranges) {
-                            // do the zooming
-                            $.each(plot.getXAxes(), function (_, axis) {
-                                var opts = axis.options;
-                                opts.min = ranges.xaxis.from;
-                                opts.max = ranges.xaxis.to;
-                            });
-                            plot.setupGrid();
-                            plot.draw();
-                            plot.clearSelection();
-                            // don't fire event on the overview to prevent eternal loop
-                            overview.setSelection(ranges, true);
-                        });
-                        overview_placeholder.bind("plotselected", function (event, ranges) {
-                            plot.setSelection(ranges);
                         });
 
                         $("<div id='tooltip'></div>").css({
