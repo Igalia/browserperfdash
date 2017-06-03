@@ -93,20 +93,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
     $scope.drawnPlotInfo = {};
 
-    function VerifyIfPreviousGraphsDrawn(seq, done) {
-        // Draw this only if graphs of previous sequence have been completed
-        for (var k=1; k<seq; k++) {
-            function checkThingsUp() {
-                if ($scope.drawnPlotInfo[k] === false) {
-                    setTimeout(checkThingsUp, 500);
-                }
-                return;
-            }
-        }
-        done();
-    }
-
-
     if( $location.$$path === "" ) {
         $scope.browsers = browserForResultExistFactory.query({}, function (data) {
             if (data.length === 0) {
@@ -149,25 +135,29 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
                     var unsortedPlotArray = JSON.parse(atob(decodeURIComponent($location.$$path.substr(1))));
                     var plotlistSorted = unsortedPlotArray.sort(keysrt('seq'));
+                    $scope.drawnsequences = [];
 
                     for ( var i=0; i< plotlistSorted.length; i++ ) {
 
                         // We need subtests resolved at this point, or later in the drawGraph function
                         var value = plotlistSorted[i];
-                        console.log(value['subtest']);
                         var subtests = subTestPathFactory.query({
                             browser: value['browser'],
                             root_test: value['root_test']
                         });
 
-                        VerifyIfPreviousGraphsDrawn(value['seq'], function (done) {
-                            $scope.drawGraph(value['browser'], value['bot'], value['root_test'], value['subtest'],
-                                value['seq'], subtests, function (plotnumberdrawn) {
-                                }
-                            );
+                        $scope.drawGraph(value['browser'], value['bot'], value['root_test'], value['subtest'],
+                            value['seq'], subtests, function (plotnumberdrawn) {
+                            $scope.drawnsequences.push(plotnumberdrawn);
                         });
-
                     }
+
+                    var checkIfEverThingDrawn = setInterval(function () {
+                       if($scope.drawnsequences.length === plotlistSorted.length) {
+                           reorderGraphs($scope.drawnsequences.length);
+                           clearInterval(checkIfEverThingDrawn);
+                       }
+                    }, 500);
                 });
             });
         });
@@ -285,7 +275,12 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         "class='close_button'>&times;</span></button>"
                     ).css('text-align', 'center').attr('ng-show', 'loaded');
 
-                    var dummyrow = $('<div>').addClass('dummy').append(infoRow, newRow);
+                    if (seq){
+                        var dummyrow = $('<div>').addClass('dummy').attr('id', seq).append(infoRow, newRow);
+                    } else {
+                        var dummyrow = $('<div>').addClass('dummy').attr('id', graphCounter).append(infoRow, newRow);
+                    }
+
 
                     var topRow = $('div#plot_area>.dummy:first');
                     if (!topRow.length) {
@@ -495,10 +490,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         if (callbackondone) {
                             // Call the main graphdraw function
                             $scope.drawnPlotInfo[seq] = true;
-                            callbackondone(seq);
+                            callbackondone(graphCounter);
                         }
-
-                        graphCounter++;
                         var plot = {
                             "browser": !selectedBrowser ? 'all' : selectedBrowser.id,
                             "bot": !selectedBot ? 'all' : selectedBot.name,
@@ -506,11 +499,11 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                             "subtest": selectedSubtest.test_path,
                             'seq': graphCounter
                         };
+
+                        graphCounter++;
                         plots.push(plot);
                         $location.path(encodeURIComponent(btoa(JSON.stringify(plots))));
                     });
-
-
                 });
             });
         });
@@ -520,6 +513,21 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     $(document).on('click','.close_button',function(){
         $(this).parent().parent().parent().remove();
     });
+
+    reorderGraphs = function (totalplots) {
+        var plotsarray = [];
+        for (var i=0; i<totalplots; i++) {
+            var dummy = $('div#'+ i +'.dummy');
+            plotsarray.push({ 'seq': i, data : dummy });
+            dummy.detach();
+        }
+
+        var plotarraysorted = $filter('orderBy')(plotsarray, '-seq');
+        // Just draw the first one
+        for (var i=0; i<plotarraysorted.length; i++) {
+            $('#plot_area').append(plotarraysorted[i].data);
+        }
+    }
 
 });
 
