@@ -428,6 +428,23 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                             }
                         });
 
+                        placeholder.bind("plotselected", function (event, ranges) {
+                            // do the zooming
+                            $.each(plot.getXAxes(), function (_, axis) {
+                                var opts = axis.options;
+                                opts.min = ranges.xaxis.from;
+                                opts.max = ranges.xaxis.to;
+                            });
+                            plot.setupGrid();
+                            plot.draw();
+                            plot.clearSelection();
+                            // don't fire event on the overview to prevent eternal loop
+                            overview.setSelection(ranges, true);
+                        });
+                        overview_placeholder.bind("plotselected", function (event, ranges) {
+                            plot.setSelection(ranges);
+                        });
+
                         $("<div id='tooltip'></div>").css({
                             position: "absolute",
                             display: "none",
