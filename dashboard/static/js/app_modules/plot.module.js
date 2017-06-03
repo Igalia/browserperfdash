@@ -91,8 +91,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         });
     };
 
-    $scope.drawnPlotInfo = {};
-
     if( $location.$$path === "" ) {
         $scope.browsers = browserForResultExistFactory.query({}, function (data) {
             if (data.length === 0) {
@@ -124,23 +122,13 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         $scope.browsers.$promise.then(function () {
             $scope.tests.$promise.then(function () {
                 $scope.bots.$promise.then(function () {
-
-                    function keysrt(key) {
-                        return function(a,b){
-                            if (a[key] > b[key]) return 1;
-                            if (a[key] < b[key]) return -1;
-                            return 0;
-                        }
-                    }
-
                     var unsortedPlotArray = JSON.parse(atob(decodeURIComponent($location.$$path.substr(1))));
-                    var plotlistSorted = unsortedPlotArray.sort(keysrt('seq'));
+                    var sortedPlotArray = $filter('orderBy')(unsortedPlotArray, 'seq');
+
                     $scope.drawnsequences = [];
 
-                    for ( var i=0; i< plotlistSorted.length; i++ ) {
-
-                        // We need subtests resolved at this point, or later in the drawGraph function
-                        var value = plotlistSorted[i];
+                    for ( var i=0; i< sortedPlotArray.length; i++ ) {
+                        var value = sortedPlotArray[i];
                         var subtests = subTestPathFactory.query({
                             browser: value['browser'],
                             root_test: value['root_test']
@@ -484,12 +472,9 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                             callback(true);
                         }
                     }
-                    $scope.drawnPlotInfo[seq] = false;
                     createPlot(plotdatumcomplete, function (plotcompleted) {
                         // Callback might not exist for nature
                         if (callbackondone) {
-                            // Call the main graphdraw function
-                            $scope.drawnPlotInfo[seq] = true;
                             callbackondone(graphCounter);
                         }
                         var plot = {
@@ -515,7 +500,9 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     });
 
     reorderGraphs = function (totalplots) {
+        $scope.loading = true;
         var plotsarray = [];
+
         for (var i=0; i<totalplots; i++) {
             var dummy = $('div#'+ i +'.dummy');
             plotsarray.push({ 'seq': i, data : dummy });
@@ -523,10 +510,13 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         }
 
         var plotarraysorted = $filter('orderBy')(plotsarray, '-seq');
-        // Just draw the first one
-        for (var i=0; i<plotarraysorted.length; i++) {
-            $('#plot_area').append(plotarraysorted[i].data);
+
+        // Redraw the graphs according to sequence
+        for (var j=0; i<plotarraysorted.length; j++) {
+            $('#plot_area').append(plotarraysorted[j].data);
         }
+        $scope.loading = false;
+        $scope.loaded = true;
     }
 
 });
