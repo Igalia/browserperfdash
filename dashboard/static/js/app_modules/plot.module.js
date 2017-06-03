@@ -91,6 +91,21 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         });
     };
 
+    $scope.drawnPlotInfo = {};
+
+    function VerifyIfPreviousGraphsDrawn(seq, done) {
+        // Draw this only if graphs of previous sequence have been completed
+        for (var k=1; k<seq; k++) {
+            function checkThingsUp() {
+                if ($scope.drawnPlotInfo[k] === false) {
+                    setTimeout(checkThingsUp, 500);
+                }
+                return;
+            }
+        }
+        done();
+    }
+
 
     if( $location.$$path === "" ) {
         $scope.browsers = browserForResultExistFactory.query({}, function (data) {
@@ -123,22 +138,35 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         $scope.browsers.$promise.then(function () {
             $scope.tests.$promise.then(function () {
                 $scope.bots.$promise.then(function () {
-                    var plotlistSorted = $filter('orderBy')(
-                        JSON.parse(atob(decodeURIComponent($location.$$path.substr(1)))
-                        ), '-seq');
-                    console.log("I got");
-                    console.log(plotlistSorted);
+
+                    function keysrt(key) {
+                        return function(a,b){
+                            if (a[key] > b[key]) return 1;
+                            if (a[key] < b[key]) return -1;
+                            return 0;
+                        }
+                    }
+
+                    var unsortedPlotArray = JSON.parse(atob(decodeURIComponent($location.$$path.substr(1))));
+                    var plotlistSorted = unsortedPlotArray.sort(keysrt('seq'));
 
                     for ( var i=0; i< plotlistSorted.length; i++ ) {
+
                         // We need subtests resolved at this point, or later in the drawGraph function
                         var value = plotlistSorted[i];
+                        console.log(value['subtest']);
                         var subtests = subTestPathFactory.query({
                             browser: value['browser'],
                             root_test: value['root_test']
                         });
 
-                        $scope.drawGraph(value['browser'], value['bot'], value['root_test'], value['subtest'],
-                            value['seq'], subtests, function (plotsdrawn) {});
+                        VerifyIfPreviousGraphsDrawn(value['seq'], function (done) {
+                            $scope.drawGraph(value['browser'], value['bot'], value['root_test'], value['subtest'],
+                                value['seq'], subtests, function (plotnumberdrawn) {
+                                }
+                            );
+                        });
+
                     }
                 });
             });
@@ -461,12 +489,13 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                             callback(true);
                         }
                     }
-
+                    $scope.drawnPlotInfo[seq] = false;
                     createPlot(plotdatumcomplete, function (plotcompleted) {
                         // Callback might not exist for nature
                         if (callbackondone) {
                             // Call the main graphdraw function
-                            callbackondone(true);
+                            $scope.drawnPlotInfo[seq] = true;
+                            callbackondone(seq);
                         }
 
                         graphCounter++;
