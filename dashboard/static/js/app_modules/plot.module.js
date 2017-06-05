@@ -33,6 +33,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                                            testMetricsOfTestAndSubtestFactory, testResultsForTestAndSubtestFactory,
                                            testsForBrowserAndBotFactory, $filter, $location){
     $scope.graphCounter = 0;
+    $scope.drawnsequences = [];
     var extraToolTipInfo = new Array(new Array());
     $scope.drawnTestsDetails = new Array(new Array());
     $scope.plots = [];
@@ -124,8 +125,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                 $scope.bots.$promise.then(function () {
                     var unsortedPlotArray = JSON.parse(atob(decodeURIComponent($location.$$path.substr(1))));
                     var sortedPlotArray = $filter('orderBy')(unsortedPlotArray, '-seq');
-
-                    $scope.drawnsequences = [];
                     for ( var i=0; i< sortedPlotArray.length; i++ ) {
                         var value = sortedPlotArray[i];
                         var subtests = subTestPathFactory.query({
@@ -200,6 +199,14 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     bot: !selectedBot ? 'all' : selectedBot.name,
                     subtest: encodeURIComponent(selectedSubtest.test_path)
                 }, function (results) {
+                    if (seq !== undefined) {
+                        // This is a draw from the URL - lets use the original sequence for this graph
+                        $scope.graphCounter = seq;
+                    } else if ($scope.drawnsequences.length > 1) {
+                        // If there is existing graphs, and this is a new added graph
+                        $scope.graphCounter = $scope.drawnsequences.length;
+                    }
+
                     extraToolTipInfo[$scope.graphCounter] = {};
                     botReportData = {};
 
@@ -313,7 +320,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                                 );
                             }
                         });
-                        createPlot(updatedPlotData);
+                        createPlot(updatedPlotData, function () {});
                     }
 
                     $scope.mainplotcomplate = false, $scope.overviewplotcomplete = false;
