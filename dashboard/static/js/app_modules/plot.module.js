@@ -346,7 +346,9 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                             xaxis: {
                                 mode: "time",
                                 tickLength: 5,
-                                timeformat: "%H:%M:%S"
+                                timeformat: "%H:%M:%S",
+                                min: !start_inc ? mid: +start_inc,
+                                max: !end_inc ? end: +end_inc,
                             },
                             crosshair: {
                                 mode: "x,y"
