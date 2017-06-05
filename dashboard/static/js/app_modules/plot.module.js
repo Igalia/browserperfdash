@@ -264,7 +264,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         "class='close_button'>&times;</span></button>"
                     ).css('text-align', 'center').attr('ng-show', 'loaded');
 
-                    if (seq){
+                    if (seq != undefined){
                         var dummyrow = $('<div>').addClass('dummy').attr('id', seq).append(infoRow, newRow);
                     } else {
                         var dummyrow = $('<div>').addClass('dummy').attr('id', graphCounter).append(infoRow, newRow);
@@ -483,11 +483,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     }
 
                     createPlot(plotdatumcomplete, function (plotcompleted) {
-                        // Callback might not exist for nature
-                        if (callbackondone) {
-                            callbackondone(graphCounter);
-                        }
-
                         var plot = {
                             "browser": !selectedBrowser ? 'all' : selectedBrowser.id,
                             "bot": !selectedBot ? 'all' : selectedBot.name,
@@ -501,6 +496,11 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         graphCounter++;
                         plots.push(plot);
                         $location.path(encodeURIComponent(btoa(JSON.stringify(plots))));
+
+                        // Callback might not exist for nature
+                        if (callbackondone) {
+                            callbackondone(graphCounter);
+                        }
                     });
                 });
             });
@@ -527,6 +527,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         for (var j=0; j<plotarraysorted.length; j++) {
             $('#plot_area').append(plotarraysorted[j].data);
         }
+
         $scope.loading = false;
         $scope.loaded = true;
     }
