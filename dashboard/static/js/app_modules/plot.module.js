@@ -405,9 +405,9 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                                 callback: function (o) {
                                     var plotSeq = overview.getPlaceholder().attr('id');
                                     var plotSeqInArray = 0;
-                                    $filter('filter')(plots, function (item) {
+                                    $filter('filter')($scope.plots, function (item) {
                                         if (item.seq == plotSeq) {
-                                            plotSeqInArray = plots.indexOf(item);
+                                            plotSeqInArray = $scope.plots.indexOf(item);
                                             return true;
                                         }
                                         return false;
