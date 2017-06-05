@@ -521,7 +521,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             dummy.detach();
         }
 
-        var plotarraysorted = $filter('orderBy')(plotsarray, 'seq');
+        var plotarraysorted = $filter('orderBy')(plotsarray, '-seq');
 
         // Redraw the graphs according to sequence
         for (var j=0; j<plotarraysorted.length; j++) {
