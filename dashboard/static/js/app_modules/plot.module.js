@@ -32,7 +32,7 @@ app.factory('testResultsForTestAndSubtestFactory', function ($resource) {
 app.controller('PlotController', function ($scope, browserForResultExistFactory, botForResultsExistFactory, subTestPathFactory,
                                            testMetricsOfTestAndSubtestFactory, testResultsForTestAndSubtestFactory,
                                            testsForBrowserAndBotFactory, $filter, $location){
-    var graphCounter = 0;
+    $scope.graphCounter = 0;
     var extraToolTipInfo = new Array(new Array());
     $scope.drawnTestsDetails = new Array(new Array());
     var plots = [];
@@ -126,7 +126,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     var sortedPlotArray = $filter('orderBy')(unsortedPlotArray, 'seq');
 
                     $scope.drawnsequences = [];
-
                     for ( var i=0; i< sortedPlotArray.length; i++ ) {
                         var value = sortedPlotArray[i];
                         var subtests = subTestPathFactory.query({
@@ -201,14 +200,14 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     bot: !selectedBot ? 'all' : selectedBot.name,
                     subtest: encodeURIComponent(selectedSubtest.test_path)
                 }, function (results) {
-                    extraToolTipInfo[graphCounter] = {};
+                    extraToolTipInfo[$scope.graphCounter] = {};
                     botReportData = {};
 
                     angular.forEach(results, function (value) {
 
                         dictkey = value['browser'] + "@" + value['bot'];
-                        extraToolTipInfo[graphCounter][dictkey] = !extraToolTipInfo[graphCounter][dictkey] ? {} :
-                            extraToolTipInfo[graphCounter][dictkey];
+                        extraToolTipInfo[$scope.graphCounter][dictkey] = !extraToolTipInfo[$scope.graphCounter][dictkey] ? {} :
+                            extraToolTipInfo[$scope.graphCounter][dictkey];
                         botReportData[dictkey] = !botReportData[dictkey] ? [] : botReportData[dictkey];
 
                         // Data to draw plots
@@ -224,22 +223,22 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         tooltipData['delta'] = value['delta'];
                         tooltipData['test_version'] = value['test_version'];
 
-                        extraToolTipInfo[graphCounter][dictkey][jqueryTimestamp] = tooltipData;
+                        extraToolTipInfo[$scope.graphCounter][dictkey][jqueryTimestamp] = tooltipData;
                     });
 
-                    $scope.drawnTestsDetails[graphCounter] = {};
+                    $scope.drawnTestsDetails[$scope.graphCounter] = {};
                     testDetails = {};
                     testDetails['root_test'] = selectedTest.root_test.id;
                     testDetails['sub_test'] = currentSubtestPath;
                     testDetails['browser'] = currentBrowser;
-                    $scope.drawnTestsDetails[graphCounter] = testDetails;
+                    $scope.drawnTestsDetails[$scope.graphCounter] = testDetails;
 
 
                     var subcontainer = $('<div>').addClass("sub-container").append(
                         $('<div>').addClass("overview")
                     );
                     var maincontainer = $('<div>').addClass("main-container").append(
-                        $('<div>').addClass("placeholder").attr('id', graphCounter)
+                        $('<div>').addClass("placeholder").attr('id', $scope.graphCounter)
                     );
 
                     var newRow = $('<div>').addClass('row').append(
@@ -248,18 +247,18 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         ),
                         $('<div>').addClass('col-md-3').attr('ng-show', 'loaded').append(
                             "<div class='panel panel-default'>" +
-                            "<div class='panel-heading'><h3 class='panel-title' id=" + graphCounter + ">" +
+                            "<div class='panel-heading'><h3 class='panel-title' id=" + $scope.graphCounter + ">" +
                             "Test: " + selectedTest.root_test.id + "</h3></div>" +
-                            "<div class='panel-body' id=" + graphCounter + ">" +
+                            "<div class='panel-body' id=" + $scope.graphCounter + ">" +
                             "Subtest: " + currentSubtestPath + "<br>" +
                             "Browser: " + currentBrowser + "<br>" +
-                            "<span class='choices' id=choice-" + graphCounter + "></span></div></div>"
+                            "<span class='choices' id=choice-" + $scope.graphCounter + "></span></div></div>"
                         )
                     ).css('padding-top', '10px');
                     var infoRow = $('<div>').addClass('row').append(
-                        "<span><b>" + $scope.drawnTestsDetails[graphCounter]['browser'] + "</b>@" +
-                        $scope.drawnTestsDetails[graphCounter]['root_test'] + "/" +
-                        $scope.drawnTestsDetails[graphCounter]['sub_test'] + "</span>" +
+                        "<span><b>" + $scope.drawnTestsDetails[$scope.graphCounter]['browser'] + "</b>@" +
+                        $scope.drawnTestsDetails[$scope.graphCounter]['root_test'] + "/" +
+                        $scope.drawnTestsDetails[$scope.graphCounter]['sub_test'] + "</span>" +
                         "<button type='button' class='close' aria-label='Close'><span aria-hidden='true' " +
                         "class='close_button'>&times;</span></button>"
                     ).css('text-align', 'center').attr('ng-show', 'loaded');
@@ -267,7 +266,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     if (seq != undefined){
                         var dummyrow = $('<div>').addClass('dummy').attr('id', seq).append(infoRow, newRow);
                     } else {
-                        var dummyrow = $('<div>').addClass('dummy').attr('id', graphCounter).append(infoRow, newRow);
+                        var dummyrow = $('<div>').addClass('dummy').attr('id', $scope.graphCounter).append(infoRow, newRow);
                     }
 
                     var topRow = $('div#plot_area>.dummy:first');
@@ -283,12 +282,12 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     var overview_placeholder = $("div.overview:first");
 
                     // We need this id to plot from URL later
-                    overview_placeholder.attr('id', graphCounter);
+                    overview_placeholder.attr('id', $scope.graphCounter);
 
                     // insert checkboxes
                     plotdatumcomplete = [];
                     // Select the right container and add in the checkboxes
-                    var choiceContainer = $("span.choices#choice-" + graphCounter);
+                    var choiceContainer = $("span.choices#choice-" + $scope.graphCounter);
 
                     angular.forEach(botReportData, function (value, key) {
                         choiceDiv = $('<div>').addClass('checkbox').append("" +
@@ -483,23 +482,24 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     }
 
                     createPlot(plotdatumcomplete, function (plotcompleted) {
+                        console.log($scope.graphCounter);
                         var plot = {
                             "browser": !selectedBrowser ? 'all' : selectedBrowser.id,
                             "bot": !selectedBot ? 'all' : selectedBot.name,
                             "root_test": selectedTest.root_test.id,
                             "subtest": selectedSubtest.test_path,
-                            "seq": graphCounter,
+                            "seq": $scope.graphCounter,
                             "start": undefined,
                             "end": undefined
                         };
 
-                        graphCounter++;
+                        $scope.graphCounter = $scope.graphCounter + 1;
                         plots.push(plot);
                         $location.path(encodeURIComponent(btoa(JSON.stringify(plots))));
 
                         // Callback might not exist for nature
                         if (callbackondone) {
-                            callbackondone(graphCounter);
+                            callbackondone($scope.graphCounter);
                         }
                     });
                 });
