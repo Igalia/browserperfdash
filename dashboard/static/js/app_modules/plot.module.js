@@ -35,7 +35,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     $scope.graphCounter = 0;
     var extraToolTipInfo = new Array(new Array());
     $scope.drawnTestsDetails = new Array(new Array());
-    var plots = [];
+    $scope.plots = [];
 
     $scope.loaded = false;
     $scope.loading = false;
@@ -407,10 +407,10 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                                     });
 
                                     // Update the URL
-                                    plots[plotSeqInArray]['start'] = o.start;
-                                    plots[plotSeqInArray]['end'] = o.end;
+                                    $scope.plots[plotSeqInArray]['start'] = o.start;
+                                    $scope.plots[plotSeqInArray]['end'] = o.end;
 
-                                    $location.path(encodeURIComponent(btoa(JSON.stringify(plots))));
+                                    $location.path(encodeURIComponent(btoa(JSON.stringify($scope.plots))));
                                     $scope.$apply();
 
                                     // updaterangeSelection(o.start, o.end);
@@ -483,6 +483,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
                     createPlot(plotdatumcomplete, function (plotcompleted) {
                         console.log($scope.graphCounter);
+
                         var plot = {
                             "browser": !selectedBrowser ? 'all' : selectedBrowser.id,
                             "bot": !selectedBot ? 'all' : selectedBot.name,
@@ -494,8 +495,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         };
 
                         $scope.graphCounter = $scope.graphCounter + 1;
-                        plots.push(plot);
-                        $location.path(encodeURIComponent(btoa(JSON.stringify(plots))));
+                        $scope.plots.push(plot);
+                        $location.path(encodeURIComponent(btoa(JSON.stringify($scope.plots))));
 
                         // Callback might not exist for nature
                         if (callbackondone) {
