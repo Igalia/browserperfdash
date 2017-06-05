@@ -123,7 +123,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
             $scope.tests.$promise.then(function () {
                 $scope.bots.$promise.then(function () {
                     var unsortedPlotArray = JSON.parse(atob(decodeURIComponent($location.$$path.substr(1))));
-                    var sortedPlotArray = $filter('orderBy')(unsortedPlotArray, 'seq');
+                    var sortedPlotArray = $filter('orderBy')(unsortedPlotArray, '-seq');
 
                     $scope.drawnsequences = [];
                     for ( var i=0; i< sortedPlotArray.length; i++ ) {
@@ -263,7 +263,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         "class='close_button'>&times;</span></button>"
                     ).css('text-align', 'center').attr('ng-show', 'loaded');
 
-                    if (seq != undefined){
+                    if (seq !== undefined){
                         var dummyrow = $('<div>').addClass('dummy').attr('id', seq).append(infoRow, newRow);
                     } else {
                         var dummyrow = $('<div>').addClass('dummy').attr('id', $scope.graphCounter).append(infoRow, newRow);
@@ -494,6 +494,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
                         $scope.graphCounter = $scope.graphCounter + 1;
                         $scope.plots.push(plot);
+
                         $location.path(encodeURIComponent(btoa(JSON.stringify($scope.plots))));
 
                         // Callback might not exist for nature
