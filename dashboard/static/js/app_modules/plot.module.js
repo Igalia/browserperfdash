@@ -482,8 +482,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     }
 
                     createPlot(plotdatumcomplete, function (plotcompleted) {
-                        console.log($scope.graphCounter);
-
                         var plot = {
                             "browser": !selectedBrowser ? 'all' : selectedBrowser.id,
                             "bot": !selectedBot ? 'all' : selectedBot.name,
