@@ -133,7 +133,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                         });
 
                         $scope.drawGraph(value['browser'], value['bot'], value['root_test'], value['subtest'],
-                            value['seq'], value['start'], value['end'], subtests, function (plotnumberdrawn) {
+                            value['seq'], value['start'], value['end'], value['plots'], subtests, function (plotnumberdrawn) {
                                 $scope.drawnsequences.push(plotnumberdrawn);
                             });
                     }
@@ -149,12 +149,14 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         });
     }
 
-    $scope.drawGraph = function (browser_inc, bot_inc, root_test_inc, subtest_inc, seq, start_inc, end_inc, subtests,
+    $scope.drawGraph = function (browser_inc, bot_inc, root_test_inc, subtest_inc, seq, start_inc, end_inc, plots_inc, subtests,
                                  callbackondone) {
         // Update tooltips, etc
         var currentBrowser = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
             selectedTest = $scope.selectedTest, selectedSubtest = $scope.selectedSubtest,
             selectedBrowser = $scope.selectedBrowser, selectedBot = $scope.selectedBot, selectionstart, selectionend;
+
+        $scope.plotsinGraph = {};
 
         /* Check if args were present. If yes, we need to modify drop-down selections and plot */
         if (browser_inc) {
@@ -167,7 +169,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
         }
         if (root_test_inc) {
             selectedTest = $filter('filter')($scope.tests, function (value, index, array) {
-                if (value['root_test']['id'] == root_test_inc) {
+                if (value['root_test']['id'] === root_test_inc) {
                     return array[index];
                 }
             })[0];
@@ -296,18 +298,56 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                     // Select the right container and add in the checkboxes
                     var choiceContainer = $("span.choices#choice-" + $scope.graphCounter);
 
+                    var currPlotSeqInArray = parseInt(choiceContainer.attr('id').split('-')[1]);
+                    $scope.plotsinGraph[currPlotSeqInArray] = [];
+
                     angular.forEach(botReportData, function (value, key) {
-                        choiceDiv = $('<div>').addClass('checkbox').append("" +
-                            "<label>" +
-                            "<input name='" + key + "' id = 'id" + key + "' type='checkbox' " +
-                            "checked='checked' value=''>" + key + "</label>"
-                        );
+                        var choiceDiv = "";
+                        if (plots_inc) {
+                            // If this was from a URL
+                            if ( $.inArray(key, plots_inc ) === -1 ) {
+                                // If the value does not exist in the plot
+                                choiceDiv = $('<div>').addClass('checkbox').append("" +
+                                    "<label>" +
+                                    "<input name='" + key + "' id = 'id" + key + "' type='checkbox' " +
+                                    "value=''>" + key + "</label>"
+                                );
+                            } else {
+                                // Draw normally
+                                choiceDiv = $('<div>').addClass('checkbox').append("" +
+                                    "<label>" +
+                                    "<input name='" + key + "' id = 'id" + key + "' type='checkbox' " +
+                                    "checked='checked' value=''>" + key + "</label>"
+                                );
+                                $scope.plotsinGraph[currPlotSeqInArray].push(key);
+                            }
+                        } else {
+                            choiceDiv = $('<div>').addClass('checkbox').append("" +
+                                "<label>" +
+                                "<input name='" + key + "' id = 'id" + key + "' type='checkbox' " +
+                                "checked='checked' value=''>" + key + "</label>"
+                            );
+                        }
                         choiceContainer.append(choiceDiv);
                         plotdatumcomplete.push({'data': botReportData[key], 'label': key});
                     });
 
                     choiceContainer.find("input").click(plotAccordingToChoices);
+                    // We might not want to draw everything here if we got some value on the URL
+
                     function plotAccordingToChoices() {
+                        var currseq = parseInt($(this).parent().parent().parent().attr('id').split('-')[1]);
+                        var currPlotSeqInArray = 0;
+                        $filter('filter')($scope.plots, function (item) {
+                            if (item.seq === currseq) {
+                                currPlotSeqInArray = $scope.plots.indexOf(item);
+                                return true;
+                            }
+                            return false;
+                        });
+                        // Clear existing plot entries
+                        $scope.plots[currPlotSeqInArray]['plots'] = [];
+
                         updatedPlotData = [];
                         choiceContainer.find("input:checked").each(function () {
                             var key = $(this).attr("name");
@@ -318,9 +358,13 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                                         'label': key
                                     }
                                 );
+                                // Update the URL
+                                $scope.plots[currPlotSeqInArray]['plots'].push(key);
                             }
                         });
                         createPlot(updatedPlotData, function () {});
+                        $location.path(encodeURIComponent(btoa(JSON.stringify($scope.plots))));
+                        $scope.$apply();
                     }
 
                     $scope.mainplotcomplate = false, $scope.overviewplotcomplete = false;
@@ -498,12 +542,16 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                             "subtest": selectedSubtest.test_path,
                             "seq": $scope.graphCounter,
                             "start": undefined,
-                            "end": undefined
+                            "end": undefined,
                         };
-
+                        if ($scope.plotsinGraph[$scope.graphCounter]) {
+                            plot['plots'] = $scope.plotsinGraph[$scope.graphCounter].length > 0 ? $scope.plotsinGraph[$scope.graphCounter] : [];
+                        } else {
+                            plot['plots'] = [];
+                        }
                         $scope.graphCounter = $scope.graphCounter + 1;
-                        $scope.plots.push(plot);
 
+                        $scope.plots.push(plot);
                         $location.path(encodeURIComponent(btoa(JSON.stringify($scope.plots))));
 
                         // Callback might not exist for nature
