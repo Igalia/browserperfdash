@@ -303,8 +303,8 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
                     angular.forEach(botReportData, function (value, key) {
                         var choiceDiv = "";
-                        if (plots_inc) {
-                            // If this was from a URL
+                        if (plots_inc.length > 0) {
+                            // If this was from a URL, and there were some plot
                             if ( $.inArray(key, plots_inc ) === -1 ) {
                                 // If the value does not exist in the plot
                                 choiceDiv = $('<div>').addClass('checkbox').append("" +
@@ -542,7 +542,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                             "subtest": selectedSubtest.test_path,
                             "seq": $scope.graphCounter,
                             "start": undefined,
-                            "end": undefined,
+                            "end": undefined
                         };
                         if ($scope.plotsinGraph[$scope.graphCounter]) {
                             plot['plots'] = $scope.plotsinGraph[$scope.graphCounter].length > 0 ? $scope.plotsinGraph[$scope.graphCounter] : [];
