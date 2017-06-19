@@ -303,7 +303,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
 
                     angular.forEach(botReportData, function (value, key) {
                         var choiceDiv = "";
-                        if (plots_inc.length > 0) {
+                        if (typeof plots_inc !== 'undefined' && plots_inc.length > 0) {
                             // If this was from a URL, and there were some plot
                             if ( $.inArray(key, plots_inc ) === -1 ) {
                                 // If the value does not exist in the plot
