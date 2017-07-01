@@ -17,13 +17,15 @@ app.controller(
     'PlotController', function (
         $scope, browserForResultExistFactory, botForResultsExistFactory,
         subTestPathFactory, testMetricsOfTestAndSubtestFactory,
-        testResultsForTestAndSubtestFactory, testsForBrowserAndBotFactory, $filter,
-        $location
+        testResultsForTestAndSubtestFactory, testsForBrowserAndBotFactory,
+        $filter, $location
     ){
         $scope.graphCounter = 0;
         $scope.drawnsequences = [];
-        var extraToolTipInfo = new Array(new Array());
-        $scope.drawnTestsDetails = new Array(new Array());
+
+        var extraToolTipInfo = [[]];
+        $scope.drawnTestsDetails = [[]];
+
         $scope.plots = [];
 
         $scope.loaded = false;
@@ -37,21 +39,24 @@ app.controller(
         $scope.onBrowserChange = function () {
             //Update tests
             $scope.tests = testsForBrowserAndBotFactory.query({
-                browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
-                bot: !$scope.selectedBot ? null : $scope.selectedBot.name,
+                browser: !$scope.selectedBrowser ? 'all'
+                    : $scope.selectedBrowser.id,
+                bot: !$scope.selectedBot ? null : $scope.selectedBot.name
             }, function () {
                 $scope.selectedTest = $scope.tests[0];
                 $scope.onTestsChange();
                 $scope.bots = botForResultsExistFactory.query({
-                    browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id
+                    browser: !$scope.selectedBrowser ? 'all'
+                        : $scope.selectedBrowser.id
                 });
             });
         };
 
         $scope.onBotsChange = function () {
             $scope.tests = testsForBrowserAndBotFactory.query({
-                browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
-                bot: !$scope.selectedBot ? null : $scope.selectedBot.name,
+                browser: !$scope.selectedBrowser ? 'all'
+                    : $scope.selectedBrowser.id,
+                bot: !$scope.selectedBot ? null : $scope.selectedBot.name
             }, function (data) {
                 if(data.length === 0) {
                     $scope.selectedTest = [];
@@ -107,27 +112,37 @@ app.controller(
                 bot: null
             });
 
-            //Lets just wait for everything to load, and then think about populating things
+            //Lets just wait for everything to load, and then populate things
             $scope.browsers.$promise.then(function () {
                 $scope.tests.$promise.then(function () {
                     $scope.bots.$promise.then(function () {
-                        var unsortedPlotArray = JSON.parse(atob(decodeURIComponent($location.$$path.substr(1))));
-                        var sortedPlotArray = $filter('orderBy')(unsortedPlotArray, '-seq');
-                        for ( var i=0; i< sortedPlotArray.length; i++ ) {
-                            var value = sortedPlotArray[i];
+                        var plotArray = JSON.parse(
+                            atob(
+                                decodeURIComponent($location.$$path.substr(1))
+                            )
+                        );
+                        // This should take in values from the URL and
+                        // execute draw
+
+                        for ( var i=0; i< plotArray.length; i++ ) {
+                            var value = plotArray[i];
                             var subtests = subTestPathFactory.query({
                                 browser: value['browser'],
                                 root_test: value['root_test']
                             });
 
-                            $scope.drawGraph(value['browser'], value['bot'], value['root_test'], value['subtest'],
-                                value['seq'], value['start'], value['end'], value['plots'], subtests, function (plotnumberdrawn) {
+                            $scope.drawGraph(
+                                value['browser'], value['bot'], value['root_test'],
+                                value['subtest'], value['seq'], value['start'],
+                                value['end'], value['plots'], subtests,
+                                function (plotnumberdrawn) {
                                     $scope.drawnsequences.push(plotnumberdrawn);
-                                });
+                                }
+                            );
                         }
 
                         var checkIfEverThingDrawn = setInterval(function () {
-                            if($scope.drawnsequences.length === sortedPlotArray.length) {
+                            if($scope.drawnsequences.length === plotArray.length) {
                                 reorderGraphs($scope.drawnsequences.length);
                                 clearInterval(checkIfEverThingDrawn);
                             }
@@ -142,9 +157,12 @@ app.controller(
             end_inc, plots_inc, subtests, callbackondone
         ) {
             // Update tooltips, etc
-            var currentBrowser = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
-                selectedTest = $scope.selectedTest, selectedSubtest = $scope.selectedSubtest,
-                selectedBrowser = $scope.selectedBrowser, selectedBot = $scope.selectedBot, selectionstart, selectionend;
+            var currentBrowser = !$scope.selectedBrowser ? 'all'
+                    : $scope.selectedBrowser.id,
+                selectedTest = $scope.selectedTest,
+                selectedSubtest = $scope.selectedSubtest,
+                selectedBrowser = $scope.selectedBrowser,
+                selectedBot = $scope.selectedBot;
 
             $scope.plotsinGraph = {};
 
