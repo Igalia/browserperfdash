@@ -320,6 +320,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                                     "checked='checked' value=''>" + key + "</label>"
                                 );
                                 $scope.plotsinGraph[currPlotSeqInArray].push(key);
+                                plotdatumcomplete.push({'data': botReportData[key], 'label': key});
                             }
                         } else {
                             choiceDiv = $('<div>').addClass('checkbox').append("" +
@@ -327,9 +328,9 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                                 "<input name='" + key + "' id = 'id" + key + "' type='checkbox' " +
                                 "checked='checked' value=''>" + key + "</label>"
                             );
+                            plotdatumcomplete.push({'data': botReportData[key], 'label': key});
                         }
                         choiceContainer.append(choiceDiv);
-                        plotdatumcomplete.push({'data': botReportData[key], 'label': key});
                     });
 
                     choiceContainer.find("input").click(plotAccordingToChoices);
@@ -362,6 +363,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                                 $scope.plots[currPlotSeqInArray]['plots'].push(key);
                             }
                         });
+                        console.log("WHTTTTTTTTT");
                         createPlot(updatedPlotData, function () {});
                         $location.path(encodeURIComponent(btoa(JSON.stringify($scope.plots))));
                         $scope.$apply();
@@ -566,6 +568,7 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     // Some JQuery stuff - to handle close button clicks
     $(document).on('click','.close_button',function(){
         $(this).parent().parent().parent().remove();
+        //TODO: Need to update the URL here as well
     });
 
     reorderGraphs = function (totalplots) {
