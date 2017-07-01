@@ -363,7 +363,6 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
                                 $scope.plots[currPlotSeqInArray]['plots'].push(key);
                             }
                         });
-                        console.log("WHTTTTTTTTT");
                         createPlot(updatedPlotData, function () {});
                         $location.path(encodeURIComponent(btoa(JSON.stringify($scope.plots))));
                         $scope.$apply();
@@ -567,8 +566,18 @@ app.controller('PlotController', function ($scope, browserForResultExistFactory,
     };
     // Some JQuery stuff - to handle close button clicks
     $(document).on('click','.close_button',function(){
-        $(this).parent().parent().parent().remove();
+        var deletedPlot = $(this).parent().parent().parent();
         //TODO: Need to update the URL here as well
+        var deletedPlotEntryIndex;
+        var deletedPlotEntry = $filter('filter')($scope.plots, function (value, index, array) {
+            if (value['seq'] === parseInt(deletedPlot.attr('id'))) {
+                deletedPlotEntryIndex = index;
+            }
+        });
+        deletedPlot.remove();
+        $scope.plots.splice(deletedPlotEntryIndex, 1);
+        $location.path(encodeURIComponent(btoa(JSON.stringify($scope.plots))));
+        $scope.$apply();
     });
 
     reorderGraphs = function (totalplots) {
