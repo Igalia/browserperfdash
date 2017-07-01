@@ -2,7 +2,9 @@
 {% load static %}
 {% block body %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/jquery-ui.min.css' %}"> </link>
-    <div class="container-fluid" ng-app="{% block ng_app %}browserperfdash.plot.static{% endblock %}" ng-controller="{% block ng_controller %}PlotController{% endblock %}">
+    <div class="container-fluid"
+         ng-app="{% block ng_app %}browserperfdash.plot.controllers{% endblock %}"
+         ng-controller="{% block ng_controller %}PlotController{% endblock %}">
         {% block content %}
             <form class="form-inline">
                 <div class="row" style="text-align: center">
@@ -56,5 +58,10 @@
         <script language="javascript" type="text/javascript" src="{% static 'js/flot/jquery.flot.crosshair.js' %}"></script>
         <script language="javascript" type="text/javascript" src="{% static 'js/flot/jquery.flot.axislabels.js' %}"></script>
         <script language="javascript" type="text/javascript" src="{% static 'js/flot/angular-flot.min.js' %}"></script>
-        <script src="{% static 'js/app_modules/plot.module.js' %}"></script>
+        <script
+                src="{% static 'js/app_controllers/plot/plot.services.js' %}">
+        </script>
+        <script
+                src="{% static 'js/app_controllers/plot/plot.module.js' %}">
+        </script>
 {% endblock body %}

@@ -14,7 +14,7 @@ var tests = [{"root_test":{"id":"dromaeo-cssquery"}},{"root_test":{"id":"dromaeo
     {"root_test":{"id":"octane"}},{"root_test":{"id":"sunspider"}}];
 
 describe('DeltaController', function() {
-    beforeEach(module('browserperfdash.dashboard.static'));
+    beforeEach(module('browserperfdash.dashboard.controller'));
     var $controller, resource, $filter;
 
     beforeEach(inject(function(_$controller_, _$filter_, $rootScope, $q){

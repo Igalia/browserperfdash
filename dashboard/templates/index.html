@@ -1,7 +1,8 @@
 {% extends "static/base.html" %}
 {% load static %}
 {% block body %}
-    <div class="container-fluid" ng-app="{% block ng_app %}browserperfdash.dashboard.static{% endblock %}"
+    <div class="container-fluid"
+         ng-app="{% block ng_app %}browserperfdash.dashboard.controller{% endblock %}"
          ng-controller="{% block ng_controller %}DeltaController{% endblock %}">
         {% block content %}
             <div class="row">
@@ -258,6 +259,11 @@
             </div>
         {% endblock content %}
         <script type="text/javascript" src="{% static 'js/bootstrap/ui-bootstrap-tpls-2.5.0.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/app_modules/dashboard.module.js' %}"></script>
+        <script type="text/javascript"
+                src="{% static 'js/app_controllers/dashboard/dashboard.services.js' %}">
+        </script>
+        <script type="text/javascript"
+                src="{% static 'js/app_controllers/dashboard/dashboard.module.js' %}">
+        </script>
     </div>
 {% endblock body %}
