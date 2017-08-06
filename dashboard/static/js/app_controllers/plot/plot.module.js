@@ -392,8 +392,9 @@ app.controller(
                             var mid = 0, end = 0;
                             if (plotdatum.length > 0) {
                                 // Will need it for selection on overview chart
-                                mid = plotdatum[0]['data'][parseInt(plotdatum[0]['data'].length / 2)][0];
-                                end = plotdatum[0]['data'][plotdatum[0]['data'].length - 1][0];
+                                var data_length = plotdatum[0]['data'].length;
+                                mid = plotdatum[0]['data'][parseInt(data_length * 0.75)][0];
+                                end = plotdatum[0]['data'][data_length - 1][0];
                             }
                             var plot = $.plot(placeholder, plotdatum, {
                                 xaxis: {
