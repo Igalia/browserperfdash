@@ -1,6 +1,14 @@
 from django.test import TransactionTestCase
-from dashboard.models import Bot, BotReportData, CPUArchitecture, GPUType, Platform, Browser, Test, \
-    MetricUnit
+
+from dashboard.core.browsers.models import Browser
+from dashboard.core.bots.models import Bot
+from dashboard.core.bots.reports.models import BotReportData
+from dashboard.core.cpus.models import CPUArchitecture
+from dashboard.core.gpus.models import GPUType
+from dashboard.core.platforms.models import Platform
+from dashboard.core.metric_units.models import MetricUnit
+from dashboard.core.tests.models import Test
+
 from rest_framework.test import APIClient
 from collections import OrderedDict
 from datetime import datetime

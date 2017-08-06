@@ -1,11 +1,23 @@
 from django.conf.urls import url
-from dashboard.views import GraphPlotView, BotReportView, GPUTypeForWhichResultsExistList, \
-    CPUArchitectureForWhichResultsExistList, PlatformForWhichResultsExistList, BrowsersForResultsExistList, \
-    BotsForResultsExistList, BotsFullDetailsForResultsExistList, TestPathList, MetricsForTestList, \
-    TestsForBrowserBotList, ResultsForSubtestList, BotDataReportImprovementListView, BotDataReportRegressionListView
+from dashboard.core.bots.reports.views import BotReportView
+from django.views.generic import TemplateView
+
+from dashboard.core.gpus.views import GPUTypeForWhichResultsExistList
+from dashboard.core.cpus.views import CPUArchitectureForWhichResultsExistList
+from dashboard.core.platforms.views import PlatformForWhichResultsExistList
+from dashboard.core.browsers.views import BrowsersForResultsExistList
+from dashboard.core.metric_units.views import MetricsForTestList
+from dashboard.core.bots.views import BotsForResultsExistList, \
+    BotsFullDetailsForResultsExistList
+from dashboard.core.bots.reports.views import TestsForBrowserBotList, \
+    ResultsForSubtestList, BotDataReportImprovementListView, \
+    BotDataReportRegressionListView, TestPathList
 
 urlpatterns = [
-    url(r'^graph/$', GraphPlotView.as_view(), name='graph_report'),
+    url(
+        r'^graph/$', TemplateView.as_view(template_name="plot.html"),
+        name='graph_report'
+    ),
     url(r'^bot-report', BotReportView.as_view()),
     url(r'^gpu_results_exist/$', GPUTypeForWhichResultsExistList.as_view()),
     url(r'^cpu_results_exist/$', CPUArchitectureForWhichResultsExistList.as_view()),

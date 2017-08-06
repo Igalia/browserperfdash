@@ -1,5 +1,5 @@
 from django.forms import ModelForm, PasswordInput
-from .models import Bot
+from dashboard.core.bots.models import Bot
 
 
 class BotForm(ModelForm):

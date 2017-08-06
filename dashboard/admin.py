@@ -1,6 +1,15 @@
 from django.contrib import admin
-from dashboard.models import CPUArchitecture, GPUType, Platform, Bot, Browser, Test, MetricUnit, BotReportData
-from dashboard.forms import BotForm
+
+from dashboard.core.cpus.models import CPUArchitecture
+from dashboard.core.gpus.models import GPUType
+from dashboard.core.platforms.models import Platform
+from dashboard.core.bots.models import Bot
+from dashboard.core.browsers.models import Browser
+from dashboard.core.tests.models import Test
+from dashboard.core.metric_units.models import MetricUnit
+from dashboard.core.bots.reports.models import BotReportData
+
+from dashboard.core.bots.forms import BotForm
 
 
 class CPUArchitectureAdmin(admin.ModelAdmin):
