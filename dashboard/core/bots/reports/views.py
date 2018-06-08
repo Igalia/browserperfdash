@@ -411,5 +411,7 @@ class BotReportView(APIView):
                     (bot_id, browser_id, browser_version, test_id, raw_path,
                      str(e))
                 )
+                return HttpResponseBadRequest("Exception inserting the data "
+                                              "into the DB: %s" % str(e))
 
         return HttpResponse("The POST went through")
