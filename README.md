@@ -30,6 +30,8 @@ mkdir -p $WORKON_HOME
 source /usr/local/bin/virtualenvwrapper.sh
 ```
 
+Note: if installed via apt, the wrapper is usually at /usr/share/virtualenvwrapper/virtualenvwrapper.sh
+
 Lets create a virtual environment `dashboard` for our project
 ```bash
 mkvirtualenv -p /usr/bin/python3 dashboard
@@ -43,6 +45,9 @@ pip install -r requirements.txt
 ```
 
 ## Setup database
+
+**NOTE:** If deploying for production (with PostgreSQL) first follow the steps in [deployment.md](docs/deployment.md)
+
 Setup tables in the DB
 ```bash
 python manage.py makemigrations
@@ -61,6 +66,12 @@ mv docs/local-settings.py browserperfdash/local_settings.py
 
 
 ## Run server
+
+**NOTE:** If deploying for production check the [Django docs](https://docs.djangoproject.com/en/1.10/howto/deployment/)
+about how to do this.
+
+For testing deployments you can run:
+
 ```bash
 python manage.py runserver
 ```
