@@ -3,75 +3,21 @@
 [![Build Status](https://travis-ci.org/Igalia/browserperfdash.svg?branch=master)](https://travis-ci.org/Igalia/browserperfdash)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-The applicaiton powers https://browserperfdash.igalia.com and provides a dashboard to analyze browser perofrmance reports. Bots 
-send in the data via `POST` APIs and the application perfroms the number crunching. 
+The application powers https://browserperfdash.igalia.com and provides a dashboard to analyze browser perofrmance reports.
 
-## Collect Pre-requisites
-Install `python3-pip`, `python-dev` and `virtualenvwrapper`
-```bash
-sudo apt-get install python3 python3-pip python3-dev virtualenvwrapper
-```
-
-## Get the files
-You can clone it directly from [https://github.com/Igalia/browserperfdash](https://github.com/Igalia/browserperfdash)
-```bash
-git clone https://github.com/Igalia/browserperfdash
-```
-
-## Setup development environment
-First, some initialization steps. Most of this only needs to be done
-one time. You will want to add the command to source
-`/usr/local/bin/virtualenvwrapper.sh` to your shell startup file
-(`.bashrc` or `.zshrc`) changing the path to `virtualenvwrapper.sh`
-depending on where it was installed by `pip`.
-```bash
-export WORKON_HOME=~/Envs
-mkdir -p $WORKON_HOME
-source /usr/local/bin/virtualenvwrapper.sh
-```
-
-Note: if installed via apt, the wrapper is usually at /usr/share/virtualenvwrapper/virtualenvwrapper.sh
-
-Lets create a virtual environment `dashboard` for our project
-```bash
-mkvirtualenv -p /usr/bin/python3 dashboard
-workon dashboard
-```
-
-## Install requirements
-All the requirements are mentioned in the file `requirements.txt`.
-```bash
-pip install -r requirements.txt
-```
-
-## Setup database
-
-**NOTE:** If deploying for production (with PostgreSQL) first follow the steps in [deployment.md](docs/deployment.md)
-
-Setup tables in the DB
-```bash
-python manage.py makemigrations
-python manage.py migrate
-python manage.py createsuperuser
-```
-Collect all the static files for fast serving
-```bash
-python manage.py collectstatic
-```
-
-Create `browserperfdash/local_settings.py` with local configurations
-```bash
-mv docs/local-settings.py browserperfdash/local_settings.py
-```
+Bots send in the data via `POST` APIs and the application perfroms the number crunching.
 
 
-## Run server
+# Deploying `browserperfdash`
 
-**NOTE:** If deploying for production check the [Django docs](https://docs.djangoproject.com/en/1.10/howto/deployment/)
-about how to do this.
+For how to deploy `browserperfdash` check the following documents:
 
-For testing deployments you can run:
+* For development or testing productions (SQLite DB + built-in http server): [deployment.md](docs/deployment-development.md)
+* For production deployments (PostgreSQL DB + Apache or Nginx fronted): [deployment.md](docs/deployment-production.md)
 
-```bash
-python manage.py runserver
-```
+
+# Running benchmarks and sending data to `browserperfdash`
+
+For that you can use the script `browserperfdash-benchmark` that you can
+find on the WebKit repository (or, alternatively at https://github.com/Igalia/browserperfrunner)
+

@@ -1,0 +1,36 @@
+--
+-- Data for Name: dashboard_metricunit; Type: TABLE DATA; Schema: public; Owner: browserperf_user
+--
+
+COPY dashboard_metricunit (name, unit, description, prefix, is_better) FROM stdin;
+Score	pt	Score points	[{"unit": 1.0, "symbol": "pt"}]	up
+FrameRate	fps	Frames per second	[{"unit": 1.0, "symbol": "fps"}]	up
+Time	ms	Time unit	[{"unit": 86400000.0, "symbol": "day"}, {"unit": 3600000.0, "symbol": "hour"}, {"unit": 60000.0, "symbol": "min"}, {"unit": 1000.0, "symbol": "sec"}, {"unit": 1.0, "symbol": "ms"}]	dw
+Duration	ms	Time to complete the benchmark	[{"unit": 1.0, "symbol": "ms"}]	dw
+Heap	Bytes	Bytes used  for heap	[{"unit": 1.0, "symbol": "Bytes"}]	dw
+Malloc	Bytes	Bytes used  for malloc	[{"unit": 1.0, "symbol": "Bytes"}]	dw
+Allocations	Bytes	Bytes used for allocations	[{"unit": 1.0, "symbol": "Bytes"}]	dw
+Runs	/s	Runs per second	[{"unit": 1.0, "symbol": "runs/sec"}]	up
+\.
+
+--
+-- Data for Name: dashboard_test; Type: TABLE DATA; Schema: public; Owner: browserperf_user
+--
+
+COPY dashboard_test (id, description, url, enabled) FROM stdin;
+ares6	ARES-6 focus on benchmarking the last JavaScript newest features	https://browserbench.org/ARES-6	t
+dromaeo-cssquery	Mozilla JavaScript performance test suite (CSS query)	http://dromaeo.com/	t
+dromaeo-dom	Mozilla JavaScript performance test suite (DOM)	http://dromaeo.com/	t
+dromaeo-jslib	Mozilla JavaScript performance test suite (JSlib)	http://dromaeo.com/	t
+jetstream	JavaScript benchmark suite focused on the most advanced web applications	https://browserbench.org/JetStream/	t
+jsbench	JavaScript benchmarks created by sampling real JavaScript-utilizing web pages	https://plg.uwaterloo.ca/~dynjs/jsbench/	t
+kraken	JavaScript benchmark that measures different test cases extracted from real-world applications and libraries	https://krakenbenchmark.mozilla.org/	t
+motionmark	Graphics benchmark that measures a browser’s capability to animate complex scenes at a target frame rate	https://browserbench.org/MotionMark	t
+octane	Benchmark of tests representative of certain use cases in JavaScript applications.	http://chromium.github.io/octane/	t
+speedometer	measures the responsiveness of Web applications	https://browserbench.org/Speedometer/	t
+speedometer2	measures the responsiveness of Web applications (version 2)	https://browserbench.org/Speedometer2.0/	t
+sunspider	This benchmark tests the core JavaScript language only, not the DOM or other browser APIs.	https://webkit.org/perf/sunspider/sunspider.html	t
+stylebench	measures the performance of the style resolution mechanism	https://svn.webkit.org/repository/webkit/trunk/PerformanceTests/StyleBench/index.html	t
+\.
+
+
