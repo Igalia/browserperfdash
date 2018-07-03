@@ -12,8 +12,8 @@ Bots send in the data via `POST` APIs and the application perfroms the number cr
 
 For how to deploy `browserperfdash` check the following documents:
 
-* For development or testing productions (SQLite DB + built-in http server): [deployment.md](docs/deployment-development.md)
-* For production deployments (PostgreSQL DB + Apache or Nginx fronted): [deployment.md](docs/deployment-production.md)
+* For development or testing productions (SQLite DB + built-in http server): [docs/deployment-development.md](docs/deployment-development.md)
+* For production deployments (PostgreSQL DB + Apache or Nginx fronted): [docs/deployment-production.md](docs/deployment-production.md)
 
 
 # Running benchmarks and sending data to `browserperfdash`
