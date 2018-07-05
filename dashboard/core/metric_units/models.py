@@ -22,5 +22,8 @@ class MetricUnit(models.Model):
         _('Is Better'),max_length=2, choices=IS_BETTER_CHOICES,default='dw'
     )
 
+    def __str__(self):
+        return self.name
+
     def __unicode__(self):
         return self.name
