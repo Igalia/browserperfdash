@@ -40,6 +40,9 @@ class Bot(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if not self.cpuArchitecture.enabled:
