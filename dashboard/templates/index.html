@@ -99,11 +99,12 @@
                                     </td>
                                     <td>
                                         <a ng-if="data.test_version==data.prev_results.test_version" popover-trigger="'mouseenter'"
-                                           uib-popover-template="testDetailsPopover.templateUrl" popover-title="test details of both revisions (unchanged)">{{ data.test_path }}
-                                        </a>
+                                           uib-popover-template="testDetailsPopover.templateUrl"
+                                           popover-title="test details of both revisions (unchanged)"
+                                           href="{{ data.plot_link }}">{{ data.test_path }}</a>
                                         <a ng-if="data.test_version != data.prev_results.test_version"  popover-title="test: {{ data.root_test  }}"
-                                           uib-popover="Warning: The test version changed in between the revisions." popover-trigger="'mouseenter'">{{ data.test_path }}
-                                        </a>
+                                           uib-popover="Warning: The test version changed in between the revisions." popover-trigger="'mouseenter'"
+                                           href="{{ data.plot_link }}">{{ data.test_path }}</a>
                                     </td>
                                     <td style="text-align: center">
                                         <span ng-if="data.prev_results.mean_value" popover-trigger="'mouseenter'"
@@ -167,12 +168,11 @@
                                     </td>
                                     <td>
                                         <a ng-if="data.test_version==data.prev_results.test_version" popover-trigger="'mouseenter'"
-                                           uib-popover-template="testDetailsPopover.templateUrl" popover-title="test details of both revisions (unchanged)">{{ data.test_path }}
-                                        </a>
+                                           uib-popover-template="testDetailsPopover.templateUrl" popover-title="test details of both revisions (unchanged)"
+                                           href="{{ data.plot_link }}">{{ data.test_path }}</a>
                                         <a ng-if="data.test_version != data.prev_results.test_version"  popover-title="test: {{ data.root_test  }}"
-                                           uib-popover="Warning: The test version changed in between the revisions." popover-trigger="'mouseenter'">{{ data.test_path }}
-                                        </a>
-
+                                           uib-popover="Warning: The test version changed in between the revisions." popover-trigger="'mouseenter'"
+                                           href="{{ data.plot_link }}">{{ data.test_path }}</a>
                                     </td>
                                     <td style="text-align: center">
                                         <span ng-if="data.prev_results.mean_value" popover-trigger="'mouseenter'"

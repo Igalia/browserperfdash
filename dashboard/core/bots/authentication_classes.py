@@ -2,9 +2,10 @@ from rest_framework import authentication, exceptions
 from dashboard.core.bots.models import Bot
 
 
-
 class BotAuthentication(authentication.BaseAuthentication):
-    """Bot authentication view, used to authenticate data sending bots via API"""
+    """
+    Bot authentication view, used to authenticate data sending bots via API
+    """
 
     def authenticate(self, request):
         bot_name = request.POST.get('bot_id')
