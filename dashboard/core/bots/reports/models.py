@@ -9,8 +9,6 @@ from dashboard.core.tests.models import Test
 from dashboard.core.metric_units.models import MetricUnit
 
 
-
-
 AGGREGATION_CHOICES = (
     ('None', 'None'),
     ('Total', 'Total'),
@@ -20,10 +18,11 @@ AGGREGATION_CHOICES = (
 
 
 class BotReportDataManger(models.Manager):
-    def create_report(self, bot, browser, browser_version, root_test,
-                      test_path, test_version, aggregation, metric_unit,
-                      metric_unit_prefixed, mean_value, stddev, delta,
-                      is_improvement,prev_result,timestamp=None):
+    def create_report(
+            self, bot, browser, browser_version, root_test,
+            test_path, test_version, aggregation, metric_unit,
+            metric_unit_prefixed, mean_value, stddev, delta,
+            is_improvement,prev_result,timestamp=None):
         bot_report_data = self.create(
             bot=bot, browser=browser, browser_version=browser_version,
             root_test=root_test, test_path=test_path,
@@ -84,9 +83,14 @@ class BotReportData(models.Model):
         super(BotReportData, self).save(*args, **kwargs)
 
     def __unicode__(self):
-        return self.bot.name + ":" + str(self.browser) \
-               + ":" + self.test_version + ":" +\
-               self.test_path + ":" + str(self.mean_value)
+        return '{0}:{1}:{2}:{3}:{4}'.format(
+            self.bot.name, self.browser, self.test_version, self.test_path,
+            self.mean_value)
+
+    def __str__(self):
+        return '{0}:{1}:{2}:{3}:{4}'.format(
+            self.bot.name, self.browser, self.test_version, self.test_path,
+            self.mean_value)
 
     class Meta:
         unique_together = (

@@ -1,3 +1,6 @@
+import base64
+import json
+
 from rest_framework import serializers
 
 from dashboard.core.bots.reports.models import BotReportData
@@ -38,6 +41,7 @@ class BotResultMinimalSerializer(serializers.ModelSerializer):
 class BotReportDataSerializer(serializers.ModelSerializer):
     prev_results = serializers.SerializerMethodField()
     metric_unit = MetricUnitSerializer()
+    plot_link = serializers.SerializerMethodField()
 
     def get_prev_results(self, obj):
         if not obj.prev_result:
@@ -49,8 +53,37 @@ class BotReportDataSerializer(serializers.ModelSerializer):
                 "mean_value": obj.prev_result.mean_value,
                 "browser_version": obj.prev_result.browser_version,
                 "stddev": obj.prev_result.stddev,
-                "metric_unit_prefixed": obj.prev_result.metric_unit_prefixed
+                "metric_unit_prefixed": obj.prev_result.metric_unit_prefixed,
             }
+
+    def get_plot_link(self, obj):
+        """
+        The plot link is a base64 encoded pointer to a plot on graphs/ page
+        :return: link to plot
+        """
+        plot_data = [
+            {
+                'browser': obj.browser.id,
+                'bot': obj.bot.name,
+                'root_test': obj.root_test.id,
+                'subtest': obj.test_path,
+                'seq': 0,
+                'start': float(obj.timestamp.strftime('%s'))*1000,
+                'plots': []
+            }
+        ]
+        if obj.prev_result:
+            plot_data[0].update(
+                {
+                    'start': float(obj.prev_result.timestamp.strftime(
+                        '%s'))*1000,
+                    'end': float(obj.timestamp.strftime('%s'))*1000,
+                }
+            )
+        return'/dash/graph/#!/{0}'.format(
+            base64.b64encode(json.dumps(plot_data).encode()).decode()
+        )
+
 
     class Meta:
         model = BotReportData
@@ -58,5 +91,5 @@ class BotReportDataSerializer(serializers.ModelSerializer):
             'id', 'bot', 'browser', 'browser_version', 'root_test',
             'test_path', 'test_version', 'metric_unit',
             'metric_unit_prefixed', 'mean_value', 'stddev', 'delta',
-            'prev_results'
+            'prev_results', 'plot_link',
         )
