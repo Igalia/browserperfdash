@@ -22,16 +22,16 @@ app.controller(
         $sce, $filter
     ) {
     $scope.browsers = browserFactory.query();
-    $scope.bots = botFullDetailsForResultsExistFactory.query({
-        browser: 'all'
-    });
+    $scope.bots = botFullDetailsForResultsExistFactory.query({});
     $scope.platforms = platformFactory.query();
     $scope.gpus = gpuFactory.query();
     $scope.cpus = cpuArchFactory.query();
-    $scope.tests = testsForBrowserAndBotFactory.query({
-        browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
-        bot: !$scope.selectedBot ? null : $scope.selectedBot.name,
+
+    $scope.tests_query = angular.extend({}, {
+        browser: !$scope.selectedBrowser ? undefined : $scope.selectedBrowser.id,
+        bot: !$scope.selectedBot ? undefined : $scope.selectedBot.name,
     });
+    $scope.tests = testsForBrowserAndBotFactory.query($scope.tests_query);
     $scope.botDetailsPopover = {
         templateUrl: 'bot-template.html'
     };
@@ -46,13 +46,16 @@ app.controller(
     };
     $scope.updateOthersOnBrowserChange = function () {
         //There can be chance of test change
-        $scope.tests = testsForBrowserAndBotFactory.query({
-            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
-            bot: !$scope.selectedBot ? null : $scope.selectedBot.name,
-        }, function () {
-            $scope.bots = botFullDetailsForResultsExistFactory.query({
-                browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id
+        $scope.tests_query_on_browser = angular.extend({}, {
+            browser: !$scope.selectedBrowser ? undefined : $scope.selectedBrowser.id,
+            bot: !$scope.selectedBot ? undefined : $scope.selectedBot.name,
+        });
+        $scope.tests = testsForBrowserAndBotFactory.query(
+            $scope.tests_query_on_browser, function () {
+            $scope.bot_query = angular.extend({}, {
+               'browser': !$scope.selectedBrowser ? undefined : $scope.selectedBrowser.id
             });
+            $scope.bots = botFullDetailsForResultsExistFactory.query($scope.bot_query);
             $scope.reload();
         });
     };

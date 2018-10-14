@@ -24,7 +24,7 @@ from dashboard.core.platforms.models import Platform
 from dashboard.core.cpus.models import CPUArchitecture
 from dashboard.core.gpus.models import GPUType
 
-from dashboard.core.bots.reports.serializers import TestPathListSerializer, \
+from dashboard.core.bots.reports.serializers import TestPathsListSerializer, \
     TestsForBrowserBotListSerializer, ResultsForSubtestListSerializer, \
     BotReportDataSerializer
 
@@ -39,7 +39,7 @@ if len(sys.argv) > 1 and sys.argv[1] == 'test':
 db_character_separator = '\\'
 
 
-class ReportDataBaseListViewSerializer(ListAPIView):
+class BaseReportDataListViewSerializer(ListAPIView):
     serializer_class = BotReportDataSerializer
 
     def build_filters(self, is_improvement=True) -> dict:
@@ -83,7 +83,7 @@ class ReportDataBaseListViewSerializer(ListAPIView):
         }
 
 
-class BotDataReportImprovementListView(ReportDataBaseListViewSerializer):
+class BotDataReportImprovementListView(BaseReportDataListViewSerializer):
     model = BotReportData
     queryset = BotReportData.objects.filter(aggregation='None')
 
@@ -95,7 +95,7 @@ class BotDataReportImprovementListView(ReportDataBaseListViewSerializer):
             prev_result__isnull=True).order_by('-delta')[:limit]
 
 
-class BotDataReportRegressionListView(ReportDataBaseListViewSerializer):
+class BotDataReportRegressionListView(BaseReportDataListViewSerializer):
     model = BotReportData
     queryset = BotReportData.objects.filter(aggregation='None')
 
@@ -107,18 +107,21 @@ class BotDataReportRegressionListView(ReportDataBaseListViewSerializer):
             prev_result__isnull=True).order_by('-delta')[:limit]
 
 
-class TestPathList(ListAPIView):
-    serializer_class = TestPathListSerializer
+class TestPathsList(ListAPIView):
+    serializer_class = TestPathsListSerializer
 
     def get_queryset(self):
-        if self.kwargs.get('browser') == 'all':
-            browser_obj = Browser.objects.all()
-        else:
-            browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
+        browser_filter = self.request.query_params.get('browser', None)
+        browser_filter_by = {'pk': browser_filter} if browser_filter else {}
+        browsers = Browser.objects.filter(**browser_filter_by)
+
+        root_test_filter = self.request.query_params.get('root_test', None)
+        root_test_filter_by = {'pk': root_test_filter} if root_test_filter \
+            else {}
+        root_test = Test.objects.filter(**root_test_filter_by)
 
         return BotReportData.objects.filter(
-            browser__in=browser_obj,
-            root_test=Test.objects.filter(pk=self.kwargs.get('test'))
+            browser__in=browsers, root_test__in=root_test
         ).distinct('test_path')
 
 
@@ -126,41 +129,40 @@ class TestsForBrowserBotList(ListAPIView):
     serializer_class = TestsForBrowserBotListSerializer
 
     def get_queryset(self):
-        if self.kwargs.get('browser') == 'all':
-            browser_obj = Browser.objects.all()
-        else:
-            browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
-        try:
-            bot = Bot.objects.get(pk=self.kwargs.get('bot'))
-            return BotReportData.objects.filter(
-                browser__in=browser_obj, bot=bot
-            ).distinct('root_test')
-        except Bot.DoesNotExist:
-            return BotReportData.objects.filter(
-                browser__in=browser_obj
-            ).distinct('root_test')
+        browser_filter = self.request.query_params.get('browser', None)
+        browser_filter_by = {'pk': browser_filter} if browser_filter else {}
+        browsers = Browser.objects.filter(**browser_filter_by)
+
+        bot_filter = self.request.query_params.get('bot', None)
+        bot_filter_by = {'pk': bot_filter} if bot_filter else {}
+        bots = Bot.objects.filter(**bot_filter_by)
+
+        return BotReportData.objects.filter(
+            browser__in=browsers, bot__in=bots
+        ).distinct('root_test')
 
 
-class ResultsForSubtestList(ListAPIView):
+class ResultsForSubTestList(ListAPIView):
     serializer_class = ResultsForSubtestListSerializer
 
     def get_queryset(self):
-        if self.kwargs.get('browser') == 'all':
-            browser_obj = Browser.objects.all()
-        else:
-            browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
-        test = Test.objects.get(pk=self.kwargs.get('test'))
-        test_path = urllib.parse.unquote(self.kwargs.get('subtest'))
-        if self.kwargs.get('bot') == 'all':
-            return BotReportData.objects.filter(
-                browser__in=browser_obj, root_test=test, test_path=test_path
-            ).order_by('timestamp')
-        else:
-            bot = Bot.objects.get(pk=self.kwargs.get('bot'))
-            return BotReportData.objects.filter(
-                browser__in=browser_obj, root_test=test, test_path=test_path,
-                bot=bot
-            ).order_by('timestamp')
+        browser_filter = self.request.query_params.get('browser', None)
+        browser_filter_by = {'pk': browser_filter} if browser_filter else {}
+        browsers = Browser.objects.filter(**browser_filter_by)
+
+        test = Test.objects.get(pk=self.request.query_params.get('test'))
+        test_path = urllib.parse.unquote(
+            self.request.query_params.get('subtest')
+        )
+
+        bot_filter = self.request.query_params.get('bot', None)
+        bot_filter_by = {'pk': bot_filter} if bot_filter else {}
+        bots = Bot.objects.filter(**bot_filter_by)
+
+        return BotReportData.objects.filter(
+            browser__in=browsers, root_test=test, test_path=test_path,
+            bot__in=bots
+        ).order_by('timestamp')
 
 
 class BotReportView(APIView):
@@ -248,12 +250,13 @@ class BotReportView(APIView):
             bot_id = self.request.POST.get('bot_id')
             json_data = self.request.POST.get('test_data')
         except AttributeError:
-            log.error("Got invalid params from the bot: %s" % request.auth)
+            log.error(
+                'Got invalid params from the bot: {0}'.format(request.auth))
             return HttpResponseBadRequest(
-                "Some params are missing in the request"
+                'Some params are missing in the request'
             )
 
-        log.info("Started processing data from bot %s" % (bot_id))
+        log.info('Started processing data from bot {0}'.format(bot_id))
         # The timestamp may/may not be there - hence not checking
         timestamp = None
         if self.request.POST.get('timestamp'):
@@ -264,33 +267,35 @@ class BotReportView(APIView):
             test_data = json.loads(json_data)
         except AttributeError:
             return HttpResponseBadRequest(
-                "Error parsing JSON file from bot: %s " % request.auth
+                'Error parsing JSON file from bot: {0}'.format(request.auth)
             )
 
         bot = Bot.objects.get(pk=bot_id)
 
         if not bot.enabled:
-            log.error("Got data from disabled bot: %s" % bot_id)
-            return HttpResponseBadRequest("The bot %s is not enabled" % bot_id)
+            log.error('Got data from disabled bot: {0}'.format(bot_id))
+            return HttpResponseBadRequest(
+                'The bot {0} is not enabled'.format(bot_id))
 
         try:
             browser = Browser.objects.get(pk=browser_id)
         except Browser.DoesNotExist:
             log.error(
-                "Got invalid browser %s from bot: %s" % (browser_id, bot_id)
+                'Got invalid browser {0} from bot: {1}'.format(
+                    browser_id, bot_id)
             )
-            return HttpResponseBadRequest("The browser does not exist")
+            return HttpResponseBadRequest('The browser does not exist')
 
         try:
             root_test = Test.objects.get(pk=test_id)
         except Test.DoesNotExist:
             log.error(
-                "Got invalid root test: %s from bot: %s for browser: %s, "
-                "browser_version: %s" % (
-                    test_id, bot_id, browser_id, browser_version
-                ))
+                'Got invalid root test: {0} from bot: {1} for browser: {2}, '
+                'browser_version: {3}'.format(
+                    test_id, bot_id, browser_id, browser_version)
+            )
             return HttpResponseBadRequest(
-                "The test %s does not exist" % test_id
+                'The test {0} does not exist'.format(test_id)
             )
 
         test_data_results = BenchmarkResults(test_data)
@@ -318,27 +323,28 @@ class BotReportView(APIView):
                         " " + current_metric.unit
             except MetricUnit.DoesNotExist:
                 log.error(
-                    "Got wrong Metric %s for bot: %s, browser: %s, "
-                    "browser_version: %s, root_test: %s, test_description: "
-                    "%s" % (metric_name, bot_id, browser_id, browser_version,
-                            test_id, raw_path
-                            )
+                    'Got wrong Metric {0} for bot: {1}, browser: {2}, '
+                    'browser_version: {3}, root_test: {4}, test_description: '
+                    '{5}'.format(
+                        metric_name, bot_id, browser_id, browser_version,
+                        test_id, raw_path)
                 )
                 return HttpResponseBadRequest(
-                    "The Metric Unit %s does not exist" % metric_name
+                    'The Metric Unit {0} does not exist'.format(metric_name)
                 )
 
             if current_metric.unit != unit:
-                log.error("Got wrong unit %s for metric unit %s data for "
-                          "bot: %s, browser: %s, browser_version: %s, "
-                          "root_test: %s, test_description: %s" %
-                          (unit, metric_name, bot_id, browser_id,
-                           browser_version, test_id, raw_path)
-                          )
-                return HttpResponseBadRequest("The received unit: %s field of "
-                                              "Metric Unit %s does not match"
-                                              % (unit, metric_name)
-                                              )
+                log.error(
+                    'Got wrong unit {0} for metric unit {1} data for bot: '
+                    '{2}, browser: {3}, browser_version: {4}, root_test: {5}, '
+                    'test_description: {6}'.format(
+                        unit, metric_name, bot_id, browser_id,
+                        browser_version, test_id, raw_path
+                    )
+                )
+                return HttpResponseBadRequest(
+                    'The received unit: {0} field of Metric Unit {1} does not '
+                    'match'.format(unit, metric_name))
 
             if self.is_aggregated(metric=result['metric']):
                 aggregation = self.extract_aggregation(metric=result['metric'])
@@ -365,13 +371,13 @@ class BotReportView(APIView):
                 )
             except Exception as e:
                 log.error(
-                    "Failed inserting data for bot: %s, browser: %s, "
-                    "browser_version: %s, root_test: %s, test_description: %s"
-                    " and Exception %s" %
-                    (bot_id, browser_id, browser_version, test_id, raw_path,
-                     str(e))
+                    'Failed inserting data for bot: {0}, browser: {1}, '
+                    'browser_version: {2}, root_test: {3}, test_description: '
+                    '{4} and Exception {5}'.format(
+                        bot_id, browser_id, browser_version, test_id,
+                        raw_path, e)
                 )
-                return HttpResponseBadRequest("Exception inserting the data "
-                                              "into the DB: %s" % str(e))
+                return HttpResponseBadRequest(
+                    'Exception while inserting the data: {0}'.format(e))
 
-        return HttpResponse("The POST went through")
+        return HttpResponse('The POST went through')
