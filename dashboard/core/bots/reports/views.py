@@ -79,7 +79,7 @@ class ReportDataBaseListViewSerializer(ListAPIView):
             'root_test__in': tests,
             'bot__in': bot,
             'browser__in': browsers,
-            'is_improvement': is_improvement
+            'is_improvement': is_improvement,
         }
 
 
@@ -91,7 +91,8 @@ class BotDataReportImprovementListView(ReportDataBaseListViewSerializer):
         queryset = super(BotDataReportImprovementListView, self).get_queryset()
         filter_params = self.build_filters(is_improvement=True)
         limit = int(self.kwargs.get('limit', 10))
-        return queryset.filter(**filter_params).order_by('-delta')[:limit]
+        return queryset.filter(**filter_params).exclude(
+            prev_result__isnull=True).order_by('-delta')[:limit]
 
 
 class BotDataReportRegressionListView(ReportDataBaseListViewSerializer):
@@ -102,7 +103,8 @@ class BotDataReportRegressionListView(ReportDataBaseListViewSerializer):
         queryset = super(BotDataReportRegressionListView, self).get_queryset()
         filter_params = self.build_filters(is_improvement=False)
         limit = int(self.kwargs.get('limit', 10))
-        return queryset.filter(**filter_params).order_by('-delta')[:limit]
+        return queryset.filter(**filter_params).exclude(
+            prev_result__isnull=True).order_by('-delta')[:limit]
 
 
 class TestPathList(ListAPIView):
