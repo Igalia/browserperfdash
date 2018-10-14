@@ -6,11 +6,11 @@
 app = angular.module('browserperfdash.dashboard.services', ['ngResource']);
 
 app.factory('botReportsImprovementFactory', function($resource) {
-    return $resource('/dash/report/improvement/:days_since/:platform/:gpu/:cpu/:browser/:test/:bot/:limit');
+    return $resource('/dash/report/improvements');
 });
 
 app.factory('botReportsRegressionFactory', function($resource) {
-    return $resource('/dash/report/regression/:days_since/:platform/:gpu/:cpu/:browser/:test/:bot/:limit');
+    return $resource('/dash/report/regressions');
 });
 
 app.factory('browserFactory', function($resource) {

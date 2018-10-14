@@ -1,4 +1,9 @@
-import json, urllib.request, urllib.parse, urllib.error, logging, sys
+import json
+import urllib.request
+import urllib.parse
+import urllib.error
+import logging
+import sys
 from datetime import datetime, timedelta
 
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -34,119 +39,70 @@ if len(sys.argv) > 1 and sys.argv[1] == 'test':
 db_character_separator = '\\'
 
 
-class BotDataReportImprovementListView(ListAPIView):
-    """Fetch improvements for main page tables"""
-
-    model = BotReportData
+class ReportDataBaseListViewSerializer(ListAPIView):
     serializer_class = BotReportDataSerializer
+
+    def build_filters(self, is_improvement=True) -> dict:
+        days_since = int(self.request.query_params.get('days_since', 5))
+
+        platform_filter = self.request.query_params.get('platform', None)
+        platform_filter_by = {'pk': platform_filter} if platform_filter else {}
+        platforms = Platform.objects.filter(**platform_filter_by)
+
+        cpu_filter = self.request.query_params.get('cpu', None)
+        cpu_filter_by = {'pk': cpu_filter} if cpu_filter else {}
+        cpus = CPUArchitecture.objects.filter(**cpu_filter_by)
+
+        gpu_filter = self.request.query_params.get('gpu', None)
+        gpu_filter_by = {'pk': gpu_filter} if gpu_filter else {}
+        gpus = GPUType.objects.filter(**gpu_filter_by)
+
+        browser_filter = self.request.query_params.get('browser', None)
+        browser_filter_by = {'pk': browser_filter} if browser_filter else {}
+        browsers = Browser.objects.filter(**browser_filter_by)
+
+        test_filter = self.request.query_params.get('test', None)
+        test_filter_by = {'pk': test_filter} if test_filter else {}
+        tests = Test.objects.filter(**test_filter_by)
+
+        bot_filter = self.request.query_params.get('bot', None)
+        bot_filter_by = {'pk': bot_filter} if bot_filter else {}
+        bots = Bot.objects.filter(**bot_filter_by)
+
+        bot = bots.filter(
+            platform__in=platforms, cpuArchitecture__in=cpus,
+            gpuType__in=gpus, enabled=True
+        )
+        requested_time = datetime.utcnow() + timedelta(days=-days_since)
+        return {
+            'timestamp__gt': requested_time,
+            'root_test__in': tests,
+            'bot__in': bot,
+            'browser__in': browsers,
+            'is_improvement': is_improvement
+        }
+
+
+class BotDataReportImprovementListView(ReportDataBaseListViewSerializer):
+    model = BotReportData
     queryset = BotReportData.objects.filter(aggregation='None')
 
     def get_queryset(self):
-        try:
-            days_since = int(self.kwargs.get('days_since'))
-        except ValueError:
-            days_since = int(5)
-
-        if self.kwargs.get('platform') == 'all':
-            platform_obj = Platform.objects.all()
-        else:
-            platform_obj = Platform.objects.filter(pk=self.kwargs.get('platform'))
-
-        if self.kwargs.get('cpu') == 'all':
-            cpu_obj = CPUArchitecture.objects.all()
-        else:
-            cpu_obj = CPUArchitecture.objects.filter(pk=self.kwargs.get('cpu'))
-
-        if self.kwargs.get('gpu') == 'all':
-            gpu_obj = GPUType.objects.all()
-        else:
-            gpu_obj = GPUType.objects.filter(pk=self.kwargs.get('gpu'))
-
-        if self.kwargs.get('browser') == 'all':
-            browser_obj = Browser.objects.all()
-        else:
-            browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
-
-        if self.kwargs.get('test') == 'all':
-            root_test = Test.objects.all()
-        else:
-            root_test = Test.objects.filter(pk=self.kwargs.get('test'))
-
-        if self.kwargs.get('bot') == 'all':
-            bot_obj = Bot.objects.all()
-        else:
-            bot_obj = Bot.objects.filter(pk=self.kwargs.get('bot'))
-
-        limit = int(self.kwargs.get('limit'))
-        bot = bot_obj.filter(
-            platform__in=platform_obj, cpuArchitecture__in=cpu_obj,
-            gpuType__in=gpu_obj, enabled=True
-        )
-
-        requested_time = datetime.utcnow() + timedelta(days=-days_since)
         queryset = super(BotDataReportImprovementListView, self).get_queryset()
-        return queryset.filter(
-            aggregation='None', timestamp__gt=requested_time,
-            root_test__in=root_test, bot__in=bot, browser__in=browser_obj,
-            is_improvement=True
-        ).order_by('-delta')[:limit]
+        filter_params = self.build_filters(is_improvement=True)
+        limit = int(self.kwargs.get('limit', 10))
+        return queryset.filter(**filter_params).order_by('-delta')[:limit]
 
 
-class BotDataReportRegressionListView(ListAPIView):
-    """Fetch regressions for main page tables"""
-
+class BotDataReportRegressionListView(ReportDataBaseListViewSerializer):
     model = BotReportData
-    serializer_class = BotReportDataSerializer
     queryset = BotReportData.objects.filter(aggregation='None')
 
     def get_queryset(self):
-        try:
-            days_since = int(self.kwargs.get('days_since'))
-        except ValueError:
-            days_since = int(5)
-
-        if self.kwargs.get('platform') == 'all':
-            platform_obj = Platform.objects.all()
-        else:
-            platform_obj = Platform.objects.filter(pk=self.kwargs.get('platform'))
-
-        if self.kwargs.get('cpu') == 'all':
-            cpu_obj = CPUArchitecture.objects.all()
-        else:
-            cpu_obj = CPUArchitecture.objects.filter(pk=self.kwargs.get('cpu'))
-
-        if self.kwargs.get('gpu') == 'all':
-            gpu_obj = GPUType.objects.all()
-        else:
-            gpu_obj = GPUType.objects.filter(pk=self.kwargs.get('gpu'))
-
-        if self.kwargs.get('browser') == 'all':
-            browser_obj = Browser.objects.all()
-        else:
-            browser_obj = Browser.objects.filter(pk=self.kwargs.get('browser'))
-
-        if self.kwargs.get('test') == 'all':
-            root_test = Test.objects.all()
-        else:
-            root_test = Test.objects.filter(pk=self.kwargs.get('test'))
-
-        if self.kwargs.get('bot') == 'all':
-            bot_obj = Bot.objects.all()
-        else:
-            bot_obj = Bot.objects.filter(pk=self.kwargs.get('bot'))
-
-        limit = int(self.kwargs.get('limit'))
-        bot = bot_obj.filter(
-            platform__in=platform_obj, cpuArchitecture__in=cpu_obj,
-            gpuType__in=gpu_obj, enabled=True
-        )
-        requested_time = datetime.utcnow() + timedelta(days=-days_since)
         queryset = super(BotDataReportRegressionListView, self).get_queryset()
-        return queryset.filter(
-            aggregation='None', timestamp__gt=requested_time,
-            root_test__in=root_test, bot__in=bot, browser__in=browser_obj,
-            is_improvement=False
-        ).order_by('-delta')[:limit]
+        filter_params = self.build_filters(is_improvement=False)
+        limit = int(self.kwargs.get('limit', 10))
+        return queryset.filter(**filter_params).order_by('-delta')[:limit]
 
 
 class TestPathList(ListAPIView):
@@ -228,7 +184,8 @@ class BotReportView(APIView):
             if len(munits) == 1:
                 if mean_value > prefix['unit']:
                     mean_value = mean_value / prefix['unit']
-                curr_string += format(mean_value, '.2f') + " " + original_prefix
+                curr_string += format(mean_value, '.2f') + \
+                    " " + original_prefix
                 return curr_string
 
             munits = munits[index + 1:]
@@ -289,7 +246,7 @@ class BotReportView(APIView):
             bot_id = self.request.POST.get('bot_id')
             json_data = self.request.POST.get('test_data')
         except AttributeError:
-            log.error("Got invalid params from the bot: %s"% request.auth)
+            log.error("Got invalid params from the bot: %s" % request.auth)
             return HttpResponseBadRequest(
                 "Some params are missing in the request"
             )
@@ -305,14 +262,14 @@ class BotReportView(APIView):
             test_data = json.loads(json_data)
         except AttributeError:
             return HttpResponseBadRequest(
-                "Error parsing JSON file from bot: %s "% request.auth
+                "Error parsing JSON file from bot: %s " % request.auth
             )
 
         bot = Bot.objects.get(pk=bot_id)
 
         if not bot.enabled:
             log.error("Got data from disabled bot: %s" % bot_id)
-            return HttpResponseBadRequest("The bot %s is not enabled"% bot_id)
+            return HttpResponseBadRequest("The bot %s is not enabled" % bot_id)
 
         try:
             browser = Browser.objects.get(pk=browser_id)
@@ -327,11 +284,11 @@ class BotReportView(APIView):
         except Test.DoesNotExist:
             log.error(
                 "Got invalid root test: %s from bot: %s for browser: %s, "
-                "browser_version: %s" %(
+                "browser_version: %s" % (
                     test_id, bot_id, browser_id, browser_version
                 ))
             return HttpResponseBadRequest(
-                "The test %s does not exist"% test_id
+                "The test %s does not exist" % test_id
             )
 
         test_data_results = BenchmarkResults(test_data)
@@ -355,7 +312,8 @@ class BotReportView(APIView):
                         original_prefix=current_metric.unit
                     )
                 else:
-                    modified_prefix = str(mean_value) + " " + current_metric.unit
+                    modified_prefix = str(mean_value) + \
+                        " " + current_metric.unit
             except MetricUnit.DoesNotExist:
                 log.error(
                     "Got wrong Metric %s for bot: %s, browser: %s, "
@@ -365,7 +323,7 @@ class BotReportView(APIView):
                             )
                 )
                 return HttpResponseBadRequest(
-                    "The Metric Unit %s does not exist"% metric_name
+                    "The Metric Unit %s does not exist" % metric_name
                 )
 
             if current_metric.unit != unit:
@@ -373,11 +331,11 @@ class BotReportView(APIView):
                           "bot: %s, browser: %s, browser_version: %s, "
                           "root_test: %s, test_description: %s" %
                           (unit, metric_name, bot_id, browser_id,
-                           browser_version,test_id, raw_path)
+                           browser_version, test_id, raw_path)
                           )
                 return HttpResponseBadRequest("The received unit: %s field of "
                                               "Metric Unit %s does not match"
-                                              % (unit,metric_name)
+                                              % (unit, metric_name)
                                               )
 
             if self.is_aggregated(metric=result['metric']):

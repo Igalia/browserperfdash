@@ -72,39 +72,26 @@ app.controller(
         $scope.noImprovementsFound = false;
         $scope.noRegressionsFound = false;
         $scope.loading = true;
-        $scope.selectedDays = !$scope.selectedDays ? 5 : $scope.selectedDays;
-        $scope.listLimit = !$scope.listLimit? 10 : $scope.listLimit;
-        $scope.selectedBrowserId = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id;
-        $scope.selectedPlatformId = !$scope.selectedPlatform ? 'all' : $scope.selectedPlatform.id;
-        $scope.selectedCPUId = !$scope.selectedCPU ? 'all' : $scope.selectedCPU.id;
-        $scope.selectedGPUId = !$scope.selectedGPU ? 'all' : $scope.selectedGPU.id;
-        $scope.selectedTestId = !$scope.selectedTest ? 'all' : $scope.selectedTest.root_test.id;
-        $scope.selectedBotName = !$scope.selectedBot ? 'all' : $scope.selectedBot.name;
-        $scope.improvement_reports = botReportsImprovementFactory.query({
-            days_since: $scope.selectedDays,
-            platform: $scope.selectedPlatformId,
-            gpu: $scope.selectedGPUId,
-            cpu: $scope.selectedCPUId,
-            browser: $scope.selectedBrowserId,
-            test: $scope.selectedTestId,
-            bot: $scope.selectedBotName,
-            limit: $scope.listLimit
-        }, function (data) {
+        $scope.query_params = angular.extend({}, {
+            browser: !$scope.selectedBrowser ? undefined : $scope.selectedBrowser.id,
+            platform: !$scope.selectedPlatform ? undefined : $scope.selectedPlatform.id,
+            gpu: !$scope.selectedGPU ? undefined : $scope.selectedGPU.id,
+            cpu: !$scope.selectedCPU ? undefined : $scope.selectedCPU.id,
+            test: !$scope.selectedTest ? undefined : $scope.selectedTest.root_test.id,
+            bot: !$scope.selectedBot ? undefined : $scope.selectedBot.name,
+            days_since: !$scope.selectedDays ? 5 : $scope.selectedDays,
+            limit: !$scope.listLimit? 10 : $scope.listLimit
+        });
+
+        $scope.improvement_reports = botReportsImprovementFactory.query(
+            $scope.query_params, function (data) {
             if (data.length == 0) {
                 $scope.noImprovementsFound = true;
             }
             $scope.loading_improvements = false;
         });
-        $scope.regression_reports = botReportsRegressionFactory.query({
-            days_since: $scope.selectedDays,
-            platform: $scope.selectedPlatformId,
-            gpu: $scope.selectedGPUId,
-            cpu: $scope.selectedCPUId,
-            browser: $scope.selectedBrowserId,
-            test: $scope.selectedTestId,
-            bot: $scope.selectedBotName,
-            limit: $scope.listLimit
-        }, function (data) {
+        $scope.regression_reports = botReportsRegressionFactory.query(
+            $scope.query_params, function (data) {
             if (data.length == 0) {
                 $scope.noRegressionsFound = true;
             }
