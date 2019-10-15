@@ -103,8 +103,11 @@ admin.site.register(MetricUnit, MetricUnitAdmin)
 
 
 class BotReportDataAdmin(admin.ModelAdmin):
+    date_hierarchy = 'timestamp'
     list_display = ('get_bot', 'get_browser', 'browser_version', 'get_root_test', 'test_path', 'get_metric_unit',
                     'timestamp', 'mean_value')
+    list_filter = ('bot__name', 'browser__id', 'root_test__id',
+                   'metric_unit__name')
     readonly_fields = ('timestamp',)
 
     def get_bot(self, obj):
