@@ -38,26 +38,28 @@ app.controller(
 
         $scope.onBrowserChange = function () {
             //Update tests
-            $scope.tests = testsForBrowserAndBotFactory.query({
-                browser: !$scope.selectedBrowser ? 'all'
-                    : $scope.selectedBrowser.id,
-                bot: !$scope.selectedBot ? null : $scope.selectedBot.name
-            }, function () {
+            $scope.tests_filter_on_browser = angular.extend({}, {
+                browser: !$scope.selectedBrowser ? undefined : $scope.selectedBrowser.id,
+                bot: !$scope.selectedBot ? undefined : $scope.selectedBot.name
+            });
+            $scope.tests = testsForBrowserAndBotFactory.query(
+                $scope.tests_filter_on_browser, function () {
                 $scope.selectedTest = $scope.tests[0];
                 $scope.onTestsChange();
-                $scope.bots = botForResultsExistFactory.query({
-                    browser: !$scope.selectedBrowser ? 'all'
-                        : $scope.selectedBrowser.id
+                $scope.query_params = angular.extend({}, {
+                    browser: !$scope.selectedBrowser ? undefined : $scope.selectedBrowser.id
                 });
+                $scope.bots = botForResultsExistFactory.query($scope.query_params);
             });
         };
 
         $scope.onBotsChange = function () {
-            $scope.tests = testsForBrowserAndBotFactory.query({
-                browser: !$scope.selectedBrowser ? 'all'
-                    : $scope.selectedBrowser.id,
-                bot: !$scope.selectedBot ? null : $scope.selectedBot.name
-            }, function (data) {
+            $scope.tests_on_bot_change = angular.extend({}, {
+                browser: !$scope.selectedBrowser ? undefined : $scope.selectedBrowser.id,
+                bot: !$scope.selectedBot ? undefined : $scope.selectedBot.name
+            });
+            $scope.tests = testsForBrowserAndBotFactory.query(
+                $scope.tests_on_bot_change, function (data) {
                 if(data.length === 0) {
                     $scope.selectedTest = [];
                     $scope.selectedSubtest = [];
@@ -76,10 +78,12 @@ app.controller(
             if(!$scope.selectedTest) {
                 return;
             }
-            $scope.subtests = subTestPathFactory.query({
-                browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
-                root_test: $scope.selectedTest.root_test.id
-            }, function (data) {
+            $scope.subtests_query = angular.extend({}, {
+                browser: !$scope.selectedBrowser ? undefined : $scope.selectedBrowser.id,
+                root_test: !$scope.selectedTest.root_test ? undefined : $scope.selectedTest.root_test.id
+            });
+            $scope.subtests = subTestPathFactory.query(
+                $scope.subtests_query, function (data) {
                 // We might have something here due to URL data
                 if (!$scope.selectedSubtest) { $scope.selectedSubtest = data[0]; }
             });
@@ -107,10 +111,7 @@ app.controller(
             $scope.bots = botForResultsExistFactory.query({
                 browser: 'all'
             });
-            $scope.tests = testsForBrowserAndBotFactory.query({
-                browser: 'all',
-                bot: null
-            });
+            $scope.tests = testsForBrowserAndBotFactory.query();
 
             //Lets just wait for everything to load, and then populate things
             $scope.browsers.$promise.then(function () {
@@ -126,11 +127,11 @@ app.controller(
 
                         for ( var i=0; i< plotArray.length; i++ ) {
                             var value = plotArray[i];
-                            var subtests = subTestPathFactory.query({
-                                browser: value['browser'],
-                                root_test: value['root_test']
+                            $scope.subtests_query_laod = angular.extend({},{
+                                browser: !value['browser'] ? undefined : value['browser'],
+                                root_test: !value['root_test'] ? undefined : value['root_test']
                             });
-
+                            var subtests = subTestPathFactory.query($scope.subtests_query_laod);
                             $scope.drawGraph(
                                 value['browser'], value['bot'], value['root_test'],
                                 value['subtest'], value['seq'], value['start'],
@@ -200,15 +201,17 @@ app.controller(
 
                 testMetricsOfTestAndSubtestFactory.query({
                     root_test: selectedTest.root_test.id,
-                    subtest: encodeURIComponent(selectedSubtest.test_path),
+                    subtest: encodeURIComponent(selectedSubtest.test_path)
                 }, function (testMetrics) {
                     $scope.loading = true;
-                    testResultsForTestAndSubtestFactory.query({
-                        browser: !selectedBrowser ? 'all' : selectedBrowser.id,
-                        root_test: selectedTest.root_test.id,
-                        bot: !selectedBot ? 'all' : selectedBot.name,
+                    $scope.results_query = angular.extend({}, {
+                        browser: !selectedBrowser ? undefined : selectedBrowser.id,
+                        test: !selectedTest.root_test ? undefined : selectedTest.root_test.id,
+                        bot: !selectedBot ? undefined : selectedBot.name,
                         subtest: encodeURIComponent(selectedSubtest.test_path)
-                    }, function (results) {
+                    });
+                    testResultsForTestAndSubtestFactory.query(
+                        $scope.results_query, function (results){
                         if (seq !== undefined) {
                             // This is a draw from the URL - lets use the original sequence for this graph
                             $scope.graphCounter = seq;

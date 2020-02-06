@@ -9,43 +9,24 @@ from dashboard.core.bots.serializers import \
 from rest_framework.generics import ListAPIView
 
 
-class BotsForResultsExistList(ListAPIView):
-    """Fetch just the botname for the plot pages"""
+class BaseBotResultsView(ListAPIView):
     model = Bot
+
+    def get_queryset(self):
+        browser_filter = self.request.query_params.get('browser', None)
+        browser_filter_by = {'pk': browser_filter} if browser_filter else {}
+        browsers = Browser.objects.filter(**browser_filter_by)
+        return Bot.objects.filter(
+            name__in=BotReportData.objects.filter(
+                browser__in=browsers
+            ).distinct('bot').values('bot'),
+            enabled=True
+        )
+
+
+class BotsForResultsExistList(BaseBotResultsView):
     serializer_class = BotsForResultsExistListSerializer
 
-    def get_queryset(self):
-        if self.kwargs.get('browser') == 'all':
-            browser_obj = Browser.objects.all()
-        else:
-            browser_obj = Browser.objects.filter(
-                pk=self.kwargs.get('browser')
-            )
-        return Bot.objects.filter(
-            name__in=BotReportData.objects.filter(
-                browser__in=browser_obj
-            ).distinct('bot').values('bot'),
-            enabled=True
-        )
 
-
-class BotsFullDetailsForResultsExistList(ListAPIView):
-    """Fetch detailed bot fields for the home page"""
-    model = Bot
+class BotsFullDetailsForResultsExistList(BaseBotResultsView):
     serializer_class = BotsFullDetailsForResultsExistListSerializer
-
-    def get_queryset(self):
-        if self.kwargs.get('browser') == 'all':
-            browser_obj = Browser.objects.all()
-        else:
-            browser_obj = Browser.objects.filter(
-                pk=self.kwargs.get('browser')
-            )
-        return Bot.objects.filter(
-            name__in=BotReportData.objects.filter(
-                browser__in=browser_obj
-            ).distinct('bot').values('bot'),
-            enabled=True
-        )
-
-

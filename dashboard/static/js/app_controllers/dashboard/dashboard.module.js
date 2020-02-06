@@ -22,16 +22,16 @@ app.controller(
         $sce, $filter
     ) {
     $scope.browsers = browserFactory.query();
-    $scope.bots = botFullDetailsForResultsExistFactory.query({
-        browser: 'all'
-    });
+    $scope.bots = botFullDetailsForResultsExistFactory.query({});
     $scope.platforms = platformFactory.query();
     $scope.gpus = gpuFactory.query();
     $scope.cpus = cpuArchFactory.query();
-    $scope.tests = testsForBrowserAndBotFactory.query({
-        browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
-        bot: !$scope.selectedBot ? null : $scope.selectedBot.name,
+
+    $scope.tests_query = angular.extend({}, {
+        browser: !$scope.selectedBrowser ? undefined : $scope.selectedBrowser.id,
+        bot: !$scope.selectedBot ? undefined : $scope.selectedBot.name,
     });
+    $scope.tests = testsForBrowserAndBotFactory.query($scope.tests_query);
     $scope.botDetailsPopover = {
         templateUrl: 'bot-template.html'
     };
@@ -46,13 +46,16 @@ app.controller(
     };
     $scope.updateOthersOnBrowserChange = function () {
         //There can be chance of test change
-        $scope.tests = testsForBrowserAndBotFactory.query({
-            browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id,
-            bot: !$scope.selectedBot ? null : $scope.selectedBot.name,
-        }, function () {
-            $scope.bots = botFullDetailsForResultsExistFactory.query({
-                browser: !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id
+        $scope.tests_query_on_browser = angular.extend({}, {
+            browser: !$scope.selectedBrowser ? undefined : $scope.selectedBrowser.id,
+            bot: !$scope.selectedBot ? undefined : $scope.selectedBot.name,
+        });
+        $scope.tests = testsForBrowserAndBotFactory.query(
+            $scope.tests_query_on_browser, function () {
+            $scope.bot_query = angular.extend({}, {
+               'browser': !$scope.selectedBrowser ? undefined : $scope.selectedBrowser.id
             });
+            $scope.bots = botFullDetailsForResultsExistFactory.query($scope.bot_query);
             $scope.reload();
         });
     };
@@ -72,39 +75,26 @@ app.controller(
         $scope.noImprovementsFound = false;
         $scope.noRegressionsFound = false;
         $scope.loading = true;
-        $scope.selectedDays = !$scope.selectedDays ? 5 : $scope.selectedDays;
-        $scope.listLimit = !$scope.listLimit? 10 : $scope.listLimit;
-        $scope.selectedBrowserId = !$scope.selectedBrowser ? 'all' : $scope.selectedBrowser.id;
-        $scope.selectedPlatformId = !$scope.selectedPlatform ? 'all' : $scope.selectedPlatform.id;
-        $scope.selectedCPUId = !$scope.selectedCPU ? 'all' : $scope.selectedCPU.id;
-        $scope.selectedGPUId = !$scope.selectedGPU ? 'all' : $scope.selectedGPU.id;
-        $scope.selectedTestId = !$scope.selectedTest ? 'all' : $scope.selectedTest.root_test.id;
-        $scope.selectedBotName = !$scope.selectedBot ? 'all' : $scope.selectedBot.name;
-        $scope.improvement_reports = botReportsImprovementFactory.query({
-            days_since: $scope.selectedDays,
-            platform: $scope.selectedPlatformId,
-            gpu: $scope.selectedGPUId,
-            cpu: $scope.selectedCPUId,
-            browser: $scope.selectedBrowserId,
-            test: $scope.selectedTestId,
-            bot: $scope.selectedBotName,
-            limit: $scope.listLimit
-        }, function (data) {
+        $scope.query_params = angular.extend({}, {
+            browser: !$scope.selectedBrowser ? undefined : $scope.selectedBrowser.id,
+            platform: !$scope.selectedPlatform ? undefined : $scope.selectedPlatform.id,
+            gpu: !$scope.selectedGPU ? undefined : $scope.selectedGPU.id,
+            cpu: !$scope.selectedCPU ? undefined : $scope.selectedCPU.id,
+            test: !$scope.selectedTest ? undefined : $scope.selectedTest.root_test.id,
+            bot: !$scope.selectedBot ? undefined : $scope.selectedBot.name,
+            days_since: !$scope.selectedDays ? 5 : $scope.selectedDays,
+            limit: !$scope.listLimit? 10 : $scope.listLimit
+        });
+
+        $scope.improvement_reports = botReportsImprovementFactory.query(
+            $scope.query_params, function (data) {
             if (data.length == 0) {
                 $scope.noImprovementsFound = true;
             }
             $scope.loading_improvements = false;
         });
-        $scope.regression_reports = botReportsRegressionFactory.query({
-            days_since: $scope.selectedDays,
-            platform: $scope.selectedPlatformId,
-            gpu: $scope.selectedGPUId,
-            cpu: $scope.selectedCPUId,
-            browser: $scope.selectedBrowserId,
-            test: $scope.selectedTestId,
-            bot: $scope.selectedBotName,
-            limit: $scope.listLimit
-        }, function (data) {
+        $scope.regression_reports = botReportsRegressionFactory.query(
+            $scope.query_params, function (data) {
             if (data.length == 0) {
                 $scope.noRegressionsFound = true;
             }
