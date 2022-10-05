@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+import sys
+import os
+import json
+import argparse
+utils_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'dashboard', 'core', 'bots', 'reports', 'utils')
+sys.path.append(utils_dir)
+from benchmark_results import BenchmarkResults
+from pprint import pprint
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Read the results from the browser based performance benchmarks.')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('-cleanfile', dest='clean_file', action='store_true',
+                       help='Rewrite the JSON file without the debugOutput entries.')
+    group.add_argument('-print-raw', dest='print_raw', action='store_true',
+                       help='Print the JSON file in raw format.')
+    group.add_argument('-print-results-dict', dest='print_results_dict', action='store_true',
+                       help='Parse the JSON file, generate aggregated results, store them in a dict and print it.')
+    group.add_argument('-print-results-dict-json', dest='print_results_dict_json', action='store_true',
+                       help='Parse the JSON file, generate aggregated results, store them in a dict, convert to JSON and print it.')
+    group.add_argument('-print-results-text', dest='print_results_text', action='store_true',
+                       help='Parse the JSON file, generate aggregated results, print them to stdout.')
+    group.add_argument('-print-results-db', dest='print_results_db', action='store_true',
+                       help='Parse the JSON file, generate aggregated results, and output a format appropiated for the DB.')
+    group.add_argument('-print-results-db-noaggregated', dest='print_results_db_noaggregated', action='store_true',
+                       help='Parse the JSON file, generate aggregated results, and output a format appropiated for the DB skipping the aggregated results.')
+    group.add_argument('-print-results-text-scaled', dest='print_results_text_scaled', action='store_true',
+                       help='Parse the JSON file, generate aggregated results, print them to stdout with the metric unit scaled.')
+    parser.add_argument('json_file', type=str,  help='Specify file you want to format')
+    args = parser.parse_args()
+
+    if not os.path.isfile(args.json_file):
+        print ('ERROR: Cat find the file %s' % args.json_file)
+        sys.exit(1)
+
+    results_json = json.load(open(args.json_file, 'r'))
+
+    if 'debugOutput' in results_json:
+        del results_json['debugOutput']
+        if args.clean_file:
+            json.dump(results_json,open(args.json_file, 'w'))
+            print('Wrote new file without debugOutput: %s ' %args.json_file)
+            sys.exit(0)
+    else:
+        if args.clean_file:
+            print('File already clean from debugOutput')
+            sys.exit(0)
+
+    if args.print_raw:
+        pprint(results_json)
+        sys.exit(0)
+
+    # Generate the aggregated results
+    results = BenchmarkResults(results_json)
+
+    if args.print_results_dict:
+        pprint(results.format_dict())
+    elif args.print_results_dict_json:
+        print results.format_json()
+    elif args.print_results_text:
+        print results.format(False)
+    elif args.print_results_text_scaled:
+        print results.format(True)
+    elif args.print_results_db:
+        results.print_db_entries()
+    elif args.print_results_db_noaggregated:
+        results.print_db_entries(skip_aggregated=True)
+    else:
+        raise RuntimError("This should have not been reached")

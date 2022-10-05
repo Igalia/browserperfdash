@@ -1,0 +1,11 @@
+
+{"SpeedometerExample": {"metrics": {"Score": {"current": [142, 141, 143, 141, 143] },
+			 "Time": ["Total"]},
+			 "tests": {"AngularJS-TodoMVC": {"metrics": {"Time": ["Total"]},
+                                                       "tests": {"Adding100Items": {"metrics": {"Time": ["Total"]},
+                                                                                   "tests": {"Async": {"metrics": {"Time": {"current": [9, 11, 10, 12.25, 14 ]}}},
+											      "Sync": {"metrics": {"Time": {"current": [207, 198, 214, 203.8, 210]}}}}},
+								  "Adding200Items": {"metrics": {"Time": ["Total"]},
+                                                                                   "tests": {"Async": {"metrics": {"Time": {"current": [19, 21, 20, 32.25, 44 ]}}},
+											      "Sync": {"metrics": {"Time": {"current": [407, 398, 414, 403.8, 523]}}}}}}}}}}
+
