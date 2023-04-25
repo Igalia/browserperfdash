@@ -11,9 +11,11 @@ and with an Apache or Nginx fronted. For that following the guide [deployment-pr
 
 1. Install Debian package dependendencies
 
-```bash
-$ sudo apt-get install python3 python3-pip python3-dev virtualenvwrapper
+Currently, this project works with python3.7 only. To install the appropriate python3.7 packages and dependencies, you need to first add the ["deadsnakes" PPA](https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa)
 
+```bash
+$ sudo apt-get install python3.7 python3.7-pip python3.7-dev python3.7-distutils virtualenvwrapper
+$ sudo apt-get install postgresql python-psycopg2
 ```
 
 2. Get the files
@@ -42,7 +44,7 @@ Notes:
 
 2. Lets create a virtual environment `dashboard` for our project
 ```bash
-mkvirtualenv -p /usr/bin/python3 dashboard
+mkvirtualenv -p /usr/bin/python3.7 dashboard
 workon dashboard
 ```
 
@@ -54,28 +56,9 @@ cd /path/to/git/checkout/browserperfdash
 pip install -r requirements.txt
 ```
 
-## Setup the database with SQLite
+## Setup the database with PostgreSQL and the app config
 
-
-1. Copy default local_settings.py
-
-```bash
-cp docs/local-settings.py browserperfdash/local_settings.py
-```
-
-2. Setup tables in the DB
-
-```bash
-python manage.py makemigrations
-python manage.py migrate
-python manage.py createsuperuser
-```
-
-3. Collect all the static files for fast serving
-
-```bash
-python manage.py collectstatic
-```
+See [postgres-setup.md](./postgres-setup.md).
 
 ## Run built-in HTTP server
 
