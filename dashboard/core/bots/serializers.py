@@ -13,7 +13,6 @@ class BotsForResultsExistListSerializer(serializers.ModelSerializer):
 
 
 class BotsFullDetailsForResultsExistListSerializer(serializers.ModelSerializer):
-    name = serializers.CharField()
     platform = PlatformListSerializer()
     cpuArchitecture = CPUArchitectureListSerializer()
     gpuType = GPUTypeListSerializer()
