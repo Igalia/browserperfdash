@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 import os
 import json
@@ -58,11 +58,11 @@ if __name__ == '__main__':
     if args.print_results_dict:
         pprint(results.format_dict())
     elif args.print_results_dict_json:
-        print results.format_json()
+        print (results.format_json())
     elif args.print_results_text:
-        print results.format(False)
+        print (results.format(False))
     elif args.print_results_text_scaled:
-        print results.format(True)
+        print (results.format(True))
     elif args.print_results_db:
         results.print_db_entries()
     elif args.print_results_db_noaggregated:

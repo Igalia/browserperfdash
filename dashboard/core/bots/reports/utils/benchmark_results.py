@@ -69,12 +69,10 @@ class BenchmarkResults(object):
 
     def fetch_db_entries(self, skip_aggregated=False):
         test_table = []
-        return self._generate_db_entries(self._results,test_table, skip_aggregated)
+        return self._generate_db_entries(self._results, test_table, skip_aggregated)
 
     def print_db_entries(self, skip_aggregated=False):
-        test_table = []
-        db_entries = self._generate_db_entries(self._results, test_table, skip_aggregated)
-        for db_entry in db_entries:
+        for db_entry in self.fetch_db_entries(skip_aggregated):
             print(('Name=%s \t Metric=%s \t Unit=%s \t Value=%s \t Stdev=%s' %(db_entry['name'], db_entry['metric'],
                                                                               db_entry['unit'], db_entry['value'], db_entry['stdev'])))
 
@@ -192,15 +190,19 @@ class BenchmarkResults(object):
 
         unit = cls._unit_from_metric(metric_name)
 
+        delta = 0
+        if mean:
+            delta = sample_stdev / mean
+
         # scale unit is ignored for db_format, we get the raw values always
         if db_format:
-            return {'value': mean, 'stdev':  sample_stdev / mean, 'unit': unit}
+            return {'value': mean, 'stdev':  delta, 'unit': unit}
 
         if json_format:
-            return {'mean_value': mean, 'stdev':  sample_stdev / mean, 'unit': unit, 'raw_values': values}
+            return {'mean_value': mean, 'stdev':  delta, 'unit': unit, 'raw_values': values}
 
         if not scale_unit:
-            return ('{mean:.3f}{unit} stdev={delta:.1%}').format(mean=mean, delta=sample_stdev / mean, unit=unit)
+            return ('{mean:.3f}{unit} stdev={delta:.1%}').format(mean=mean, delta=delta, unit=unit)
 
         if unit == 'ms':
             unit = 's'
@@ -209,15 +211,21 @@ class BenchmarkResults(object):
 
         base = 1024 if unit == 'B' else 1000
         value_sig_fig = 1 - math.floor(math.log10(sample_stdev / mean)) if sample_stdev else 3
-        SI_magnitude = math.floor(math.log(mean, base))
+        if mean:
+            SI_magnitude = math.floor(math.log(mean, base))
+        else:
+            SI_magnitude = 0
 
         scaled_mean = mean * math.pow(base, -SI_magnitude)
         SI_prefix = cls.SI_prefixes[int(SI_magnitude) + 3]
 
-        non_floating_digits = 1 + math.floor(math.log10(scaled_mean))
+        if scaled_mean:
+            non_floating_digits = 1 + math.floor(math.log10(scaled_mean))
+        else:
+            non_floating_digits = 1
         floating_points_count = max(0, value_sig_fig - non_floating_digits)
         return ('{mean:.' + str(int(floating_points_count)) + 'f}{prefix}{unit} stdev={delta:.1%}').format(
-            mean=scaled_mean, delta=sample_stdev / mean, prefix=SI_prefix, unit=unit)
+            mean=scaled_mean, delta=delta, prefix=SI_prefix, unit=unit)
 
     @classmethod
     def _unit_from_metric(cls, metric_name):

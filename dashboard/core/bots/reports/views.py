@@ -334,10 +334,14 @@ class BotReportView(APIView):
                 "The test %s does not exist"% test_id
             )
 
-        test_data_results = BenchmarkResults(test_data)
-        results_table = test_data_results.fetch_db_entries(
-            skip_aggregated=False
-        )
+        try:
+            test_data_results = BenchmarkResults(test_data)
+            results_table = test_data_results.fetch_db_entries(skip_aggregated=False)
+        except Exception as e:
+            log.error("Exception processing the json test data from bot %s, "
+                      "browser: %s, browser_version: %s, test %s. %s" %
+                      (bot_id, browser_id, browser_version, test_id, str(e)))
+            return HttpResponseBadRequest("Exception processing the json data: %s" % str(e))
 
         for result in results_table:
             raw_path = result['name']
@@ -384,6 +388,23 @@ class BotReportView(APIView):
                 aggregation = self.extract_aggregation(metric=result['metric'])
             else:
                 aggregation = 'None'
+
+            # It seems some subtest results can have 0 as value for mean_value.
+            # It happens sometimes with the stylebench benchmark where it gives
+            # a mean_value of 0 ms (Time) for the run.
+            # Funny, isn't it? How can it take 0ms to run? Is it even possible to
+            # calculate a delta of improvement/regression with 0 ms of time?
+            # I think something is wrong with that benchmark, maybe some
+            # rounding error or some wrong type cast from float to integer.
+            # Anyway, we have to deal with that corner case here somehow, so
+            # for now just workaround this issue by simply avoiding to process
+            # the result of the subtest when the value is 0, and also log
+            # a warning in the admin dashboard with the details.
+            if not mean_value:
+                log.warning("Ignoring result with value==%f and stddev=%f for data with metric unit \"%s\" at test: %s [%s] "
+                            "from bot: %s running browser %s version %s" %
+                            (mean_value, stddev, metric_name, test_id, raw_path, bot_id, browser_id, browser_version))
+                continue
 
             # Calculate the change and store it during processing the POST
             delta_and_prev_results = self.process_delta_and_improvement(
