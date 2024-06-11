@@ -81,7 +81,7 @@ Then configure a virtual site, this is an example of how it can be done:
         Require all granted
     </Directory>
 
-    WSGIDaemonProcess browserperfdash python-home=/srv/browserperfdash/venv/dashboard python-path=/srv/browserperfdash
+    WSGIDaemonProcess browserperfdash python-home=/srv/browserperfdash/venv/dashboard python-path=/srv/browserperfdash processes=50 threads=1
 
     WSGIProcessGroup browserperfdash
     WSGIApplicationGroup %{GLOBAL}

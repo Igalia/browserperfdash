@@ -1,7 +1,9 @@
 import json, urllib.request, urllib.parse, urllib.error, logging, sys
 from datetime import datetime, timedelta
+from threading import Thread
+import time
 
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, StreamingHttpResponse
 
 from rest_framework.views import APIView
 from rest_framework import permissions
@@ -32,6 +34,21 @@ if len(sys.argv) > 1 and sys.argv[1] == 'test':
 
 
 db_character_separator = '\\'
+
+# https://stackoverflow.com/a/6894023
+# https://alexandra-zaharia.github.io/posts/how-to-return-a-result-from-a-python-thread/
+class ThreadWithReturnValue(Thread):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._return_value = None
+
+    def run(self):
+        if self._target is not None:
+            self._return_value = self._target(*self._args, **self._kwargs)
+
+    def join(self, *args, **kwargs):
+        super().join(*args, **kwargs)
+        return self._return_value
 
 
 class BotDataReportImprovementListView(ListAPIView):
@@ -300,7 +317,6 @@ class BotReportView(APIView):
             bot_id = None
             json_data = None
             timestamp = None
-            start_stamp = datetime.now()
             try:
                 browser_id = get_value_and_check_defined(request.POST, 'browser_id')
                 browser_version = get_value_and_check_defined(request.POST, 'browser_version')
@@ -310,43 +326,57 @@ class BotReportView(APIView):
                 json_data = get_value_and_check_defined(request.POST, 'test_data')
             except Exception as e:
                 log.error("Got invalid params from the bot: %s. Exception: %s" % (request.auth, str(e)))
-                response_for_worker = HttpResponseBadRequest("Some params are missing in the request. Error: %s" % str(e))
-                return  # go to finally block since we actually return the response from there
+                return HttpResponseBadRequest("Some params are missing in the request. Error: %s" % str(e))
             try:
                 # The timestamp is optional
                 bot_timestamp = self.request.POST.get('timestamp')
                 if bot_timestamp:
                     timestamp = datetime.fromtimestamp(float(bot_timestamp))
             except Exception as e:
-                response_for_worker = HttpResponseBadRequest("Error parsing the timestamp %s from bot: %s. Exception: %s"% (bot_timestamp, request.auth, str(e)))
-                return # go to finally block since we actually return the response from there
-            # Process the data, instert into the DB and respond
-            response_for_worker = self.process_benchmark_data(bot_id, browser_id, browser_version, test_id, test_version, json_data, timestamp)
+                return HttpResponseBadRequest("Error parsing the timestamp %s from bot: %s. Exception: %s"% (bot_timestamp, request.auth, str(e)))
+            # We may take several seconds to process the data (600 or more sometimes), so if we wait until the processing is done before replying
+            # then we risk that the connection is dropped due to timeout on the gateway or endpoint (NAT). To avoid that use a streaming_response
+            # that each seconds outputs a "." indicating that processing is still ongoing
+            streaming_response = StreamingHttpResponse(self.stream_process_benchmark_data(bot_id, browser_id, browser_version, test_id, test_version, json_data, timestamp))
+            streaming_response.status_code = 202  # 202 Accepted, the worker knows how to handle it.
+            return streaming_response
         except Exception as e:
-                log.error("Failed processing data for bot: %s, browser: %s, browser_version: %s, test: %s, test_version %s, run_stamp: %s, and Exception %s"
+                log.error("Exception at BotReportView.post() for bot: %s, browser: %s, browser_version: %s, test: %s, test_version %s, run_stamp: %s, and Exception %s"
                           % (bot_id, browser_id, browser_version, test_id, test_version, timestamp, str(e)))
-                response_for_worker = HttpResponseBadRequest("Exception processing the data: %s" % str(e))
-        finally:
+                return HttpResponseBadRequest("Exception processing the data: %s" % str(e))
+
+
+    def stream_process_benchmark_data(self, bot_id, browser_id, browser_version, test_id, test_version, json_data, timestamp):
+        try:
+            start_stamp = datetime.now()
+            work_thread = ThreadWithReturnValue(target=self.process_benchmark_data, args=(bot_id, browser_id, browser_version, test_id, test_version, json_data, timestamp))
+            work_thread.start()
+            yield ("Processing data ")
+            while work_thread.is_alive():
+                yield (".")
+                time.sleep(1)
+            response_for_worker = work_thread.join()
             seconds_took = (datetime.now() - start_stamp).total_seconds()
             if isinstance(response_for_worker, HttpResponseBadRequest):
                 log.error("Failed processing data in %f seconds for bot: %s, browser: %s, browser_version: %s, test: %s, test_version %s, run_stamp: %s, with error: %s"
-                          % (seconds_took, bot_id, browser_id, browser_version, test_id, test_version, timestamp, str(response_for_worker.content)))
-                return response_for_worker
-            if isinstance(response_for_worker, HttpResponse):
+                          % (seconds_took, bot_id, browser_id, browser_version, test_id, test_version, timestamp, str(response_for_worker.content.decode())))
+            elif isinstance(response_for_worker, HttpResponse):
                 log.info("Processed data in %f seconds for bot: %s, browser: %s, browser_version: %s, test: %s, test_version: %s, run_stamp: %s"
                           % (seconds_took, bot_id, browser_id, browser_version, test_id, test_version, timestamp))
-                return response_for_worker
-            unhandled_str = ("Unhandled error when processing data in %f seconds for bot: %s, browser: %s, browser_version: %s, test: %s, test_version: %s, run_stamp: %s"
-                            % (seconds_took, bot_id, browser_id, browser_version, test_id, test_version, timestamp))
-            log.error(unhandled_str)
-            return HttpResponseBadRequest(unhandled_str)
+            else:
+                raise ValueError("Unexpected return value at stream_process_benchmark_data() from the worker thread with type %s" % type(response_for_worker))
+            yield ("\nHTTP_202_FINAL_STATUS_CODE = %s\nHTTP_202_FINAL_MSG_NEXT_LINES\n%s" % (response_for_worker.status_code, response_for_worker.content.decode()))
+        except Exception as e:
+            log.error("Exception at BotReportView.stream_process_benchmark_data() for bot: %s, browser: %s, browser_version: %s, test: %s, test_version: %s, run_stamp: %s. Exception: %s"
+                       % (bot_id, browser_id, browser_version, test_id, test_version, timestamp, str(e)))
+            yield ("\nException: %s\n" % (str(e)))
 
 
     def process_benchmark_data(self, bot_id, browser_id, browser_version, test_id, test_version, json_data, timestamp):
         try:
             test_data = json.loads(json_data)
-        except AttributeError:
-            return HttpResponseBadRequest("Error parsing JSON file from bot: %s "% request.auth)
+        except Exception as e:
+            return HttpResponseBadRequest("Error parsing JSON file from bot: %s. Exception: %s"% (bot_id, str(e)))
 
         bot = Bot.objects.get(pk=bot_id)
 
