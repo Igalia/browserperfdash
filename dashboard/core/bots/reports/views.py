@@ -281,32 +281,72 @@ class BotReportView(APIView):
                 "Score": {"current": [2, 3, 4]}}}}')
             ])
         """
-        try:
-            browser_id = self.request.POST.get('browser_id')
-            browser_version = self.request.POST.get('browser_version')
-            test_id = self.request.POST.get('test_id')
-            test_version = self.request.POST.get('test_version')
-            bot_id = self.request.POST.get('bot_id')
-            json_data = self.request.POST.get('test_data')
-        except AttributeError:
-            log.error("Got invalid params from the bot: %s"% request.auth)
-            return HttpResponseBadRequest(
-                "Some params are missing in the request"
-            )
 
-        log.info("Started processing data from bot %s" % (bot_id))
-        # The timestamp may/may not be there - hence not checking
-        timestamp = None
-        if self.request.POST.get('timestamp'):
-            timestamp = datetime.fromtimestamp(
-                float(self.request.POST.get('timestamp'))
-            )
+        # Check that the key is there and it contains a value other than None
+        def get_value_and_check_defined(data, key):
+            value = data.get(key)
+            if value == None:
+                raise KeyError("variable %s is not defined" % key)
+            if str(value) == "None":
+                raise KeyError("variable %s can not be equal to str(None)" % key)
+            return value
+
+        try:
+            response_for_worker = None
+            browser_id = None
+            browser_version = None
+            test_id = None
+            test_version = None
+            bot_id = None
+            json_data = None
+            timestamp = None
+            start_stamp = datetime.now()
+            try:
+                browser_id = get_value_and_check_defined(request.POST, 'browser_id')
+                browser_version = get_value_and_check_defined(request.POST, 'browser_version')
+                test_id = get_value_and_check_defined(request.POST, 'test_id')
+                test_version = get_value_and_check_defined(request.POST, 'test_version')
+                bot_id = get_value_and_check_defined(request.POST, 'bot_id')
+                json_data = get_value_and_check_defined(request.POST, 'test_data')
+            except Exception as e:
+                log.error("Got invalid params from the bot: %s. Exception: %s" % (request.auth, str(e)))
+                response_for_worker = HttpResponseBadRequest("Some params are missing in the request. Error: %s" % str(e))
+                return  # go to finally block since we actually return the response from there
+            try:
+                # The timestamp is optional
+                bot_timestamp = self.request.POST.get('timestamp')
+                if bot_timestamp:
+                    timestamp = datetime.fromtimestamp(float(bot_timestamp))
+            except Exception as e:
+                response_for_worker = HttpResponseBadRequest("Error parsing the timestamp %s from bot: %s. Exception: %s"% (bot_timestamp, request.auth, str(e)))
+                return # go to finally block since we actually return the response from there
+            # Process the data, instert into the DB and respond
+            response_for_worker = self.process_benchmark_data(bot_id, browser_id, browser_version, test_id, test_version, json_data, timestamp)
+        except Exception as e:
+                log.error("Failed processing data for bot: %s, browser: %s, browser_version: %s, test: %s, test_version %s, run_stamp: %s, and Exception %s"
+                          % (bot_id, browser_id, browser_version, test_id, test_version, timestamp, str(e)))
+                response_for_worker = HttpResponseBadRequest("Exception processing the data: %s" % str(e))
+        finally:
+            seconds_took = (datetime.now() - start_stamp).total_seconds()
+            if isinstance(response_for_worker, HttpResponseBadRequest):
+                log.error("Failed processing data in %f seconds for bot: %s, browser: %s, browser_version: %s, test: %s, test_version %s, run_stamp: %s, with error: %s"
+                          % (seconds_took, bot_id, browser_id, browser_version, test_id, test_version, timestamp, str(response_for_worker.content)))
+                return response_for_worker
+            if isinstance(response_for_worker, HttpResponse):
+                log.info("Processed data in %f seconds for bot: %s, browser: %s, browser_version: %s, test: %s, test_version: %s, run_stamp: %s"
+                          % (seconds_took, bot_id, browser_id, browser_version, test_id, test_version, timestamp))
+                return response_for_worker
+            unhandled_str = ("Unhandled error when processing data in %f seconds for bot: %s, browser: %s, browser_version: %s, test: %s, test_version: %s, run_stamp: %s"
+                            % (seconds_took, bot_id, browser_id, browser_version, test_id, test_version, timestamp))
+            log.error(unhandled_str)
+            return HttpResponseBadRequest(unhandled_str)
+
+
+    def process_benchmark_data(self, bot_id, browser_id, browser_version, test_id, test_version, json_data, timestamp):
         try:
             test_data = json.loads(json_data)
         except AttributeError:
-            return HttpResponseBadRequest(
-                "Error parsing JSON file from bot: %s "% request.auth
-            )
+            return HttpResponseBadRequest("Error parsing JSON file from bot: %s "% request.auth)
 
         bot = Bot.objects.get(pk=bot_id)
 
@@ -317,30 +357,22 @@ class BotReportView(APIView):
         try:
             browser = Browser.objects.get(pk=browser_id)
         except Browser.DoesNotExist:
-            log.error(
-                "Got invalid browser %s from bot: %s" % (browser_id, bot_id)
-            )
+            log.error("Got invalid browser %s from bot: %s" % (browser_id, bot_id))
             return HttpResponseBadRequest("The browser does not exist")
 
         try:
             root_test = Test.objects.get(pk=test_id)
         except Test.DoesNotExist:
-            log.error(
-                "Got invalid root test: %s from bot: %s for browser: %s, "
-                "browser_version: %s" %(
-                    test_id, bot_id, browser_id, browser_version
-                ))
-            return HttpResponseBadRequest(
-                "The test %s does not exist"% test_id
-            )
+            log.error("Got invalid root test: %s from bot: %s for browser: %s, browser_version: %s"
+                      %(test_id, bot_id, browser_id, browser_version))
+            return HttpResponseBadRequest("The test %s does not exist"% test_id)
 
         try:
             test_data_results = BenchmarkResults(test_data)
             results_table = test_data_results.fetch_db_entries(skip_aggregated=False)
         except Exception as e:
-            log.error("Exception processing the json test data from bot %s, "
-                      "browser: %s, browser_version: %s, test %s. %s" %
-                      (bot_id, browser_id, browser_version, test_id, str(e)))
+            log.error("Exception processing the json test data from bot %s,browser: %s, browser_version: %s, test %s. %s"
+                      % (bot_id, browser_id, browser_version, test_id, str(e)))
             return HttpResponseBadRequest("Exception processing the json data: %s" % str(e))
 
         for result in results_table:
@@ -354,35 +386,18 @@ class BotReportView(APIView):
             try:
                 current_metric = MetricUnit.objects.get(pk=metric_name)
                 if len(current_metric.prefix) > 0:
-                    modified_prefix = self.calculate_prefix(
-                        current_metric.prefix, mean_value, curr_string="",
-                        original_prefix=current_metric.unit
-                    )
+                    modified_prefix = self.calculate_prefix(current_metric.prefix, mean_value, curr_string="", original_prefix=current_metric.unit)
                 else:
                     modified_prefix = str(mean_value) + " " + current_metric.unit
             except MetricUnit.DoesNotExist:
-                log.error(
-                    "Got wrong Metric %s for bot: %s, browser: %s, "
-                    "browser_version: %s, root_test: %s, test_description: "
-                    "%s" % (metric_name, bot_id, browser_id, browser_version,
-                            test_id, raw_path
-                            )
-                )
-                return HttpResponseBadRequest(
-                    "The Metric Unit %s does not exist"% metric_name
-                )
+                log.error("Got wrong Metric %s for bot: %s, browser: %s, browser_version: %s, root_test: %s, test_description: %s"
+                          % (metric_name, bot_id, browser_id, browser_version,test_id, raw_path))
+                return HttpResponseBadRequest("The Metric Unit %s does not exist"% metric_name)
 
             if current_metric.unit != unit:
-                log.error("Got wrong unit %s for metric unit %s data for "
-                          "bot: %s, browser: %s, browser_version: %s, "
-                          "root_test: %s, test_description: %s" %
-                          (unit, metric_name, bot_id, browser_id,
-                           browser_version,test_id, raw_path)
-                          )
-                return HttpResponseBadRequest("The received unit: %s field of "
-                                              "Metric Unit %s does not match"
-                                              % (unit,metric_name)
-                                              )
+                log.error("Got wrong unit %s for metric unit %s data for bot: %s, browser: %s, browser_version: %s, root_test: %s, test_description: %s"
+                          % (unit, metric_name, bot_id, browser_id, browser_version,test_id, raw_path))
+                return HttpResponseBadRequest("The received unit: %s field of Metric Unit %s does not match" % (unit,metric_name))
 
             if self.is_aggregated(metric=result['metric']):
                 aggregation = self.extract_aggregation(metric=result['metric'])
@@ -407,10 +422,7 @@ class BotReportView(APIView):
                 continue
 
             # Calculate the change and store it during processing the POST
-            delta_and_prev_results = self.process_delta_and_improvement(
-                bot, browser, root_test, raw_path, mean_value,
-                current_metric, aggregation
-            )
+            delta_and_prev_results = self.process_delta_and_improvement(bot, browser, root_test, raw_path, mean_value, current_metric, aggregation)
 
             try:
                 BotReportData.objects.create_report(
@@ -422,16 +434,10 @@ class BotReportView(APIView):
                     mean_value=mean_value,
                     stddev=stddev, delta=delta_and_prev_results[0],
                     is_improvement=delta_and_prev_results[1],
-                    prev_result=delta_and_prev_results[2], timestamp=timestamp
-                )
+                    prev_result=delta_and_prev_results[2], timestamp=timestamp)
             except Exception as e:
-                log.error(
-                    "Failed inserting data for bot: %s, browser: %s, "
-                    "browser_version: %s, root_test: %s, test_description: %s"
-                    " and Exception %s" %
-                    (bot_id, browser_id, browser_version, test_id, raw_path,
-                     str(e))
-                )
+                log.error("Failed inserting data for bot: %s, browser: %s, browser_version: %s, root_test: %s, test_description: %s and Exception %s"
+                          % (bot_id, browser_id, browser_version, test_id, raw_path, str(e)))
                 return HttpResponseBadRequest("Exception inserting the data "
                                               "into the DB: %s" % str(e))
 
