@@ -8,7 +8,7 @@ from dashboard.core.metric_units.serializers import MetricUnitSerializer
 from dashboard.core.tests.serializers import TestListListSerializer
 
 
-class TestPathListSerializer(serializers.Serializer):
+class TestPathsListSerializer(serializers.Serializer):
     test_path = serializers.CharField()
     root_test = serializers.CharField()
     aggregation = serializers.CharField()
