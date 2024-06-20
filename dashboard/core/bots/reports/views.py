@@ -374,101 +374,106 @@ class BotReportView(APIView):
 
     def process_benchmark_data(self, bot_id, browser_id, browser_version, test_id, test_version, json_data, timestamp):
         try:
-            test_data = json.loads(json_data)
-        except Exception as e:
-            return HttpResponseBadRequest("Error parsing JSON file from bot: %s. Exception: %s"% (bot_id, str(e)))
-
-        bot = Bot.objects.get(pk=bot_id)
-
-        if not bot.enabled:
-            log.error("Got data from disabled bot: %s" % bot_id)
-            return HttpResponseBadRequest("The bot %s is not enabled"% bot_id)
-
-        try:
-            browser = Browser.objects.get(pk=browser_id)
-        except Browser.DoesNotExist:
-            log.error("Got invalid browser %s from bot: %s" % (browser_id, bot_id))
-            return HttpResponseBadRequest("The browser does not exist")
-
-        try:
-            root_test = Test.objects.get(pk=test_id)
-        except Test.DoesNotExist:
-            log.error("Got invalid root test: %s from bot: %s for browser: %s, browser_version: %s"
-                      %(test_id, bot_id, browser_id, browser_version))
-            return HttpResponseBadRequest("The test %s does not exist"% test_id)
-
-        try:
-            test_data_results = BenchmarkResults(test_data)
-            results_table = test_data_results.fetch_db_entries(skip_aggregated=False)
-        except Exception as e:
-            log.error("Exception processing the json test data from bot %s,browser: %s, browser_version: %s, test %s. %s"
-                      % (bot_id, browser_id, browser_version, test_id, str(e)))
-            return HttpResponseBadRequest("Exception processing the json data: %s" % str(e))
-
-        for result in results_table:
-            raw_path = result['name']
-
-            metric_name = self.extract_metric(result['metric'])
-            stddev = float(result['stdev'])
-            mean_value = float(result['value'])
-            unit = result['unit']
-
             try:
-                current_metric = MetricUnit.objects.get(pk=metric_name)
-                if len(current_metric.prefix) > 0:
-                    modified_prefix = self.calculate_prefix(current_metric.prefix, mean_value, curr_string="", original_prefix=current_metric.unit)
-                else:
-                    modified_prefix = str(mean_value) + " " + current_metric.unit
-            except MetricUnit.DoesNotExist:
-                log.error("Got wrong Metric %s for bot: %s, browser: %s, browser_version: %s, root_test: %s, test_description: %s"
-                          % (metric_name, bot_id, browser_id, browser_version,test_id, raw_path))
-                return HttpResponseBadRequest("The Metric Unit %s does not exist"% metric_name)
-
-            if current_metric.unit != unit:
-                log.error("Got wrong unit %s for metric unit %s data for bot: %s, browser: %s, browser_version: %s, root_test: %s, test_description: %s"
-                          % (unit, metric_name, bot_id, browser_id, browser_version,test_id, raw_path))
-                return HttpResponseBadRequest("The received unit: %s field of Metric Unit %s does not match" % (unit,metric_name))
-
-            if self.is_aggregated(metric=result['metric']):
-                aggregation = self.extract_aggregation(metric=result['metric'])
-            else:
-                aggregation = 'None'
-
-            # It seems some subtest results can have 0 as value for mean_value.
-            # It happens sometimes with the stylebench benchmark where it gives
-            # a mean_value of 0 ms (Time) for the run.
-            # Funny, isn't it? How can it take 0ms to run? Is it even possible to
-            # calculate a delta of improvement/regression with 0 ms of time?
-            # I think something is wrong with that benchmark, maybe some
-            # rounding error or some wrong type cast from float to integer.
-            # Anyway, we have to deal with that corner case here somehow, so
-            # for now just workaround this issue by simply avoiding to process
-            # the result of the subtest when the value is 0, and also log
-            # a warning in the admin dashboard with the details.
-            if not mean_value:
-                log.warning("Ignoring result with value==%f and stddev=%f for data with metric unit \"%s\" at test: %s [%s] "
-                            "from bot: %s running browser %s version %s" %
-                            (mean_value, stddev, metric_name, test_id, raw_path, bot_id, browser_id, browser_version))
-                continue
-
-            # Calculate the change and store it during processing the POST
-            delta_and_prev_results = self.process_delta_and_improvement(bot, browser, root_test, raw_path, mean_value, current_metric, aggregation)
-
-            try:
-                BotReportData.objects.create_report(
-                    bot=bot, browser=browser, browser_version=browser_version,
-                    root_test=root_test, test_path=raw_path,
-                    test_version=test_version, aggregation=aggregation,
-                    metric_unit=current_metric,
-                    metric_unit_prefixed=modified_prefix,
-                    mean_value=mean_value,
-                    stddev=stddev, delta=delta_and_prev_results[0],
-                    is_improvement=delta_and_prev_results[1],
-                    prev_result=delta_and_prev_results[2], timestamp=timestamp)
+                test_data = json.loads(json_data)
             except Exception as e:
-                log.error("Failed inserting data for bot: %s, browser: %s, browser_version: %s, root_test: %s, test_description: %s and Exception %s"
-                          % (bot_id, browser_id, browser_version, test_id, raw_path, str(e)))
-                return HttpResponseBadRequest("Exception inserting the data "
-                                              "into the DB: %s" % str(e))
+                return HttpResponseBadRequest("Error parsing JSON file from bot: %s. Exception: %s"% (bot_id, str(e)))
 
-        return HttpResponse("The POST went through")
+            bot = Bot.objects.get(pk=bot_id)
+
+            if not bot.enabled:
+                log.error("Got data from disabled bot: %s" % bot_id)
+                return HttpResponseBadRequest("The bot %s is not enabled"% bot_id)
+
+            try:
+                browser = Browser.objects.get(pk=browser_id)
+            except Browser.DoesNotExist:
+                log.error("Got invalid browser %s from bot: %s" % (browser_id, bot_id))
+                return HttpResponseBadRequest("The browser does not exist")
+
+            try:
+                root_test = Test.objects.get(pk=test_id)
+            except Test.DoesNotExist:
+                log.error("Got invalid root test: %s from bot: %s for browser: %s, browser_version: %s"
+                          %(test_id, bot_id, browser_id, browser_version))
+                return HttpResponseBadRequest("The test %s does not exist"% test_id)
+
+            try:
+                test_data_results = BenchmarkResults(test_data)
+                results_table = test_data_results.fetch_db_entries(skip_aggregated=False)
+            except Exception as e:
+                log.error("Exception processing the json test data from bot %s,browser: %s, browser_version: %s, test %s. %s"
+                          % (bot_id, browser_id, browser_version, test_id, str(e)))
+                return HttpResponseBadRequest("Exception processing the json data: %s" % str(e))
+
+            for result in results_table:
+                raw_path = result['name']
+
+                metric_name = self.extract_metric(result['metric'])
+                stddev = float(result['stdev'])
+                mean_value = float(result['value'])
+                unit = result['unit']
+
+                try:
+                    current_metric = MetricUnit.objects.get(pk=metric_name)
+                    if len(current_metric.prefix) > 0:
+                        modified_prefix = self.calculate_prefix(current_metric.prefix, mean_value, curr_string="", original_prefix=current_metric.unit)
+                    else:
+                        modified_prefix = str(mean_value) + " " + current_metric.unit
+                except MetricUnit.DoesNotExist:
+                    log.error("Got wrong Metric %s for bot: %s, browser: %s, browser_version: %s, root_test: %s, test_description: %s"
+                              % (metric_name, bot_id, browser_id, browser_version,test_id, raw_path))
+                    return HttpResponseBadRequest("The Metric Unit %s does not exist"% metric_name)
+
+                if current_metric.unit != unit:
+                    log.error("Got wrong unit %s for metric unit %s data for bot: %s, browser: %s, browser_version: %s, root_test: %s, test_description: %s"
+                              % (unit, metric_name, bot_id, browser_id, browser_version,test_id, raw_path))
+                    return HttpResponseBadRequest("The received unit: %s field of Metric Unit %s does not match" % (unit,metric_name))
+
+                if self.is_aggregated(metric=result['metric']):
+                    aggregation = self.extract_aggregation(metric=result['metric'])
+                else:
+                    aggregation = 'None'
+
+                # It seems some subtest results can have 0 as value for mean_value.
+                # It happens sometimes with the stylebench benchmark where it gives
+                # a mean_value of 0 ms (Time) for the run.
+                # Funny, isn't it? How can it take 0ms to run? Is it even possible to
+                # calculate a delta of improvement/regression with 0 ms of time?
+                # I think something is wrong with that benchmark, maybe some
+                # rounding error or some wrong type cast from float to integer.
+                # Anyway, we have to deal with that corner case here somehow, so
+                # for now just workaround this issue by simply avoiding to process
+                # the result of the subtest when the value is 0, and also log
+                # a warning in the admin dashboard with the details.
+                if not mean_value:
+                    log.warning("Ignoring result with value==%f and stddev=%f for data with metric unit \"%s\" at test: %s [%s] "
+                                "from bot: %s running browser %s version %s" %
+                                (mean_value, stddev, metric_name, test_id, raw_path, bot_id, browser_id, browser_version))
+                    continue
+
+                # Calculate the change and store it during processing the POST
+                delta_and_prev_results = self.process_delta_and_improvement(bot, browser, root_test, raw_path, mean_value, current_metric, aggregation)
+
+                try:
+                    BotReportData.objects.create_report(
+                        bot=bot, browser=browser, browser_version=browser_version,
+                        root_test=root_test, test_path=raw_path,
+                        test_version=test_version, aggregation=aggregation,
+                        metric_unit=current_metric,
+                        metric_unit_prefixed=modified_prefix,
+                        mean_value=mean_value,
+                        stddev=stddev, delta=delta_and_prev_results[0],
+                        is_improvement=delta_and_prev_results[1],
+                        prev_result=delta_and_prev_results[2], timestamp=timestamp)
+                except Exception as e:
+                    log.error("Failed inserting data for bot: %s, browser: %s, browser_version: %s, root_test: %s, test_description: %s and Exception %s"
+                              % (bot_id, browser_id, browser_version, test_id, raw_path, str(e)))
+                    return HttpResponseBadRequest("Exception inserting the data "
+                                                  "into the DB: %s" % str(e))
+
+            return HttpResponse("The POST went through")
+        except Exception as e:
+            log.error("Unexpected exception at BotReportView.process_benchmark_data() for bot: %s, browser: %s, browser_version: %s, test: %s, test_version %s, run_stamp: %s, and Exception %s"
+                  % (bot_id, browser_id, browser_version, test_id, test_version, timestamp, str(e)))
+            return HttpResponseBadRequest("Exception processing the data: %s" % str(e))
