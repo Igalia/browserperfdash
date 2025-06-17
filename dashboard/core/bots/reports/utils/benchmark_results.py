@@ -40,6 +40,7 @@ class BenchmarkResults(object):
         'Malloc': 'B',
         'Heap': 'B',
         'Allocations': 'B',
+        'Size': 'B',
         'Score': 'pt',
         'BrowserMemoryUsage': 'B',
         'BrowserMemoryPeak': 'B',
