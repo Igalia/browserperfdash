@@ -236,6 +236,7 @@ app.controller(
                             tooltipData['yvalue'] = value['mean_value'];
                             tooltipData['browser'] = value['browser'];
                             tooltipData['browser_version'] = value['browser_version'];
+                            tooltipData['metric_unit_prefixed'] = value['metric_unit_prefixed'];
                             tooltipData['stddev'] = value['stddev'];
                             tooltipData['delta'] = value['delta'];
                             tooltipData['test_version'] = value['test_version'];
@@ -506,12 +507,16 @@ app.controller(
                                     var date = new Date(x);
                                     var currentPlot = +placeholder.attr('id');
                                     hoveredSeriesBot = item.series.label;
+                                    var valueStr = parseFloat(y).toFixed(2) + " " + testMetrics[0]['unit'];
+                                    var prefixedValueStr = extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['metric_unit_prefixed'];
+                                    if (valueStr != prefixedValueStr)
+                                        valueStr += ` (${prefixedValueStr})`;
                                     $("#tooltip").html("<b>" + hoveredSeriesBot + "</b> on <i>" + currentSubtestPath + "</i><br>"
                                         + "<b>Time</b>: " + date.toISOString().split('T')[0] + ", " + date.toISOString().split('T')[1].substring(0, 8) + "<br>"
                                         + "<b>Test Version</b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['test_version'].slice(-7) + "<br>"
                                         + "<b>Browser Version</b>: " + extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['browser_version'] + "<br>"
                                         + "<b>Std. Dev</b>: " + parseFloat(extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['stddev']).toFixed(3) + "<br>"
-                                        + "<b>Value</b>: " + parseFloat(y).toFixed(3) + " " + testMetrics[0]['unit'] + "<br>"
+                                        + "<b>Value</b>: " + valueStr + "<br>"
                                         + "<b>Delta</b> :" + parseFloat(extraToolTipInfo[currentPlot][hoveredSeriesBot][x]['delta']).toFixed(3) + "<br>"
                                         + "<b>Aggregation </b> :" + selectedSubtest.aggregation + "<br>")
                                         .css({top: item.pageY + 5, left: item.pageX + 5})

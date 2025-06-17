@@ -28,7 +28,7 @@ class ResultsForSubtestListSerializer(serializers.ModelSerializer):
         model = BotReportData
         fields = (
             'timestamp', 'browser', 'mean_value', 'stddev', 'browser_version',
-            'delta', 'bot', 'test_version'
+            'delta', 'bot', 'test_version', 'metric_unit_prefixed'
         )
 
 
